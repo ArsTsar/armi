@@ -1,0 +1,2140 @@
+<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0d11">
+<title>Арми — прототип v5</title>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#0b0d11; --panel:#0d0f13; --panel2:#12151c; --panel3:#151922; --panel4:#1c212b;
+  --line:rgba(255,255,255,.07); --line2:rgba(255,255,255,.12);
+  --amber:#fbbf24; --amber2:#f59e0b; --amber3:#fcd34d;
+  --t1:#e4e4e7; --t2:#a1a1aa; --t3:#71717a; --t4:#52525b;
+  --red:#f87171; --em:#34d399; --teal:#2dd4bf; --rose:#fb7185; --blue:#60a5fa; --violet:#a78bfa;
+  --r:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:var(--bg);color:var(--t1);font:14px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input,textarea,select{font:inherit;color:var(--t1);background:rgba(255,255,255,.03);border:1px solid var(--line2);border-radius:10px;padding:9px 12px;width:100%;outline:none;transition:border-color .15s}
+select{background:var(--panel3);cursor:pointer}
+select option,select optgroup{background:var(--panel3);color:var(--t1)}
+input:focus,textarea:focus,select:focus{border-color:rgba(251,191,36,.5)}
+textarea{resize:vertical;min-height:90px;line-height:1.5}
+::placeholder{color:var(--t4)}
+a{color:var(--amber3);text-decoration:none}
+a:hover{text-decoration:underline}
+svg.ic{width:16px;height:16px;flex:none;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── layout ── */
+.app{display:flex;height:100vh;height:100dvh}
+.sidebar{width:240px;flex:none;display:flex;flex-direction:column;background:var(--panel);border-right:1px solid var(--line)}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:16px;cursor:pointer;user-select:none}
+.logo-tile{width:36px;height:36px;border-radius:12px;background:var(--amber);color:#0b0d11;font-weight:800;font-size:19px;display:grid;place-items:center;flex:none}
+.logo-tile.sm{width:28px;height:28px;font-size:15px;border-radius:9px}
+.sb-nav{flex:1;overflow-y:auto;padding:0 10px 10px}
+.nav-item{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border-radius:10px;color:var(--t2);text-align:left;font-size:13.5px}
+.nav-item:hover{background:var(--panel3);color:var(--t1)}
+.nav-item.act{background:var(--panel4);color:var(--t1)}
+.nav-item span:nth-child(2){flex:1}
+.group-label{font-size:10px;font-weight:700;letter-spacing:.09em;color:var(--t4);text-transform:uppercase;padding:14px 10px 6px}
+.cnt{font-size:10.5px;background:var(--panel4);color:var(--t2);border-radius:99px;padding:1px 7px}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.pcheader{height:56px;flex:none;display:flex;align-items:center;gap:10px;padding:0 20px;border-bottom:1px solid var(--line);background:var(--panel)}
+.content{flex:1;overflow-y:auto;padding:20px 24px}
+.narrow{max-width:860px;margin:0 auto}
+.fade-in{animation:fi .18s ease-out}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.stack{display:flex;flex-direction:column;gap:12px}
+
+/* ── общие ── */
+.card{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px}
+.card h3{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.h-note{margin-left:auto;font-size:11px;font-weight:500;color:var(--t3)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--t2);background:var(--panel3);border:1px solid var(--line);border-radius:99px;padding:3px 10px}
+.pill.click{cursor:pointer}
+.pill.click:hover{border-color:var(--line2);color:var(--t1)}
+.pill.on{background:rgba(251,191,36,.13);border-color:rgba(251,191,36,.4);color:var(--amber3)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-size:13px;font-weight:600;color:var(--t1);background:var(--panel4);border:1px solid var(--line2);border-radius:10px;padding:9px 14px;transition:filter .15s}
+.btn:hover{filter:brightness(1.15)}
+.btn-amber{background:var(--amber);border-color:var(--amber);color:#0b0d11}
+.btn-danger{background:rgba(248,113,113,.12);border-color:rgba(248,113,113,.35);color:var(--red)}
+.btn-sm{padding:6px 10px;font-size:12px;border-radius:8px}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:4px}
+.tab{flex:none;font-size:12.5px;font-weight:600;color:var(--t2);padding:6px 11px;border-radius:8px}
+.tab:hover{color:var(--t1)}
+.tab.on{background:var(--panel4);color:var(--t1)}
+.item{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--line);cursor:pointer}
+.item:last-child{border-bottom:none}
+.item .ckb{width:20px;height:20px;flex:none;border-radius:7px;border:1.5px solid var(--t4);display:grid;place-items:center;color:transparent;transition:all .15s}
+.item.done .ckb{background:var(--em);border-color:var(--em);color:#0b0d11}
+.item.done .tx{color:var(--t3);text-decoration:line-through}
+.item .tx{font-size:13.5px;color:var(--t1)}
+.dot{width:8px;height:8px;border-radius:99px;flex:none}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.stat .v{font-size:21px;font-weight:800;letter-spacing:-.02em}
+.stat .l{font-size:11px;color:var(--t3);margin-top:2px}
+.banner{background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.22);border-radius:var(--r);padding:10px 14px;font-size:13px;color:var(--t2);line-height:1.55}
+.banner.red{background:rgba(248,113,113,.08);border-color:rgba(248,113,113,.3);color:#fca5a5}
+.note{font-size:12px;color:var(--t3);line-height:1.55;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+.tiny{font-size:11px;color:var(--t3)}
+.dim{font-size:12.5px;color:var(--t2);line-height:1.6}
+.sub{font-size:13px;color:var(--t2);line-height:1.6}
+.mt6{margin-top:6px}.mt10{margin-top:10px}.mt14{margin-top:14px}
+.row{display:flex;align-items:center;gap:10px}
+.between{justify-content:space-between}
+.wrap{flex-wrap:wrap}
+.empty{padding:26px 14px;text-align:center;color:var(--t3);font-size:13px;background:var(--panel);border:1px dashed var(--line2);border-radius:var(--r)}
+.code{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:12px;background:var(--panel);border:1px solid var(--line2);border-radius:10px;padding:10px 12px;word-break:break-all;color:var(--t2)}
+kbd{font-family:inherit;font-size:10.5px;background:rgba(255,255,255,.07);border:1px solid var(--line2);border-bottom-width:2px;border-radius:5px;padding:1px 6px;color:var(--t2)}
+
+/* таблицы */
+.tw{width:100%;border-collapse:collapse;font-size:12.5px}
+.tw th{text-align:left;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--t4);padding:6px 8px;border-bottom:1px solid var(--line2)}
+.tw td{padding:7px 8px;border-bottom:1px solid var(--line);color:var(--t2);vertical-align:top}
+.tw td:first-child{color:var(--t1)}
+.tw tr:last-child td{border-bottom:none}
+
+/* раскрывающиеся блоки */
+details{background:var(--panel2);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+summary{list-style:none;cursor:pointer;padding:12px 16px;font-size:13.5px;font-weight:600;color:var(--t1);display:flex;align-items:center}
+summary::-webkit-details-marker{display:none}
+.dbody{padding:0 16px 14px}
+.ic.chev{margin-left:auto;width:14px;height:14px;transition:transform .15s;color:var(--t3)}
+details[open] .ic.chev{transform:rotate(90deg)}
+
+/* заметки-плитки */
+.ngrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:10px}
+.ntile{background:var(--panel2);border:1px solid var(--line);border-top:3px solid var(--amber);border-radius:12px;padding:12px 12px 10px;min-height:122px;cursor:pointer;display:flex;flex-direction:column;transition:border-color .15s}
+.ntile:hover{border-color:var(--line2)}
+.ntile .nt-t{font-size:13px;font-weight:700;line-height:1.35;color:var(--t1);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ntile .nt-b{font-size:11.5px;color:var(--t3);line-height:1.5;margin-top:6px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.ntile .nt-m{margin-top:auto;padding-top:8px;font-size:10.5px;color:var(--t4);display:flex;align-items:center;gap:5px}
+.ntile .nt-dot{width:7px;height:7px;border-radius:99px;flex:none}
+.group-label.sec{color:var(--amber);display:flex;align-items:center;gap:5px}
+.group-label.sec .ic{width:11px;height:11px}
+.sheet-tile.sec{color:var(--amber3)}
+
+/* видео */
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:12px}
+.vthumb{position:relative;cursor:pointer;border-radius:10px;overflow:hidden;aspect-ratio:16/10;background:var(--panel4);display:block}
+.vthumb img{width:100%;height:100%;object-fit:cover;display:block}
+.play{position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:22px;background:rgba(0,0,0,.25);text-shadow:0 2px 8px rgba(0,0,0,.6)}
+.vname{font-size:12px;color:var(--t2);margin-top:6px;line-height:1.45}
+.vframe{width:100%;aspect-ratio:16/9;border:none;border-radius:10px;display:block}
+
+/* фото (закрытая зона) */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.pgrid .ph{position:relative}
+.pgrid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;border:1px solid var(--line2);cursor:pointer;display:block}
+.pgrid .phdel{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:7px;background:rgba(11,13,17,.75);color:var(--t2);display:grid;place-items:center;font-size:12px}
+.pgrid .phdel:hover{color:var(--red)}
+
+/* чат */
+.msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:16px;min-height:0}
+.msg{max-width:78%;padding:10px 13px;border-radius:14px;font-size:13.5px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+.msg.user{margin-left:auto;background:rgba(251,191,36,.14);border:1px solid rgba(251,191,36,.25)}
+.msg.ai{background:var(--panel3);border:1px solid var(--line)}
+.mt{font-size:10.5px;color:var(--t4);margin-top:6px}
+.chatbar{padding:12px 16px 14px;display:flex;gap:10px;align-items:center;border-top:1px solid var(--line)}
+.chatbar input{flex:1}
+.chip{font-size:12px;color:var(--t2);background:var(--panel3);border:1px solid var(--line);border-radius:99px;padding:5px 11px;cursor:pointer;white-space:nowrap}
+.chip:hover{color:var(--t1);border-color:var(--line2)}
+
+/* музыка */
+.eq{display:flex;align-items:flex-end;gap:2px;height:14px;width:16px;flex:none}
+.eq span{width:3px;background:var(--amber);border-radius:2px;height:4px}
+.eq.play span:nth-child(1){animation:eq .9s ease-in-out infinite}
+.eq.play span:nth-child(2){animation:eq .9s .2s ease-in-out infinite}
+.eq.play span:nth-child(3){animation:eq .9s .4s ease-in-out infinite}
+@keyframes eq{0%,100%{height:4px}50%{height:14px}}
+.trow{display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.trow:last-child{border-bottom:none}
+.trow .eq{cursor:pointer}
+.bar{height:3px;background:var(--panel4);border-radius:99px;overflow:hidden;flex:1}
+.bar i{display:block;height:100%;background:var(--amber);border-radius:99px}
+
+/* модалки/тосты */
+.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.62);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px}
+.modal{width:min(460px,100%);max-height:86vh;overflow-y:auto;background:var(--panel2);border:1px solid var(--line2);border-radius:16px;padding:18px;animation:fi .15s ease-out}
+.modal h3{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(8px);background:var(--panel4);border:1px solid var(--line2);color:var(--t1);font-size:13px;font-weight:500;border-radius:12px;padding:9px 16px;z-index:200;opacity:0;transition:all .2s;max-width:88vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%)}
+
+/* телефон */
+.pwrap{flex:1;display:flex;flex-direction:column;height:100vh;height:100dvh;min-width:0;position:relative}
+.statusbar{flex:none;height:38px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font-size:12.5px;color:var(--t2)}
+.pheader{flex:none;display:flex;align-items:center;gap:10px;padding:6px 14px 10px}
+.pcontent{flex:1;overflow-y:auto;padding:4px 16px 20px}
+.bottomnav{flex:none;display:flex;border-top:1px solid var(--line);background:var(--panel);padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
+.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;color:var(--t3);font-size:10px;border-radius:10px}
+.bn-item.act{color:var(--amber)}
+.sheet-back{position:absolute;inset:0;background:rgba(0,0,0,.55);z-index:60;display:flex;align-items:flex-end}
+.sheet{width:100%;background:var(--panel2);border-radius:18px 18px 0 0;padding:8px 16px calc(18px + env(safe-area-inset-bottom));animation:up .2s ease-out}
+@keyframes up{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
+.grab{width:36px;height:4px;border-radius:99px;background:var(--t4);margin:4px auto 10px;opacity:.5}
+.sheet-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.sheet-tile{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 4px;border-radius:12px;color:var(--t2);font-size:11px}
+.sheet-tile.act{background:var(--panel4);color:var(--t1)}
+
+@media (max-width:560px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .content{padding:14px}
+  .pcontent .stack{gap:10px}
+}
+</style></head><body>
+<div id="app" class="app"></div><div id="overlays"></div>
+<div id="toast" class="toast"></div>
+<script>
+'use strict';
+/* ══════════ ДАННЫЕ ПЛАНА (импорт из GLM-чата, план-трекер v4) ══════════ */
+const START = new Date(2026, 9, 5);   /* пн первой недели; план стартует в ср 7.10 внутри неё */
+const BALL  = new Date(2027, 3, 4);   /* бал 4.04.2027 */
+const BIRTH = new Date(2027, 6, 6);   /* 21 год, 6.07.2027 */
+const PHASES = [
+  {n:1, name:'Ф1 Фундамент', a:new Date(2026,9,7),  b:new Date(2026,10,29)},
+  {n:2, name:'Ф2 Сила+бег',  a:new Date(2026,10,30),b:new Date(2027,0,31)},
+  {n:3, name:'Ф3 Нормативы', a:new Date(2027,1,1),  b:new Date(2027,3,4)},
+  {n:4, name:'Ф4 Лето к 21', a:new Date(2027,3,5),  b:new Date(2027,6,6)},
+];
+const SPECIAL = [
+  ['Нед. 1 (7–11.10) · короткий старт','План стартовал в среду: ср — силовая B вполсилы (техника и запись весов, не геройствовать), пт — силовая C, сб — бег-минимум + айкидо, вс — замеры и тест 3 км. Главное дело недели: врач по кисти + УЗИ до воскресенья 11.10'],
+  ['Нед. 3 (19–25.10)','Сборы 23–25: силовые 2 лёгких по 30 мин. Еда с собой. Кисть — предупредить тренера'],
+  ['Нед. 8 (23–29.11)','Разгрузка −40% + тесты фазы 1 (подтягивания, фото, 3 км 29.11)'],
+  ['Нед. 13 (28.12–3.01)','НГ: минимум + сон. Без литров сладкого'],
+  ['Нед. 15–16 (11–24.01)','Сессия: быстрые версии 25 мин ×2/нед, сон святое, еда не падает'],
+  ['Нед. 23 (8–14.03)','Тесты нормативов: подтягивания, 3 км, 100 м'],
+  ['Нед. 24–26 (15.03–4.04)','Подводка: объём −30%, сон 8 ч. Последняя силовая за 3 дня до бала'],
+  ['Нед. 27 (5–11.04)','Отдых после бала: 2 силовых без веса, 1–2 лёгких бега, сон 8+. Это часть плана, не слабость'],
+  ['Нед. 39 (28.06–4.07)','Тесты к 21: подтягивания, 3 км, 100 м, вис на время, фотосет + новый кружок. 6.07 — день рождения'],
+];
+const DAYS = {
+  1:{type:'Понедельник — силовая A', plan:'Утро: осанка-минимум. Силовая A (8:30–10:00 до пар или в окне 15–17). Вечер — академия.',
+     train:['Подтягивания — объём: 5×8–10','Болгарские сплит-приседания 3×8–12/ногу','Австралийские подтягивания 3×10–15','Румынская тяга 3×10–12','Отжимания на кулаках, ноги выше 3×(макс−2)','Подъёмы коленей в висе 3×8–12','Вис на турнике 2×60 с → «парашютист» 3×20–30 с']},
+  2:{type:'Вторник — осанка + айкидо', plan:'Утро: осанка полный блок 12–15 мин. Физра 13:00 — вполсилы. Вечер — айкидо.',
+     train:['Осанка: полный блок 12–15 мин (таблица ниже)','Физра 13:00 — движение, не подвиг','Айкидо 19:00–21:00 (кисть: предупреждать партнёров)']},
+  3:{type:'Среда — силовая B', plan:'Утро: осанка-минимум. Силовая B в окне 15–17. Вечер — академия.',
+     train:['Подтягивания — сила: 5×3–5 с рюкзаком +5 кг','Приседания с рюкзаком у груди 4×10–15','Отжимания на кулаках 3-1-1: 4×8–15','Хип-траст/мост с рюкзаком 3×12–15','Жим гантелей над головой / пайк 3×8–15','Планка на предплечьях 3×20–30 с','Боковая планка 2×30 с/сторону','Вис на турнике 2×60 с → «парашютист» 3×20–30 с']},
+  4:{type:'Четверг — осанка + айкидо', plan:'Утро: осанка полный блок 12–15 мин. Окно — учёба/отдых. Вечер — айкидо.',
+     train:['Осанка: полный блок 12–15 мин (таблица ниже)','Айкидо 19:00–21:00 (кисть: предупреждать партнёров)']},
+  5:{type:'Пятница — силовая C', plan:'Утро: осанка-минимум. Силовая C после пар (16:40) или утром. Вечер — академия.',
+     train:['Подтягивания — плотность: 5 повторов каждую минуту × 8–10 мин','Австралийские, ноги выше 3×8–12','Узкие отжимания на кулаках 3×8–15','Боковые подъёмы гантелей 3×12–20','Hollow 3×20–30 с','Y-T-W с паузой 2 с: 2×8','Мост на одной ноге 2×10/ногу','Вис на турнике 2×60 с → «парашютист» 3×20–30 с']},
+  6:{type:'Суббота — бег + айкидо', plan:'Утро: осанка полный блок + бег-блок по фазе. Днём — свои дела. Вечер — айкидо.',
+     train:['Осанка: полный блок 12–15 мин','Бег-блок по фазе (расписан во вкладке «Бег»)','Айкидо 19:00–21:00']},
+  0:{type:'Воскресенье — замеры, D и жизнь', plan:'Утро: замеры 10 мин. Днём: силовая D 30–35 мин (руки/плечи/предплечья). Закупки, вечер — жизнь.',
+     train:['Замеры: вес, талия, тест у стены','Фото спереди/сбоку (по графику)','Вис на турнике 2×60 с (по сенсею — первый)','Вис «парашютиста» 3×20–60 с — запиши лучший','Разводка гантелей в наклоне 3×12–20 (по сенсею)','Махи в стороны 3×12–20 + бицепс 4×10–15, молотки 3×10–12','Узкие отжимания 3×10–15 + запястья 2×15–20 (после вердикта)','Закупки + заготовка еды','План недели на 10 минут']},
+};
+const HEAD_W = ['Упражнение','Подходы × повторы','Зачем'];
+const GRIP = ['+ Хват-блок в конце (по сенсею)','вис 2×60 с → «парашютист» 3×20–30 с → 90 с к лету','Разгрузка спины, хват и предплечья, лопатки'];
+const W_A = [
+ ['Подтягивания — день «объём» (протокол ниже)','5×8–10, отдых 2 мин','Ширина спины, V-силуэт'],
+ ['Болгарские сплит-приседания с рюкзаком','3×8–12 на ногу','Ноги и ягодицы; растягивает сгибатель бедра задней ноги'],
+ ['Австралийские подтягивания (низкая перекладина/стол)','3×10–15','Середина спины; тело — доска, пауза 1 с вверху'],
+ ['Румынская тяга (гантели 5 кг, позже рюкзак)','3×10–12','Ягодицы и задняя поверхность бедра; таз назад, поясница нейтральна'],
+ ['Отжимания на кулаках, ноги на возвышении','3×(макс −2)','Грудь, плечи; не проваливай поясницу'],
+ ['Подъёмы коленей в висе, таз к рёбрам','3×8–12','Нижний пресс без раскачки'],
+ GRIP];
+const W_B = [
+ ['Подтягивания — день «сила»','5×3–5 с рюкзаком +5 кг (или негативы 5×3, спуск 5 с)','Сила тяги'],
+ ['Приседания с рюкзаком у груди','4×10–15','Ноги; рюкзак спереди учит держать корпус'],
+ ['Отжимания на кулаках, темп 3-1-1','4×8–15','Грудь, трицепс'],
+ ['Хип-траст или мост с рюкзаком на бёдрах','3×12–15, пауза 2 с','Ягодицы держат таз — против прогиба'],
+ ['Жим гантелей над головой нейтральным хватом или пайк на кулаках','3×8–15','Плечи — ширина для V'],
+ ['Планка на предплечьях (ягодицы напряжены, рёбра вниз)','3×20–30 с','«Жёсткий» кор без провала в пояснице'],
+ ['Боковая планка на предплечье','2×30 с на сторону','Косые мышцы, стабильность таза'],
+ GRIP];
+const W_C = [
+ ['Подтягивания — день «плотность»','Каждую минуту 5 повторов, 8–10 минут подряд','Выносливость тяги'],
+ ['Австралийские подтягивания, ноги на возвышении','3×8–12','Середина спины, задние дельты'],
+ ['Узкие отжимания на кулаках','3×8–15','Трицепс, грудь'],
+ ['Боковые подъёмы гантелей 5 кг','3×12–20','Ширина плеч'],
+ ['«Пустая лодочка» (hollow)','3×20–30 с','Пресс и контроль таза'],
+ ['Y-T-W с паузой 2 с','2×8 каждой буквы','Нижняя трапеция, серратус'],
+ ['Мост на одной ноге','2×10 на ногу','Ягодицы без нагрузки на ноги'],
+ GRIP];
+const W_D = [
+ ['Вис на турнике (по сенсею — всегда первый)','2×60 с','Разгрузка позвоночника после дня за партой, разминка хвата'],
+ ['Вис «парашютиста»','3×20–60 с → 90 с','Хват, предплечья; лопатки активно вниз-назад'],
+ ['Гантели в наклоне разводить (по сенсею, обязательно)','3×12–20','Задние дельты и верх спины: осанка + ширина'],
+ ['Махи гантелями в стороны','3×12–20','Средняя дельта — ширина плеч для V'],
+ ['Сгибания на бицепс: гантели 5 кг, темп 3-1-1','4×10–15','Бицепс; медленное опускание растит и на лёгком весе'],
+ ['Молотковые сгибания','3×10–12','Брахиалис — толщина руки сбоку'],
+ ['Отжимания узко на кулаках','3×10–15','Трицепс — две трети объёма руки'],
+ ['Сгибания запястий с гантелью сидя','2×15–20','Предплечья — только после вердикта врача']];
+const NOTE_W = 'Отдых 90–150 с · опускание 2–3 с · запас 1–2 повтора, в последнем подходе 0–1 · веса записывай';
+const NOTE_D = 'Правило D: бонус-объём сверху базы A/B/C. Не выспался, кисть ноет, завал по учёбе — D пропускается без чувства вины, минимум дня не трогается. Чувствуешь себя свежо — D превращает недели 27–39 в главный строительный блок рук и плеч к 21-му';
+const HEAD_O = ['Упражнение','Дозировка','Зачем'];
+const OS_FULL = [
+ ['1. Подбородок назад (у стены или лёжа)','2×10, удержание 5 с','Включает глубокие мышцы шеи, выключенные при вынесенной вперёд голове'],
+ ['2. Растяжка сгибателя бедра в полувыпаде (таз подкручен, ягодица напряжена)','2×45 с на ногу','Укороченный сгибатель тянет таз вперёд и усиливает прогиб — расслабляем'],
+ ['3. Растяжка грудных в дверном проёме','2×30 с на сторону','Короткие грудные заворачивают плечи вперёд'],
+ ['4. Разгибание грудного отдела на валике/полотенце','2×8 медленных вдохов','Сутулость — нехватка разгибания грудного отдела; поясница компенсирует лишним прогибом'],
+ ['5. «Мёртвый жук»','2×8 на сторону','Учит держать таз в нейтрали и не «ломать» поясницу'],
+ ['6. Ягодичный мост, пауза 2 с наверху','2×15','Ягодицы должны держать таз сзади — сейчас они «спят»'],
+ ['7. Y-T-W лёжа лицом вниз','2×8 каждой буквы','Нижняя и средняя трапеции, задние дельты; подъём на 1–2 см, лопатки вниз'],
+ ['8. Активный вис на турнике (плечи вниз, рёбра вниз)','2×60 с — по сенсею','Тянет широчайшие и грудные, тренирует хват, разгружает позвоночник']];
+const OS_NOTE = 'Минимум-версия (5 мин, в силовые дни): пункты 1, 2, 4, 7. Ориентир на день: рёбра опущены, таз в нейтрали (не «уточкой»), макушка вверх, лопатки вниз. Плоская спина не нужна — нужна нейтральная. Привычки: экран на уровне глаз; каждые 45–60 минут — 5 «подбородков назад»; рюкзак на обе лямки; в очереди и на остановке — «рёбра вниз, макушка вверх».';
+const OS_CRUNCH = 'Если нет боли, защемления и онемения — это чаще всего кавитация (пузырьки газа в суставах), а не повреждение. Мобилизация из блока осанки (растяжка сгибателя, разгибание грудного отдела на валике) обычно делает хруст тише за пару месяцев. Хруст с болью, прострелом или онемением — врач, без самодеятельности.';
+const RUNS = {
+  1:['БЕГ-БЛОК · Ф1 · СУББОТА (~25 МИН)','Разминка 8 мин → дриллы A-skip/B-skip 2×20 м → 6×40–60 м на 85–95% (отдых 2–3 мин) → 8–10 мин лёгкого. Без полной разминки спринты не начинаем. Тест 3 км: 11.10 и 29.11'],
+  2:['БЕГ-БЛОК · Ф2 · СУББОТА','Разминка + спринты как в Ф1. Вторая сессия в воскресенье: 30–40 мин лёгкого или 4–6×400 м. Тест 100 м: 13.12. Цель к концу фазы: 3 км ≤ 13:00'],
+  3:['БЕГ-БЛОК · Ф3 · СУББОТА (СПРИНТЫ ДО АЙКИДО)','Ноги забиты — вместо спринтов только дриллы и 4×30 м легко. По неделе: интервалы 6–8×400 м (88–95 с) + темповая 20 мин + длинная 40 мин'],
+  4:['БЕГ-БЛОК · Ф4 · СУББОТА','Поддержка: темповая 20 мин + длинная лёгкая 40 мин. Спринты по желанию, если ноги свежие. Тесты — в неделю 39, к 21-му'],
+};
+const MIN5 = ['Осанка-минимум 5 минут','Белок в каждом приёме + добор','Вода 2 литра (бутылка с собой)','Силовой день сорвался — быстрая 25 мин (только для пн/ср/пт)','Экраны off 23:00 + будильник 7:00'];
+const MEALS = ['Завтрак 07:35 (3 яйца + овсянка + банан + орехи)','Перекус ~11:00 (бутерброд + фрукт)','Обед 13:00 (мясо + гарнир + овощи)','Ужин 17:30 (домашний + пункт добора)','Вечер 21:30 (творог / кефир / яйца)'];
+const SLEEP = ['22:40 — телефон на зарядку вне кровати','22:00–22:40 — свободный слот, дальше тишина','23:00 — экраны off, душ','23:15 — отбой'];
+const TECH = [
+ ['Подтягивания и вис', [
+  ['Подтягивания — правильная техника (Юрий Харламов)','K5UVjeNCKmY'],
+  ['Австралийские подтягивания — главная ошибка новичка','LFoRoQVek4o'],
+  ['Вис «парашютист»: лопатки в висе (Scapular Pull-Ups)','hQbW2kua5io'],
+  ['Подъёмы коленей/ног в висе — разбор','dVKJUa2gyww'],
+ ]],
+ ['Отжимания, плечи, руки', [
+  ['Отжимания — идеальная техника (и на кулаках)','VJx7Ql80ec8'],
+  ['Жим гантелей над головой стоя','QBgVVF5ByBU'],
+  ['Махи гантелями в стороны','Q3j7XYxrJtk'],
+  ['Разводка гантелей в наклоне (задняя дельта)','bXJ9aM-NCpE'],
+  ['Задние дельты и Y-T-W — 5 упражнений + ошибки','asVCQYpTOM4'],
+ ]],
+ ['Ноги и ягодицы', [
+  ['Болгарские сплит-приседания — избегай ошибок','7-Pp2rf9Bjg'],
+  ['Румынская тяга с гантелями','w8618QnyZi8'],
+  ['Ягодичный мост / хип-траст','E2W93hwI-5c'],
+ ]],
+ ['Кор', [
+  ['Планка — правильная техника','0JtBS11DGDk'],
+  ['Боковая планка','q4hzrrvIFtk'],
+  ['«Пустая лодочка» (hollow)','u_CTE4TBsAg'],
+ ]],
+ ['Бег', [
+  ['Дриллы A-skip / B-skip (на английском, но всё видно)','aSDyoraNOZc'],
+ ]],
+];
+const TECH_IMG = [
+ ['Пункт 1 осанки: подбородок назад (chin tuck)','https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/7d035eda5b4b.jpg'],
+ ['Пункт 2: растяжка сгибателя бедра','https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/3883dd831688.jpg'],
+ ['Пункт 3: растяжка грудных в дверном проёме','https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/68ba34cd50e8.jpg'],
+ ['Пункт 5: мёртвый жук','https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/1aeb8b791962.jpg'],
+];
+/* ══════════ ИКОНКИ (инлайн SVG, офлайн) ══════════ */
+const IC = {
+  home:'<path d="M3 11l9-8 9 8"/><path d="M5 9.8V21h14V9.8"/>',
+  chat:'<path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.3c-1.4 0-2.8-.3-4-.9L3 21l2.1-5.2A8 8 0 0 1 4 11.5 8.4 8.4 0 0 1 12.5 3 8.4 8.4 0 0 1 21 11.5z"/>',
+  note:'<path d="M4 4h16v12l-4 4H4z"/><path d="M16 20v-4h4"/>',
+  task:'<path d="M9 11.5l2 2 4-4.5"/><rect x="3" y="4" width="18" height="17" rx="3"/>',
+  cal:'<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/>',
+  dumb:'<path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11"/>',
+  video:'<rect x="2" y="6" width="14" height="12" rx="3"/><path d="M16 10.5l6-3.5v10l-6-3.5"/>',
+  lect:'<path d="M12 3l9 5-9 5-9-5z"/><path d="M21 13a9 9 0 0 1-18 0"/>',
+  music:'<path d="M9 18V6l11-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>',
+  set:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h0a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55h0a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v0a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
+  wifi:'<path d="M5 12.5a10 10 0 0 1 14 0"/><path d="M8.5 15.5a5 5 0 0 1 7 0"/><path d="M12 19h.01"/>',
+  zap:'<path d="M13 2L3 14h8l-1 8 10-12h-8z"/>',
+  grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  lock:'<rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  key:'<circle cx="8" cy="15" r="4"/><path d="M10.8 12.2L20 3m-4 1l3 3m-6 0l3 3"/>',
+  moon:'<path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/>',
+  sync:'<path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-7.6-4.2M3 12a9 9 0 0 1 9-9 9 9 0 0 1 7.6 4.2"/><path d="M21 4v5h-5M3 20v-5h5"/>',
+  alert:'<path d="M12 3l10 17H2z"/><path d="M12 10v4M12 17.5h.01"/>',
+  check:'<path d="M4 12.5l5 5L20 6.5"/>',
+  power:'<path d="M18.4 6.6a9 9 0 1 1-12.8 0"/><path d="M12 2v8"/>',
+  play:'<path d="M6 4l14 8-14 8z"/>',
+  pause:'<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  up:'<path d="M12 19V5M5 12l7-7 7 7"/>',
+  down:'<path d="M12 3v14M5 10l7 7 7-7"/><path d="M4 21h16"/>',
+  copy:'<rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+  eye:'<path d="M1 12s4-7.5 11-7.5S23 12 23 12s-4 7.5-11 7.5S1 12 1 12z"/><circle cx="12" cy="12" r="3"/>',
+  chevR:'<path d="M9 6l6 6-6 6"/>',
+  back:'<path d="M15 6l-6 6 6 6"/>',
+  flame:'<path d="M12 22c4.4 0 7.5-3 7.5-7.2 0-3-1.7-5-3.2-6.8C14.8 6.2 14 4.8 14 3c-3 2-4.2 4.6-4.2 6.7 0 .8.1 1.4.1 1.4s-.8-.4-1.5-1.4C7 11.3 4.5 13.6 4.5 17 4.5 19.9 7.6 22 12 22z"/>',
+  spark:'<path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8z"/><path d="M19 15l.9 3.1L23 19l-3.1.9L19 23l-.9-3.1L15 19l3.1-.9z"/>',
+  book:'<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5z"/><path d="M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/>',
+  bulb:'<path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.8.6 1 1.4 1 2.3h6c0-.9.2-1.7 1-2.3A7 7 0 0 0 12 2z"/>',
+  img:'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5-11 11"/>',
+  signal:'<path d="M2 20h.01M7 20v-4M12 20v-8M17 20V8M22 20V4"/>',
+  battery:'<rect x="1" y="6" width="18" height="12" rx="3"/><path d="M23 13v-2"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
+  pen:'<path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/>',
+};
+function ic(k){ return '<svg class="ic" viewBox="0 0 24 24">'+(IC[k]||'')+'</svg>'; }
+
+/* ══════════ НАВИГАЦИЯ ══════════ */
+const SCREENS = {
+  home:{t:'Сегодня'}, chat:{t:'Арми'}, notes:{t:'Заметки'}, tasks:{t:'Задачи'},
+  schedule:{t:'Расписание'}, train:{t:'Тренировки'}, lectures:{t:'Лекции'},
+  music:{t:'Музыка'}, video:{t:'Видео'}, photos:{t:'Фото'}, fun:{t:'Развитие'}, settings:{t:'Настройки'},
+};
+const NAV_GROUPS = [
+  {label:'Ассистент', items:['home','chat']},
+  {label:'Организатор', items:['tasks','schedule','notes']},
+  {label:'План и тело', items:['train','video']},
+  {label:'Медиа и учёба', items:['photos','lectures','music','fun']},
+  {label:'Система', items:['settings']},
+];
+const PHONE_MAIN = ['home','chat','train','tasks'];
+const PHONE_MORE = ['schedule','notes','photos','video','lectures','music','fun','settings'];
+const NAV_ICONS = {home:'home', chat:'chat', notes:'note', tasks:'task', schedule:'cal', train:'dumb',
+  video:'video', photos:'img', lectures:'lect', music:'music', fun:'spark', settings:'set'};
+const WEEKDAYS = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+const WEEKFULL = ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'];
+
+/* ══════════ СЕМЕЙНЫЕ ДАННЫЕ (импорт из GLM-чата, 8 ноября) ══════════ */
+const SEED_SECTIONS = [
+  {id:'s_zdo', name:'Здоровье', c:'#60a5fa'},
+  {id:'s_telo', name:'Тело', c:'#2dd4bf'},
+  {id:'s_rab', name:'Работа', c:'#fbbf24'},
+  {id:'s_aik', name:'Айкидо', c:'#a78bfa'},
+  {id:'s_uch', name:'Учёба', c:'#34d399'},
+  {id:'s_fin', name:'Финансы', c:'#f59e0b'},
+  {id:'s_lich', name:'Личное', c:'#fb7185'},
+];
+const SECT_COLORS = ['#60a5fa','#2dd4bf','#fbbf24','#a78bfa','#34d399','#f59e0b','#fb7185','#f87171'];
+const SEED_TOPICS = [
+  {id:'tp1', name:'Личное', c:'#fb7185'},
+  {id:'tp2', name:'Тело', c:'#2dd4bf'},
+  {id:'tp3', name:'Здоровье', c:'#60a5fa'},
+  {id:'tp4', name:'Финансы', c:'#f59e0b'},
+  {id:'tp5', name:'Проекты', c:'#a78bfa'},
+];
+const SEED_TASKS = [
+  {id:'t1', title:'Травмпункт: рентген кисти по ОМС — бесплатно, без записи', done:false, priority:'high', project:'Здоровье', due:'до вс'},
+  {id:'t2', title:'Силовая по плану дня (отметить в трекере)', done:false, priority:'high', project:'Тело', due:'сегодня'},
+  {id:'t3', title:'Стажировка: дождаться первой зарплаты, уточнить дату', done:false, priority:'high', project:'Работа', due:'на неделе'},
+  {id:'t4', title:'Оплатить хакаму (2 кю получено)', done:false, priority:'normal', project:'Айкидо', due:'до 27.12'},
+  {id:'t5', title:'Академия: доучиться и забрать диплом', done:false, priority:'normal', project:'Учёба', due:'до марта'},
+  {id:'t6', title:'Вернуть долг 6к другу — с первой зарплаты', done:false, priority:'normal', project:'Финансы', due:'к дек'},
+  {id:'t7', title:'Замеры и фото — воскресенье, натощак', done:false, priority:'low', project:'Тело', due:'вс'},
+  {id:'t8', title:'Настроить llama.cpp на 1660 Super', done:true, priority:'high', project:'Работа', due:'сделано'},
+];
+const SEED_NOTES = [
+  {id:'n1', title:'Контракт до 30.11',
+   content:'Контракт до 30.11 — пробный формат, финал совпадает с концом Фазы 1 (29.11).\n\nПравила:\n— не «парень»: никаких подарков-инвестиций и логистики за неё\n— 1–2 встречи в неделю, не каждый день\n— ни разу не спрашивать «появились?»\n— спорт неприкосновенен: план не двигается из-за настроения\n— деньги: ничего сверх обычного\n— триггер выхода: 15–20 ноября самопроверка — если инициативы и тепла нет, завершаю сам\n\nПосле 30.11 — чистый разрыв и 2–4 недели тишины. Декабрь-протокол в трекере буквально для этого.', topic:'Личное', updatedAt:'сб, 7 ноя'},
+  {id:'n2', title:'Протокол кисти',
+   content:'Макивара — СТОП до снимка и вердикта врача.\nБесплатный путь: травмпункт при больнице скорой помощи — рентген по ОМС без записи. Или поликлиника → травматолог-ортопед.\nПосле вердикта: сила удара 20–30%, первые две костяшки, запястье прямое, 2–3 мин через день.\nХват-блок по сенсею: вис 2×60 с (всегда первый) → «парашютист» 3×20–60 с → разводка в наклоне 3×12–20.', topic:'Тело', updatedAt:'сб, 7 ноя'},
+  {id:'n3', title:'Финансы: долг и степуха',
+   content:'Долг 6к другу — гасить с первой зарплаты со стажировки.\nСтепуха ~27к ожидается 27.12. Малая степуха 2900 → зал.\nС марта (диплом + зарплата): 3–4 месяца копить → своя комната к 6.07.2027.\nПравило: траты записывать в тот же день, чтобы понимать, куда уходит.', topic:'Финансы', updatedAt:'вс, 8 ноя'},
+  {id:'n4', title:'Кожа — протокол за 400 ₽',
+   content:'1) умывание мягким гелем 2 раза в день + обязательно после тренировки\n2) на ночь бензоилпероксид 2,5% (Базирон/аналог) или адапален 0,1% — тонким слоем на всё лицо, через день\n3) наволочка свежая раз в 2–3 дня, полотенце для лица отдельное\n4) не давить. Эффект 8–12 недель\nЕсли через 2 месяца тяжело — терапевт → дерматолог (бесплатно).', topic:'Здоровье', updatedAt:'сб, 7 ноя'},
+  {id:'n5', title:'Цель: своя комната к 6.07.2027',
+   content:'«Хочу один жить» — это цель, а не побег.\nПуть: стажировка платит → долг 6к → степуха 27.12 → с марта зп + диплом → 3–4 месяца копить → комната к 6.07.2027.\nКаждая тренировка теперь работает и на это.\nЛюди: минимум там, где клинят (дома). Друзья с тренировок и айкидо — свои люди, там уважают.', topic:'Проекты', updatedAt:'вс, 8 ноя'},
+  {id:'n6', title:'Роадмап Арми',
+   content:'1) Локальный RAG по заметкам — векторный поиск без облака\n2) Брифинг на будильник: Арми зачитывает план дня\n3) Голосовые лекции → автоконспект + теги (whisper.cpp)\n4) Секретный режим: тот же интерфейс, скрытый вход двойным кликом по логотипу\n5) Мультиагенты по мотивам Сары — только локальные', topic:'Проекты', updatedAt:'пн, 9 ноя'},
+];
+const KIND_STYLE = {'учёба':{c:'#34d399'},'спорт':{c:'#2dd4bf'},'работа':{c:'#fbbf24'},'личное':{c:'#fb7185'},'прочее':{c:'#a1a1aa'}};
+const SEED_EVENTS = [
+  {id:'e1', day:0, start:'15:00', end:'17:00', title:'Силовая A — окно 15:00–17:00', place:'зал у дома', kind:'спорт'},
+  {id:'e2', day:0, start:'18:30', end:'21:00', title:'Академия — вечер', place:'академия', kind:'учёба'},
+  {id:'e3', day:1, start:'07:15', end:'07:30', title:'Осанка — полный блок', place:'дома', kind:'спорт'},
+  {id:'e4', day:1, start:'13:00', end:'14:00', title:'Физра', place:'корпус', kind:'спорт'},
+  {id:'e5', day:1, start:'19:00', end:'21:00', title:'Айкидо', place:'додзё', kind:'спорт'},
+  {id:'e6', day:2, start:'15:00', end:'17:00', title:'Силовая B — окно 15:00–17:00', place:'зал у дома', kind:'спорт'},
+  {id:'e7', day:2, start:'18:30', end:'21:00', title:'Академия — вечер', place:'академия', kind:'учёба'},
+  {id:'e8', day:3, start:'07:15', end:'07:30', title:'Осанка — полный блок', place:'дома', kind:'спорт'},
+  {id:'e9', day:3, start:'19:00', end:'21:00', title:'Айкидо', place:'додзё', kind:'спорт'},
+  {id:'e10', day:4, start:'16:40', end:'18:00', title:'Силовая C после пар', place:'зал у дома', kind:'спорт'},
+  {id:'e11', day:4, start:'18:30', end:'21:00', title:'Академия — вечер', place:'академия', kind:'учёба'},
+  {id:'e12', day:5, start:'09:30', end:'10:30', title:'Бег-блок по фазе', place:'парк/стадион', kind:'спорт'},
+  {id:'e13', day:5, start:'19:00', end:'21:00', title:'Айкидо', place:'додзё', kind:'спорт'},
+  {id:'e14', day:6, start:'10:00', end:'10:20', title:'Замеры: вес, талия, фото', place:'дома', kind:'личное'},
+  {id:'e15', day:6, start:'16:00', end:'16:40', title:'Силовая D (руки/плечи)', place:'дома', kind:'спорт'},
+];
+const SEED_LECTURES = [
+  {id:'l1', title:'Базы данных — Индексы и планы запросов', dur:'48 мин', date:'пн, 9 ноя', consp:true,
+   text:'Индексы ускоряют чтение, но замедляют запись. B-дерево по умолчанию; составной индекс подчиняется правилу крайнего левого. EXPLAIN — первый инструмент диагностики.',
+   excerpt:'…индекс — это отдельная структура на диске. Когда мы пишем WHERE date = X, движок не сканирует таблицу, а спускается по дереву за O(log n). Цена — каждая вставка обновляет все индексы таблицы…'},
+  {id:'l2', title:'Архитектура нейросетей — Лекция 7: Attention', dur:'1 ч 12 мин', date:'ср, 4 ноя', consp:true,
+   text:'Механизм внимания взвешивает важность токенов друг для друга: запрос-ключ-значение, масштабирование на корень из размерности, softmax по строкам.',
+   excerpt:'…проблема RNN — затухание градиента на длинных последовательностях. Attention решает её прямым доступом к любому элементу: каждый токен «смотрит» на все остальные и выбирает, что важно…'},
+];
+const SEED_MYVIDEOS = [
+  {id:'mv1', title:'План-трекер (исходник из чата)', url:'https://chat.z.ai/s/ea06a617', note:'39 недель, импортировано 8 ноя', added:'8 ноя'},
+  {id:'mv2', title:'GLM-чат: анализ диалогов и план', url:'https://chat.z.ai/s/ea06a617', note:'источник данных прототипа', added:'8 ноя'},
+];
+const TRACKS = [
+  {id:'m1', title:'Утренний фокус', artist:'Арми · локальный плейлист', seconds:204},
+  {id:'m2', title:'Глубокая работа', artist:'Арми · ambient', seconds:252},
+  {id:'m3', title:'Ночной код', artist:'Арми · lo-fi', seconds:228},
+  {id:'m4', title:'Поток', artist:'Арми · ambient', seconds:302},
+  {id:'m5', title:'Перезагрузка', artist:'Арми · локальный плейлист', seconds:178},
+];
+const PROFILES = {
+  pc1660:{t:'ПК · GTX 1660 Super 6 ГБ', m:'llama 7B Q4_K_M — локально, бесплатно'},
+  phone:{t:'Телефон · Samsung A23', m:'llama 1–3B Q4 — на устройстве, бесплатно'},
+  old:{t:'Ноутбук 2010 · без GPU', m:'локальный ИИ не тянет — работает облако или офлайн-функции'},
+};
+const MODEL_LABEL = {
+  offline:{pc1660:'llama 7B Q4 · локально', phone:'llama 1B Q4 · локально', old:'офлайн-функции'},
+  online:{pc1660:'облако 100–200 ₽/мес · для сложного', phone:'облако 100–200 ₽/мес · для сложного', old:'облако 100–200 ₽/мес · основной'},
+};
+/* ══════════ РАЗВЛЕЧЕНИЯ И САМОРАЗВИТИЕ ══════════ */
+const FACTS = [
+ 'Мозг — около 2% массы тела, но потребляет примерно 20% всей энергии. Думать — дорого.',
+ 'Скелет полностью обновляется примерно за 10 лет: кость — живая ткань, которая постоянно перестраивается под нагрузку. Силовые — сигнал «строить плотнее».',
+ 'Мышцы растут не во время тренировки, а во время восстановления: тренировка лишь оставляет сигнал, стройка идёт ночью во сне.',
+ 'Сон — не «выключатель», а активная уборка: ночью мозг промывает себя от продуктов дневного метаболизма, а выученное за день закрепляется в долговременную память.',
+ 'За день межпозвоночные диски слегка сплющиваются — к вечеру рост на 1–2 см меньше утреннего. Вис на турнике — самый простой способ вернуть им высоту.',
+ 'Привычка в среднем закрепляется не за 21 день: исследования дают около 66 дней с разбросом от 18 до 254. Один пропущенный день почти не влияет на результат.',
+ 'Сила хвата в исследованиях коррелирует с общим здоровьем и выживаемостью в старости — дешёвый маркер, который тренируется обычным висом.',
+ 'Кофеин начинает работать через ~20 минут и выводится 5–6 часов: кофе в 17:00 реально портит глубокий сон, даже если «я нормально засыпаю».',
+ 'Прогулка 10–20 минут после еды сглаживает скачок сахара в крови заметно лучше, чем та же прогулка до еды.',
+ 'Записанный план разгружает рабочую память: мозг перестаёт крутить задачу фоном, и внимание освобождается. Это доказанный эффект «когнитивной выгрузки».',
+ 'Формулировка «когда-где-как» удваивает шансы выполнить намерение: не «начну бегать», а «в субботу в 9:00, стадион, после разминки — 6×60 м».',
+ 'Одна ночь сна меньше 5 часов снижает внимание примерно на треть — и эффект накапливается несколько дней подряд. Недосып нельзя «перетерпеть».',
+ 'Яркое мысленное повторение движения активирует моторную кору — этим пользуются в реабилитации после травм. Прокрутка техники между подходами — не эзотерика.',
+ 'Ночью синтез мышечного белка максимален, если перед сном был белок: творог — классика спортивной науки не зря.',
+ 'Витамин D кожей почти не вырабатывается с октября по март в северных широтах — зимний дефицит это норма, а не исключение.',
+ 'Лёгкий голод повышает бдительность: эволюционно «не поел — надо искать», и мозг включается резче. Тяжёлый обед делает обратное.',
+ 'Регулярное аэробное усилие выращивает новые капилляры в мозге — самый надёжный «ноотроп» из бесплатных.',
+ 'Дофамин — не «гормон удовольствия», а химический интерес «стоит ли повторить»: предвкушение сильнее самой награды. Поэтому планирование приятного само по себе поднимает настроение.',
+ 'Люди запоминают истории примерно в 20 раз лучше голых фактов — конспект лекции работает лучше, когда превращён в рассказ.',
+ 'Холодная вода на лицо включает «рефлекс ныряльщика»: пульс падает, тревожность отступает. Быстрая перезагрузка без таблеток.',
+ 'Скорость чтения ограничена не глазами, а пониманием: глаза скачят по строке быстро, узкое место — сборка смысла. Поэтому перечитывание сложного абзаца эффективнее «разгона глаз».',
+ 'Моторика письма от руки задействует больше зон мозга, чем печать: конспект лекции от руки усваивается глубже, чем набранный.',
+];
+const BOOKS = [
+ {id:'b1', t:'Атомные привычки', a:'Джеймс Клир', why:'Маленькие системы бьют мотивацию: +1% в день, среда важнее силы воли. Прямо про твой «минимум дня».', tags:['дисциплина']},
+ {id:'b2', t:'Глубокая работа', a:'Кэл Ньюпорт', why:'Концентрация как редкая валюта: как строить блоки фокуса и что они дают. Твой плейлист «Глубокая работа» — оттуда же.', tags:['учёба','дисциплина']},
+ {id:'b3', t:'Психология денег', a:'Морган Хаузел', why:'Поведение важнее математики: терпение, время и отсутствие глупостей решают больше, чем доход. К пути «комната к 6.07» — в тему.', tags:['деньги','мышление']},
+ {id:'b4', t:'Самый богатый человек в Вавилоне', a:'Джордж Клейсон', why:'Финансовые законы в форме притч: платите сначала себе, долги гаси по плану. Короткая, читается за вечер.', tags:['деньги']},
+ {id:'b5', t:'Сила воли', a:'Келли Макгонигал', why:'Воля — мышца: зависит от сна, стресса и глюкозы. Объясняет, почему «сорвался» — не слабость, а физиология, и как с этим жить.', tags:['дисциплина','тело']},
+ {id:'b6', t:'Ешь, двигайся, спи', a:'Том Рат', why:'Здоровье как набор крошечных ежедневных решений вместо подвигов. По духу — близнец твоего плана.', tags:['тело']},
+ {id:'b7', t:'Гибкое сознание', a:'Кэрол Дуэк', why:'Установка на рост: способность не фиксирована. Полезно перед сессией и любыми «у меня не получится».', tags:['мышление','учёба']},
+ {id:'b8', t:'Пик. Всё о выдающихся результатах', a:'Андерс Эрикссон', why:'Осознанная практика — главный исследователь «10 000 часов» объясняет, как именно растут навыки: не часы, а качество повторений.', tags:['учёба','тело']},
+ {id:'b9', t:'Мартин Иден', a:'Джек Лондон', why:'Самосделанность железной волей — моряк становится писателем. Художественная, но заряжает сильнее мотивационных книг. И честно показывает цену пути.', tags:['отдых','дисциплина']},
+ {id:'b10', t:'Думай медленно… решай быстро', a:'Даниэль Канеман', why:'Нобелевский лауреат о двух системах мышления и ловушках, в которые мозг попадает ежедневно. Тяжелее остальных — по кусочкам.', tags:['мышление']},
+ {id:'b11', t:'Понедельник начинается в субботу', a:'Стругацкие', why:'Лёгкая умная фантастика про НИИЧАВО: отдых с привкусом роста. Идеальна на вечер после силовой.', tags:['отдых']},
+ {id:'b12', t:'Хочу и буду', a:'Михаил Лабковский', why:'Про тревожность, чужие правила и «нормально относиться к себе». Помогает не тащить в дом лишнее.', tags:['мышление','отдых']},
+ {id:'b13', t:'Не заставляйте меня думать', a:'Стив Круг', why:'UX глазами практика: короткая, смешная, про то, как люди на самом деле смотрят на интерфейсы. Прямо в твою тему с Арми.', tags:['учёба','отдых']},
+ {id:'b14', t:'Как приобретать друзей', a:'Дейл Карнеги', why:'Классика общения: местами устарела, но база — искренний интерес вместо давления — работает и в додзё, и на стажировке.', tags:['мышление']},
+];
+const IDEAS = [
+ 'Прогулка 20 минут без телефона — маршрут новый, наушники дома.',
+ '25 минут на диплом: один маленький кусок, таймер, потом отдых.',
+ 'Растяжка 10 минут под плейлист «Перезагрузка» — осанка скажет спасибо.',
+ 'Три строки в дневник: что пошло хорошо / что мешало / одно улучшение на завтра.',
+ 'Заготовь еду на завтра — вечерний ты поблагодарит утреннего.',
+ 'Разбор одного видео по технике из раздела «Видео» — без тренировки, только головой.',
+ 'Напиши одному человеку с тренировок или айкидо — без повода.',
+ '20 страниц книги с чаем, экраны в другой комнате.',
+ 'Наведи порядок на столе за 10 минут — внешний порядок снижает фоновый шум в голове.',
+ 'Выйди на улицу и посмотри на небо 5 минут. Буквально.',
+ 'Составь завтрашний план за 5 минут — утром мозг скажет спасибо.',
+ 'Вис на турнике 2×60 с + «парашютист» — если день был сидячим.',
+ 'Пролистай конспект одной лекции — только заголовками, вспомни структуру.',
+ 'Расскажи себе вслух, чему научился за день — техника Фейнмана за 3 минуты.',
+ 'Уборка в комнате под таймер 15 минут, музыка погромче.',
+ 'Полчаса тишины: без музыки, ленты и диалогов — просто поскучать с чашкой чая.',
+];
+function funContextTags(){
+  const tags = ['дисциплина','тело'];
+  if(DB.tasks.some(t=>t.project==='Финансы'||/долг|деньг/i.test(t.title))) tags.push('деньги');
+  if(DB.tasks.some(t=>t.project==='Учёба'||/диплом|академ/i.test(t.title))) tags.push('учёба');
+  return tags;
+}
+function pickBook(){
+  const ctx = funContextTags();
+  const seen = loadJSON('armi_fun_books', []);
+  let pool = BOOKS.map(b=>{
+    let s = b.tags.filter(t=>ctx.includes(t)).length;
+    if(seen.includes(b.id)) s -= 0.6;
+    return {b, s: s + Math.random()*0.9};
+  }).sort((x,y)=>y.s-x.s);
+  const pick = pool[0].b;
+  const nx = [...seen.filter(id=>id!==pick.id), pick.id].slice(-5);
+  saveJSON('armi_fun_books', nx);
+  const reason = 'под твой контекст: ' + ctx.map(c=>({дисциплина:'план 39 недель', тело:'тренировки и восстановление', деньги:'цель — комната к 6.07', учёба:'диплом до марта'}[c])).join(' · ');
+  return {book:pick, reason};
+}
+
+/* ══════════ ХРАНИЛИЩЕ И УТИЛИТЫ ══════════ */
+const store = (function(){
+  try{ const t='__t'; localStorage.setItem(t,'1'); localStorage.removeItem(t); return localStorage; }
+  catch(e){ const m={}; return {getItem:k=>(k in m)?m[k]:null, setItem:(k,v)=>{m[k]=String(v);}, removeItem:k=>{delete m[k];}}; }
+})();
+function loadJSON(k, d){ try{ const v = store.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
+function saveJSON(k, v){ try{ store.setItem(k, JSON.stringify(v)); }catch(e){ toast('Хранилище переполнено'); } }
+const dkey = d => d.toISOString().slice(0,10);
+function chkGet(k){ return store.getItem(k)==='1'; }
+function chkSet(k,v){ v?store.setItem(k,'1'):store.removeItem(k); }
+function esc(s){ return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function uid(p){ return p+Math.random().toString(36).slice(2,9); }
+function nowHM(){ return new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}); }
+function fmtSec(s){ return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0'); }
+function fmtSize(b){ return b>1048576? (b/1048576).toFixed(1)+' МБ' : Math.round(b/1024)+' КБ'; }
+
+/* ══════════ МЕДИА-ХРАНИЛИЩЕ (IndexedDB: файлы музыки/видео/фото) ══════════ */
+const IDB = {
+  _p:null,
+  open(){ if(!this._p) this._p = new Promise((res)=>{ try{ const rq=indexedDB.open('armi_files',2);
+    rq.onupgradeneeded=()=>{ if(!rq.result.objectStoreNames.contains('files')) rq.result.createObjectStore('files'); };
+    rq.onsuccess=()=>res(rq.result); rq.onerror=()=>res(null); rq.onblocked=()=>res(null); }catch(e){ res(null); } }); return this._p; },
+  async _tx(mode,fn){ const db=await this.open(); if(!db) return new Promise(r=>r(undefined));
+    return new Promise((res)=>{ try{ const tx=db.transaction('files',mode); const q=fn(tx.objectStore('files'));
+      tx.oncomplete=()=>res(q&&q.result); tx.onerror=()=>res(undefined); tx.onabort=()=>res(undefined); }catch(e){ res(undefined); } }); },
+  put(k,b){ return this._tx('readwrite',st=>st.put(b,k)); },
+  get(k){ return this._tx('readonly',st=>st.get(k)); },
+  del(k){ return this._tx('readwrite',st=>st.delete(k)); },
+  clear(){ return this._tx('readwrite',st=>st.clear()); },
+};
+const MEDIA_URLS = {};
+async function mediaUrl(id){
+  if(MEDIA_URLS[id]) return MEDIA_URLS[id];
+  const b=await IDB.get(id); if(!b) return null;
+  return MEDIA_URLS[id]=URL.createObjectURL(b);
+}
+async function compressImage(file, max=1600, q=.82){
+  const bmp = await createImageBitmap(file).catch(()=>null);
+  if(!bmp) return file;
+  const k=Math.min(1,max/Math.max(bmp.width,bmp.height));
+  const w=Math.max(1,Math.round(bmp.width*k)), h=Math.max(1,Math.round(bmp.height*k));
+  const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+  cv.getContext('2d').drawImage(bmp,0,0,w,h);
+  const blob = await new Promise(r=>cv.toBlob(r,'image/jpeg',q));
+  return blob||file;
+}
+async function mediaAdd(inp, kind, maxMB){
+  const files=[...(inp.files||[])]; inp.value=''; if(!files.length) return;
+  let n=0;
+  for(const f of files){
+    if(f.size>(maxMB||200)*1048576){ toast('«'+f.name+'» больше '+(maxMB||200)+' МБ — пропущен'); continue; }
+    try{
+      let blob=f;
+      if(kind==='photo') blob=await compressImage(f);
+      const id=uid(kind==='audio'?'aud':kind==='video'?'vid':'img');
+      await IDB.put(id, blob);
+      DB.media.unshift({id, kind, name:f.name.replace(/\.[^.]+$/,''), size:blob.size, type:blob.type||'', added:'сегодня', dur:0});
+      n++;
+    }catch(e){ toast('Не удалось добавить «'+f.name+'»'); }
+  }
+  saveDB(); render();
+  toast(n>1?('Добавлено файлов: '+n):n?(kind==='audio'?'Трек добавлен — жми по нему':'Добавлено — файл на устройстве'):'Ничего не добавлено');
+}
+async function mediaDel(arg){
+  if(PLAYER.fileId===arg){ PLAYER.stopAll(); PLAYER.mode=null; PLAYER.fileId=null; PLAYER.custom=null; S.music.playing=false; S.music.progress=0; }
+  if(PLAYER.custom && PLAYER.custom.id===arg){ PLAYER.stopAll(); PLAYER.mode=null; PLAYER.custom=null; S.music.playing=false; S.music.progress=0; }
+  await IDB.del(arg);
+  if(MEDIA_URLS[arg]){ try{URL.revokeObjectURL(MEDIA_URLS[arg]);}catch(e){} delete MEDIA_URLS[arg]; }
+  DB.media=DB.media.filter(m=>m.id!==arg);
+  saveDB(); render(); toast('Удалено');
+}
+function hydrateMedia(){ /* заполняет img из IndexedDB после рендера */
+  document.querySelectorAll('[data-mid]').forEach(async el=>{ const u=await mediaUrl(el.getAttribute('data-mid')); if(u) el.src=u; });
+}
+
+/* ══════════ ПЛЕЕР: демо-треки (WebAudio-синтезатор) + файлы пользователя ══════════ */
+function currentTrack(){ const t=PLAYER.track(); return t||TRACKS[0]; }
+const PLAYER = {
+  audio:null, ctx:null, master:null, beatT:null, progT:null, mode:null, fileId:null, custom:null,
+  track(){
+    if(this.mode==='file'){ const m=DB.media.find(x=>x.id===this.fileId); return m?{id:m.id,title:m.name,artist:'мой файл · '+fmtSize(m.size),seconds:m.dur||0}:TRACKS[0]; }
+    if(this.mode==='custom') return this.custom||TRACKS[0];
+    return TRACKS.find(t=>t.id===S.music.trackId)||TRACKS[0];
+  },
+  ensureAudio(){
+    if(this.audio) return this.audio;
+    const a=new Audio();
+    a.addEventListener('timeupdate',()=>{ S.music.progress=a.currentTime; this.paint(); });
+    a.addEventListener('loadedmetadata',()=>{ const m=DB.media.find(x=>x.id===this.fileId);
+      if(m&&a.duration&&isFinite(a.duration)&&Math.abs((m.dur||0)-a.duration)>1){ m.dur=a.duration; saveDB(); this.paint(); } });
+    a.addEventListener('ended',()=>{ S.music.playing=false; S.music.progress=0; this.paint(); render(); });
+    this.audio=a; return a;
+  },
+  playFile(id){
+    this.stopAll(); this.mode='file'; this.fileId=id; this.custom=null; S.music.trackId=null;
+    S.music.progress=0; S.music.playing=true; render();
+    mediaUrl(id).then(u=>{ if(!u){ toast('Файл не найден'); return; }
+      const a=this.ensureAudio(); a.src=u; a.play().catch(()=>toast('Нажми «Слушать» ещё раз — браузер просит жест')); this.paint(); });
+  },
+  playDemo(id){ this.stopAll(); this.mode=null; this.fileId=null; this.custom=null; S.music.trackId=id; S.music.progress=0; S.music.playing=true; this.startEngine(); render(); },
+  playCustom(tr){ this.stopAll(); this.mode='custom'; this.custom=tr; this.fileId=null; S.music.trackId=null; S.music.progress=0; S.music.playing=true; this.startEngine(); render(); },
+  toggle(){
+    if(S.music.playing){ S.music.playing=false; if(this.mode==='file'&&this.audio) this.audio.pause(); this.stopEngine(); }
+    else{
+      if(this.mode==='file'&&this.audio&&this.audio.src){ S.music.playing=true; this.audio.play().catch(()=>{}); }
+      else if(this.mode==='custom'&&this.custom){ S.music.playing=true; this.startEngine(); }
+      else if(this.mode===null&&S.music.trackId){ S.music.playing=true; this.startEngine(); }
+      else { this.playDemo(S.music.trackId||TRACKS[0].id); return; }
+    }
+    render();
+  },
+  stopAll(){ if(this.audio) this.audio.pause(); this.stopEngine(); },
+  startEngine(){
+    const tr=this.track(); this.synthStart(tr);
+    clearInterval(this.progT);
+    this.progT=setInterval(()=>{ if(!S.music.playing) return;
+      const t=this.track(); const dur=(t&&(t.seconds||t.dur))||180;
+      S.music.progress=(S.music.progress||0)+1; if(S.music.progress>=dur) S.music.progress=0;
+      this.paint(); },1000);
+  },
+  stopEngine(){
+    clearInterval(this.progT); this.progT=null; clearInterval(this.beatT); this.beatT=null;
+    if(this.master){ try{ const m=this.master, ctx=this.ctx; m.gain.setTargetAtTime(0, ctx.currentTime, .06); setTimeout(()=>{try{m.disconnect();}catch(e){}},300); }catch(e){} this.master=null; }
+  },
+  synthStart(tr){
+    try{
+      const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+      this.ctx=this.ctx||new AC(); if(this.ctx.state==='suspended') this.ctx.resume();
+      const seed=[...(tr.id||'x')].reduce((a,c)=>a+c.charCodeAt(0),0)+(tr.title||'').length;
+      const base=174+((seed%6)*11);
+      const penta=[0,3,5,7,10];
+      const master=this.ctx.createGain(); master.gain.value=.14; master.connect(this.ctx.destination);
+      const flt=this.ctx.createBiquadFilter(); flt.type='lowpass'; flt.frequency.value=1500; flt.connect(master);
+      this.master=master;
+      const note=(f,t,d,v,ty)=>{ const o=this.ctx.createOscillator(), g=this.ctx.createGain();
+        o.type=ty; o.frequency.value=f;
+        g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(v,t+.03); g.gain.exponentialRampToValueAtTime(.0001,t+d);
+        o.connect(g); g.connect(flt); o.start(t); o.stop(t+d+.05); };
+      const beat=.36; let step=0;
+      const tick=()=>{
+        if(!S.music.playing||this.master!==master) return;
+        const t=this.ctx.currentTime+.06, i=step%32;
+        if(i%8===0) note(base/2, t, beat*7, .26, 'sine');
+        if(i%16===8) note(base/2*1.335, t, beat*7, .18, 'sine');
+        if(i%16===0) [0,3,7].forEach(s=>note(base*Math.pow(2,s/12), t, beat*15, .05, 'sine'));
+        if(i%2===0&&(seed+step)%3) note(base*2*Math.pow(2,penta[(step*3+seed)%5]/12), t, beat*1.6, .07, 'triangle');
+        step++;
+      };
+      tick(); this.beatT=setInterval(tick, beat*1000);
+    }catch(e){}
+  },
+  paint(){
+    const tr=this.track(); const dur=(tr&&(tr.seconds||tr.dur))||0;
+    const mp=document.getElementById('mp-sub'); if(mp) mp.textContent=(S.music.playing?'играет':'на паузе')+' · '+fmtSec(S.music.progress||0);
+    const mpt=document.getElementById('mp-title'); if(mpt&&tr) mpt.textContent=tr.title;
+    const bar=document.getElementById('mbar'); if(bar&&dur) bar.style.width=Math.min(100,Math.round(100*(S.music.progress||0)/dur))+'%';
+    const pos=document.getElementById('mpos'); if(pos) pos.textContent=fmtSec(S.music.progress||0);
+    const tot=document.getElementById('mtot'); if(tot&&dur) tot.textContent=fmtSec(dur);
+  },
+};
+
+/* ══════════ КАЛЬКУЛЯТОР ДЛЯ ЧАТА ══════════ */
+function pf(x){ return parseFloat(String(x).replace(',','.')); }
+function fmtNum(v){ const r=Math.round(v*1e6)/1e6; return r.toLocaleString('ru-RU'); }
+function calcAnswer(qRaw){
+  let q=' '+qRaw.toLowerCase().replace(/\s+/g,' ')+' ';
+  q=q.replace(/сколько будет|сколько|посчитай|реши|чему равно|посчитать|=|\?/g,' ');
+  let m=q.match(/(\d+(?:[.,]\d+)?)\s*(?:%|процент[а-я]*)\s*от\s*(\d+(?:[.,]\d+)?)/);
+  if(m){ const a=pf(m[1]), b=pf(m[2]); return fmtNum(a)+'% от '+fmtNum(b)+' = '+fmtNum(a*b/100); }
+  m=q.match(/(\d+(?:[.,]\d+)?)\s+на\s+(\d+(?:[.,]\d+)?)/);
+  if(m && !/[+\-*/:×÷%]/.test(q)){
+    const a=pf(m[1]), b=pf(m[2]);
+    return fmtNum(a)+' : '+fmtNum(b)+' = '+fmtNum(a/b)+'\n(если про умножение: '+fmtNum(a)+' × '+fmtNum(b)+' = '+fmtNum(a*b)+')';
+  }
+  let s=q.replace(/умножить на|умножить|умножь на|умножь|произведение/g,'*')
+    .replace(/разделить на|поделить на|делить на|разделить|поделить|раздели|подели|частное/g,'/')
+    .replace(/плюс|прибавить/g,'+').replace(/минус|отнять/g,'-')
+    .replace(/,/g,'.').replace(/×/g,'*').replace(/÷/g,'/').replace(/:/g,'/').replace(/\^/g,'**');
+  if(/^[\d+\-*/().%\s]+$/.test(s.trim()) && /\d/.test(s) && /[+\-*/]/.test(s)){
+    try{
+      const v=Function('"use strict";return('+s+')')();
+      if(typeof v==='number'&&isFinite(v)) return qRaw.trim()+' = '+fmtNum(v);
+    }catch(e){}
+  }
+  return null;
+}
+function weekOf(d){
+  const days = Math.floor((d - START)/864e5);
+  if(days < 0) return {w:0, ph:null};
+  const w = Math.floor(days/7)+1;
+  if(w > 39) return {w:39, ph:PHASES[3]};
+  for(const p of PHASES) if(d >= p.a && d <= p.b) return {w, ph:p};
+  return {w, ph:null};
+}
+function streak(){
+  let s=0;
+  for(let i=0;i<400;i++){
+    const d=new Date(); d.setDate(d.getDate()-i);
+    const done = MIN5.filter((_,j)=>chkGet('m_'+dkey(d)+'_'+j)).length;
+    if(done>=4) s++; else if(i>0) break; else continue;
+  }
+  return s;
+}
+function weekMatch(label,w){
+  const m = label.match(/^Нед\.\s*([\d–]+)/); if(!m) return false;
+  const p = m[1].split('–').map(Number);
+  return w>=p[0] && w<=(p[1]||p[0]);
+}
+const dayLow = t => t.toLowerCase().replace(/\b([a-d])\b/g, m=>m.toUpperCase());
+function toast(t){
+  const el=document.getElementById('toast'); el.textContent=t; el.classList.add('show');
+  clearTimeout(toast._t); toast._t=setTimeout(()=>el.classList.remove('show'), 2200);
+}
+function modal(html){ const o=document.getElementById('overlays'); o.innerHTML='<div class="modal-back" data-act="modalBack"><div class="modal">'+html+'</div></div>'; }
+function closeModal(){ document.getElementById('overlays').innerHTML=''; }
+
+/* ══════════ СОСТОЯНИЕ ══════════ */
+const S = {
+  screen:'home', view:'auto', trainTab:'today', taskFilter:'all', taskSect:null,
+  schedView:'week', schedDay:(new Date().getDay()+6)%7,
+  aiMode:'offline', deviceProfile:'pc1660',
+  music:{trackId:'m1', playing:false, progress:0},
+  moreOpen:false, noteOpen:null, noteTopic:null, lectRec:false,
+  funTab:'fact', funFact:Math.floor(Math.random()*FACTS.length), funIdea:Math.floor(Math.random()*IDEAS.length), funBook:null,
+  secretActive:false, secretMode:'real', secretScreen:null, secretThread:null, secretNoteOpen:null,
+};
+const PERSIST_KEYS = ['view','aiMode','deviceProfile'];
+const DB = {
+  tasks:loadJSON('armi_tasks', SEED_TASKS),
+  notes:loadJSON('armi_notes', SEED_NOTES),
+  events:loadJSON('armi_events', SEED_EVENTS),
+  sections:loadJSON('armi_sections', SEED_SECTIONS),
+  topics:loadJSON('armi_topics', SEED_TOPICS),
+  lectures:loadJSON('armi_lectures', SEED_LECTURES),
+  myvideos:loadJSON('armi_myvideos', SEED_MYVIDEOS),
+  weights:loadJSON('armi_weights', []),
+  media:loadJSON('armi_media', []),
+};
+/* миграция старых данных (v2/v3 → v4): задачи без priority/project и заметки без topic больше не роняют экраны */
+(function(){
+  const sectNames = DB.sections.map(s=>s.name);
+  const topicNames = DB.topics.map(t=>t.name);
+  DB.tasks = (DB.tasks||[]).map(t=>({
+    id:t.id||uid('t'), title:String(t.title||'Без названия'), done:!!t.done,
+    priority:['high','normal','low'].includes(t.priority)?t.priority:'normal',
+    project:sectNames.includes(t.project)?t.project:'Личное',
+    due:t.due?String(t.due):'—',
+  }));
+  DB.notes = (DB.notes||[]).map(n=>({
+    id:n.id||uid('n'), title:String(n.title||'Без названия'), content:String(n.content||''),
+    topic:topicNames.includes(n.topic)?n.topic:'Личное',
+    updatedAt:n.updatedAt?String(n.updatedAt):'—',
+  }));
+})();
+PERSIST_KEYS.forEach(k=>{ const v=store.getItem('armi_'+k); if(v) S[k]=v; });
+function persist(){ PERSIST_KEYS.forEach(k=>store.setItem('armi_'+k, S[k])); }
+function saveDB(){ saveJSON('armi_tasks',DB.tasks); saveJSON('armi_notes',DB.notes); saveJSON('armi_events',DB.events); saveJSON('armi_sections',DB.sections); saveJSON('armi_topics',DB.topics); saveJSON('armi_lectures',DB.lectures); saveJSON('armi_myvideos',DB.myvideos); saveJSON('armi_weights',DB.weights); saveJSON('armi_media',DB.media); }
+function sectColor(name){ const s=DB.sections.find(x=>x.name===name); return s?s.c:'#a1a1aa'; }
+function resolveView(){ if(S.view!=='auto') return S.view; return window.innerWidth>=900?'pc':'phone'; }
+/* ══════════ ОБОЛОЧКА (обычная и закрытая — один и тот же интерфейс) ══════════ */
+const S_SCREENS = {schat:{t:'Чаты'}, snotes:{t:'Заметки'}, sphotos:{t:'Фото'}, smusic:{t:'Музыка'}, contour:{t:'Второй контур'}, ssync:{t:'Синхронизация'}};
+const S_NAV_GROUPS = [
+  {label:'Ассистент', items:['schat','contour']},
+  {label:'Организатор', items:['snotes']},
+  {label:'Медиа', items:['sphotos','smusic']},
+  {label:'Система', items:['ssync']},
+];
+const S_NAV_ICONS = {schat:'chat', snotes:'note', sphotos:'img', smusic:'music', contour:'zap', ssync:'sync'};
+const S_PHONE_MAIN_ZONE = ['schat','snotes','sphotos','smusic'];
+const S_PHONE_MORE_ZONE = ['contour','ssync'];
+const SECRET_IDS = ['schat','snotes','sphotos','smusic','contour','ssync'];
+const isSecretId = id => SECRET_IDS.includes(id);
+function screenTitle(id){ return isSecretId(id) ? (S_SCREENS[id]?S_SCREENS[id].t:'') : (SCREENS[id]?SCREENS[id].t:''); }
+function screenIcon(id){ return isSecretId(id) ? (S_NAV_ICONS[id]||'grid') : (NAV_ICONS[id]||'grid'); }
+function activeScreenId(){ return (S.secretActive && S.secretScreen) ? S.secretScreen : S.screen; }
+function navCount(id){
+  if(isSecretId(id)) return S.secretActive ? (Secret.counts()[id]||0) : 0;
+  if(id==='tasks') return DB.tasks.filter(t=>!t.done).length;
+  if(id==='notes') return DB.notes.length;
+  if(id==='photos') return DB.media.filter(m=>m.kind==='photo').length;
+  return 0;
+}
+function navItem(id, act){
+  const cnt = navCount(id);
+  return '<button class="nav-item'+(act?' act':'')+'" data-act="go" data-arg="'+id+'">'+ic(screenIcon(id))+'<span>'+screenTitle(id)+'</span>'+(cnt?'<span class="cnt">'+cnt+'</span>':'')+'</button>';
+}
+function logoTap(){ /* скрытый вход: 2 клика по логотипу */
+  if(S.secretActive) return;
+  const now = Date.now();
+  if(now - (logoTap.t||0) < 1200){ logoTap.t=0; Secret.openGate(); }
+  else { logoTap.t=now; toast('Арми · прототип v5'); }
+}
+function pcShell(){
+  const online = S.aiMode==='online';
+  const fullChat = (S.secretActive && S.secretScreen) ? (S.secretScreen==='schat'&&!!S.secretThread) : (S.screen==='chat');
+  const secLbl = ic('lock').replace('class="ic"','class="ic" style="width:11px;height:11px"');
+  return '<aside class="sidebar">'+
+    '<div class="sb-logo" data-act="logoTap"><div class="logo-tile">А</div><div><div style="font-weight:700;letter-spacing:-.01em">Арми</div><div class="tiny">локальный ассистент</div></div></div>'+
+    '<nav class="sb-nav">'+
+      (S.secretActive? '<div><div class="group-label sec">'+secLbl+'Закрытая зона</div><div style="display:flex;flex-direction:column;gap:2px">'+SECRET_IDS.map(id=>navItem(id, S.secretScreen===id)).join('')+'</div></div>' : '')+
+      NAV_GROUPS.map(g=>'<div><div class="group-label">'+g.label+'</div><div style="display:flex;flex-direction:column;gap:2px">'+g.items.map(id=>navItem(id, S.screen===id&&!S.secretScreen)).join('')+'</div></div>').join('')+
+    '</nav>'+
+    '<div style="padding:12px;border-top:1px solid var(--line)">'+
+      miniPlayer()+
+      '<div class="card" style="padding:12px;margin-top:10px">'+
+        '<div class="row" style="gap:7px"><span class="dot" style="background:'+(online?'var(--em)':'var(--amber)')+'"></span><span class="sub" style="font-weight:600;color:var(--t1)">'+(online?'Онлайн':'Офлайн')+'</span></div>'+
+        '<div class="tiny mt6">'+MODEL_LABEL[S.aiMode][S.deviceProfile]+'</div>'+
+        '<button class="btn btn-sm mt10" style="width:100%" data-act="aiToggle">'+(online?'Перейти в офлайн':'Подключить облако')+'</button>'+
+      '</div>'+
+      (S.secretActive? '<button class="btn btn-danger btn-sm" style="width:100%;margin-top:8px" onclick="Secret.panic()" title="Esc">'+ic('power')+'Быстрый выход</button>' : '')+
+    '</div></aside>'+
+  '<main class="main"><header class="pcheader">'+
+    '<div><div style="font-size:14px;font-weight:700">'+esc(screenTitle(activeScreenId()))+'</div><div class="tiny">'+new Date().toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'})+'</div></div>'+
+    '<div style="margin-left:auto;position:relative;width:min(260px,30vw)">'+
+      '<span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--t4);display:flex">'+ic('search')+'</span>'+
+      '<input id="gsearch" placeholder="Поиск по всему…" style="padding-left:34px" oninput="globalSearch(this.value)">'+
+      '<div id="gsres" style="position:absolute;right:0;top:44px;width:320px;background:var(--panel3);border:1px solid var(--line2);border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5);z-index:50;display:none"></div>'+
+    '</div>'+
+    (S.secretScreen? '<button class="pill click" data-act="toOpen" title="Вернуться к обычным разделам">'+ic('back')+'К открытым</button>' : '')+
+    (S.secretActive
+      ? '<button class="pill click on" onclick="Secret.panic()" title="Быстрый выход из закрытой зоны (Esc)">'+ic('lock')+'Закрыто</button>'
+      : '<button class="pill click'+(online?' on':'')+'" data-act="aiToggle">'+ic(online?'wifi':'zap')+(online?'Онлайн':'Офлайн')+'</button>')+
+    '<button class="pill click" data-act="viewCycle" title="Переключить вид ПК/телефон">'+ic('grid')+(resolveView()==='pc'?'ПК':'Телефон')+'</button>'+
+  '</header><div class="content" style="'+(fullChat?'padding:0;':'')+'"><div class="'+(fullChat?'':'narrow ')+'fade-in" style="'+(fullChat?'height:100%;':'')+'">'+renderScreen()+'</div></div></main>';
+}
+function phoneShell(){
+  const online = S.aiMode==='online';
+  const t = new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+  const fullChat = (S.secretActive && S.secretScreen) ? (S.secretScreen==='schat'&&!!S.secretThread) : (S.screen==='chat');
+  return '<div class="pwrap">'+
+    '<div class="statusbar"><span style="font-weight:600;color:var(--t1)">'+t+'</span><span style="display:flex;gap:6px;align-items:center">'+ic('signal')+ic('wifi')+ic('battery')+'</span></div>'+
+    '<div class="pheader"><div class="logo-tile sm" data-act="logoTap">А</div><span style="font-weight:700">Арми</span>'+
+      (S.secretActive
+        ? '<button class="pill click on" style="margin-left:auto" onclick="Secret.panic()" title="Быстрый выход (Esc)">'+ic('lock')+'Закрыто</button>'
+        : '<button class="pill click'+(online?' on':'')+'" style="margin-left:auto" data-act="aiToggle"><span class="dot" style="background:'+(online?'#0b0d11':'var(--amber)')+'"></span>'+(online?'Онлайн':'Офлайн')+'</button>')+
+    '</div>'+
+    '<div class="pcontent" style="'+(fullChat?'padding:0;display:flex;':'')+'"><div class="fade-in" style="'+(fullChat?'flex:1;min-height:0;':'')+'">'+renderScreen()+'</div></div>'+
+    '<nav class="bottomnav">'+PHONE_MAIN.map(id=>bnItem(id)).join('')+bnMore()+'</nav>'+
+    (S.moreOpen?moreSheet():'')+
+  '</div>';
+}
+function bnItem(id){
+  const act=S.screen===id && !S.secretScreen;
+  return '<button class="bn-item'+(act?' act':'')+'" data-act="go" data-arg="'+id+'">'+ic(screenIcon(id))+ '<span>'+screenTitle(id)+'</span></button>';
+}
+function bnMore(){
+  const act=PHONE_MORE.includes(S.screen) && !S.secretScreen;
+  return '<button class="bn-item'+(act?' act':'')+'" data-act="more">'+ic('grid')+'<span>Ещё</span></button>';
+}
+function moreSheet(){
+  const secLbl = ic('lock').replace('class="ic"','class="ic" style="width:11px;height:11px"');
+  return '<div class="sheet-back" data-act="moreClose"><div class="sheet"><div class="grab"></div><div class="group-label" style="padding:0 4px 8px">Все разделы</div><div class="sheet-grid">'+
+    PHONE_MORE.map(id=>'<button class="sheet-tile'+(S.screen===id&&!S.secretScreen?' act':'')+'" data-act="go" data-arg="'+id+'">'+ic(screenIcon(id))+'<span>'+screenTitle(id)+'</span></button>').join('')+'</div>'+
+    (S.secretActive? '<div class="group-label sec" style="padding:12px 4px 8px">'+secLbl+'Закрытая зона</div><div class="sheet-grid">'+
+      SECRET_IDS.map(id=>'<button class="sheet-tile sec'+(S.secretScreen===id?' act':'')+'" data-act="go" data-arg="'+id+'">'+ic(screenIcon(id))+'<span>'+screenTitle(id)+'</span></button>').join('')+
+      '<button class="sheet-tile" style="color:var(--red)" onclick="Secret.panic()">'+ic('power')+'<span>Выход</span></button></div>' : '')+
+  '</div></div></div>';
+}
+function miniPlayer(){
+  const tr = currentTrack();
+  return '<div style="display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:10px;cursor:pointer" data-act="go" data-arg="music">'+
+    '<div class="eq'+(S.music.playing?' play':'')+'"><span></span><span></span><span></span></div>'+
+    '<div style="min-width:0;flex:1"><div class="row" style="gap:6px"><span id="mp-title" style="font-size:12px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(tr.title)+'</span></div><div id="mp-sub" class="tiny">'+(S.music.playing?'играет':'на паузе')+' · '+fmtSec(S.music.progress)+'</div></div>'+
+    '<button class="btn btn-sm" style="width:30px;height:30px;padding:0" data-act="musicToggle">'+ic(S.music.playing?'pause':'play')+'</button></div>';
+}
+function globalSearch(q){
+  const box = document.getElementById('gsres');
+  q = q.trim().toLowerCase();
+  if(q.length<2){ box.style.display='none'; box.innerHTML=''; return; }
+  const res = [
+    ...DB.tasks.filter(t=>t.title.toLowerCase().includes(q)).slice(0,4).map(t=>({i:'task',l:t.title,s:'Задача · '+t.project,g:'tasks'})),
+    ...DB.notes.filter(n=>(n.title+' '+n.content).toLowerCase().includes(q)).slice(0,4).map(n=>({i:'note',l:n.title,s:'Заметка',g:'notes'})),
+    ...DB.events.filter(e=>e.title.toLowerCase().includes(q)).slice(0,3).map(e=>({i:'cal',l:e.title,s:'Событие · '+WEEKDAYS[e.day],g:'schedule'})),
+    ...BOOKS.filter(b=>(b.t+' '+b.a).toLowerCase().includes(q)).slice(0,2).map(b=>({i:'book',l:b.t,s:'Книга · '+b.a,g:'fun'})),
+  ].slice(0,8);
+  if(!res.length){ box.style.display='block'; box.innerHTML='<div style="padding:12px" class="dim">Ничего не найдено</div>'; return; }
+  box.style.display='block';
+  box.innerHTML = res.map(r=>'<button style="display:flex;width:100%;gap:10px;align-items:center;padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)" data-act="go" data-arg="'+r.g+'">'+ic(r.i)+'<span style="min-width:0"><span style="display:block;font-size:13px;color:var(--t1)" class="tx">'+esc(r.l)+'</span><span class="tiny">'+esc(r.s)+'</span></span></button>').join('');
+}
+
+/* ══════════ РЕНДЕР ══════════ */
+function renderScreen(){
+  if(S.secretActive && S.secretScreen) return Secret.renderSecretScreen();
+  switch(S.screen){
+    case 'home': return scrHome();
+    case 'chat': return scrChat();
+    case 'notes': return scrNotes();
+    case 'tasks': return scrTasks();
+    case 'schedule': return scrSchedule();
+    case 'train': return scrTrain();
+    case 'lectures': return scrLectures();
+    case 'music': return scrMusic();
+    case 'video': return scrVideo();
+    case 'photos': return scrPhotos();
+    case 'fun': return scrFun();
+    case 'settings': return scrSettings();
+  }
+  return '';
+}
+/* ══════════ РЕНДЕР ══════════ */
+/* позиция скролла хранится между перерисовками: фильтры, правки и выбор категории не прыгают вверх */
+const SCROLLMEM = {};
+function scrollHost(){ return document.querySelector('.content') || document.querySelector('.pcontent'); }
+function viewKey(){ return (S.secretActive&&S.secretScreen ? S.secretScreen : S.screen)+'|'+(S.noteOpen||'')+'|'+(S.secretNoteOpen||'')+'|'+(S.secretThread||''); }
+function render(){
+  const prev = scrollHost(); if(prev) SCROLLMEM[render._vk || ''] = prev.scrollTop;
+  const app = document.getElementById('app');
+  app.innerHTML = resolveView()==='pc' ? pcShell() : phoneShell();
+  render._vk = viewKey();
+  const host = scrollHost(); if(host) host.scrollTop = SCROLLMEM[render._vk] || 0;
+  afterRender();
+}
+function afterRender(){
+  const m=document.getElementById('msgs')||document.getElementById('smsgs')||document.getElementById('cmsgs');
+  if(m) m.scrollTop=m.scrollHeight;
+  hydrateMedia();
+}
+function checkList(prefix, items, dateK){
+  const dk = dateK||dkey(new Date());
+  return items.map((t,i)=>{
+    const on = chkGet(prefix+'_'+dk+'_'+i);
+    return '<div class="item'+(on?' done':'')+'" data-act="chk" data-arg="'+prefix+'|'+dk+'|'+i+'"><span class="ckb">'+ic('check')+'</span><span class="tx">'+esc(t)+'</span></div>';
+  }).join('');
+}
+
+/* ── СЕГОДНЯ ── */
+function scrHome(){
+  const d=new Date(), {w,ph}=weekOf(d), day=DAYS[d.getDay()];
+  const tgt = d<=BALL?BALL:BIRTH;
+  const left = Math.max(0,Math.round((tgt-d)/864e5));
+  const openTasks = DB.tasks.filter(t=>!t.done);
+  const todayEvents = DB.events.filter(e=>e.day===(d.getDay()+6)%7).sort((a,b)=>a.start.localeCompare(b.start));
+  const doneMin = MIN5.filter((_,j)=>chkGet('m_'+dkey(d)+'_'+j)).length;
+  const doneTr = day.train.filter((_,j)=>chkGet('tr_'+dkey(d)+'_'+j)).length;
+  const idea = IDEAS[Math.floor(d/864e5)%IDEAS.length];
+  return '<div class="stack">'+
+    (S.secretActive? '<div class="banner" style="background:rgba(52,211,153,.07);border-color:rgba(52,211,153,.3);color:#a7f3d0"><b>Закрытая зона открыта.</b> Секретные чаты, заметки, фото и музыка появились в меню сверху, рядом с обычными разделами. <button class="btn btn-sm btn-danger" style="padding:2px 8px;margin-left:4px" onclick="Secret.panic()">Быстрый выход</button></div>' : '')+
+    '<div><div style="font-size:22px;font-weight:800;letter-spacing:-.02em">'+(d.getHours()<12?'Доброе утро':d.getHours()<18?'Добрый день':'Добрый вечер')+'</div>'+
+    '<div class="sub" style="margin-top:2px">'+d.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'})+'</div></div>'+
+    '<div class="stats">'+
+      '<div class="stat"><div class="v">'+(w?w+'/39':'–')+'</div><div class="l">неделя плана</div></div>'+
+      '<div class="stat"><div class="v" style="font-size:15px;padding-top:4px">'+(ph?ph.name:'между фазами')+'</div><div class="l">текущая фаза</div></div>'+
+      '<div class="stat"><div class="v">'+left+'</div><div class="l">'+(d<=BALL?'дней до бала':'дней до 21')+'</div></div>'+
+      '<div class="stat"><div class="v">'+streak()+'</div><div class="l">дней серии</div></div>'+
+    '</div>'+
+    '<div class="card"><h3>'+ic('dumb')+'Сегодня по плану<span class="h-note">'+esc(day.type.split('—')[1]||'')+'</span></h3>'+
+      '<div class="dim" style="margin-bottom:10px">'+esc(day.plan)+'</div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><span class="pill">Тренировка: '+doneTr+'/'+day.train.length+'</span><span class="pill">Минимум: '+doneMin+'/'+MIN5.length+'</span></div>'+
+      checkList('tr', day.train, '')+
+      '<button class="btn btn-sm mt6" data-act="go" data-arg="train">Открыть тренировки</button></div>'+
+    '<div class="card"><h3>'+ic('flame')+'Минимум дня</h3>'+checkList('m', MIN5, '')+'</div>'+
+    '<div class="card"><h3>'+ic('cal')+'Дальше сегодня</h3>'+
+      (todayEvents.length? todayEvents.map(e=>'<div class="row" style="padding:7px 0;border-bottom:1px solid var(--line)"><span class="dot" style="background:'+((KIND_STYLE[e.kind]||{}).c)+'"></span><span style="font-variant-numeric:tabular-nums;font-size:13px;color:var(--t2);width:76px;flex:none">'+e.start+'–'+e.end+'</span><span style="font-size:13px">'+esc(e.title)+'</span><span class="tiny" style="margin-left:auto">'+esc(e.place||'')+'</span></div>').join('') : '<div class="dim">Пусто — день твой</div>')+'</div>'+
+    '<div class="card"><h3>'+ic('bulb')+'Идея на вечер<span class="h-note">раздел «Развитие»</span></h3><div class="sub">'+esc(idea)+'</div>'+
+      '<button class="btn btn-sm mt10" data-act="go" data-arg="fun">Факты · Книги · Идеи</button></div>'+
+    '<div class="card"><h3>'+ic('chat')+'Брифинг Арми</h3><div class="sub" style="line-height:1.6">'+
+      esc('Открытых задач: '+openTasks.length+'. Первая по важности: «'+(openTasks[0]?openTasks[0].title:'всё чисто')+'». '+(ph?('Идёт '+ph.name+'. '):'')+'Тренировка сегодня: '+dayLow(day.type)+'.')+
+    '</div><button class="btn btn-sm mt10" data-act="go" data-arg="chat">Спросить Арми</button></div>'+
+  '</div>';
+}
+/* ── ЗАДАЧИ (+ разделы) ── */
+const PRIO = {high:{t:'Важно',c:'var(--red)'}, normal:{t:'Обычно',c:'var(--t2)'}, low:{t:'Потом',c:'var(--t3)'}};
+function scrTasks(){
+  const f = S.taskFilter, sect = S.taskSect;
+  let list = DB.tasks.slice();
+  if(f==='active') list=list.filter(t=>!t.done);
+  if(f==='done') list=list.filter(t=>t.done);
+  if(sect) list=list.filter(t=>t.project===sect);
+  list.sort((a,b)=>(a.done-b.done)||((PRIO[a.priority]?({high:0,normal:1,low:2}[a.priority]):1)-(PRIO[b.priority]?({high:0,normal:1,low:2}[b.priority]):1)));
+  const groups = DB.sections.map(s=>({s, items:list.filter(t=>t.project===s.name)}));
+  const orphan = list.filter(t=>!DB.sections.some(s=>s.name===t.project));
+  const showEmpty = (f==='all' && !sect);
+  return '<div class="stack">'+
+    '<div class="row between wrap"><div style="font-size:19px;font-weight:800">Задачи</div><div class="row" style="gap:8px"><span class="pill">'+DB.tasks.filter(t=>!t.done).length+' открытых</span>'+
+    '<button class="btn btn-amber btn-sm" data-act="taskNew">'+ic('plus')+'Задача</button></div></div>'+
+    '<div class="row wrap" style="gap:6px">'+
+      [['all','Все'],['active','Активные'],['done','Готово']].map(x=>'<button class="pill click'+(f===x[0]?' on':'')+'" data-act="taskFilter" data-arg="'+x[0]+'">'+x[1]+'</button>').join('')+
+      '<button class="pill click" style="'+(sect?'':'opacity:.45;')+'" data-act="taskSect" data-arg="">Разделы: '+esc(sect||'все')+'</button>'+
+      '<button class="tiny" data-act="sectMng" title="Добавить или убрать раздел" style="color:var(--t3);padding:4px 6px;font-size:11px">＋ раздел</button>'+
+    '</div>'+
+    (groups.filter(g=>g.items.length||showEmpty).map(g=>
+      '<div class="card"><h3><span class="dot" style="background:'+g.s.c+'"></span>'+esc(g.s.name)+'<span class="h-note">'+(g.items.length||'пусто')+'</span></h3>'+
+      (g.items.length?g.items.map(taskItem).join(''):'<div class="tiny" style="padding:4px 2px;color:var(--t4)">Задачи из этого раздела появятся здесь</div>')+'</div>'
+    ).join('')+(orphan.length?'<div class="card"><h3>Без раздела</h3>'+orphan.map(taskItem).join('')+'</div>':''))+
+    (!list.length&&!showEmpty?'<div class="empty">Пусто. Создай задачу или смени фильтр.</div>':'')+
+  '</div>';
+}
+function taskItem(t){
+  const pr = PRIO[t.priority]||PRIO.normal;
+  return '<div class="item'+(t.done?' done':'')+'">'+
+    '<button class="ckb" data-act="taskToggle" data-arg="'+t.id+'" aria-label="Отметить выполненной">'+ic('check')+'</button>'+
+    '<span style="min-width:0;flex:1;cursor:pointer" data-act="taskEdit" data-arg="'+t.id+'"><span class="tx">'+esc(t.title)+'</span><span class="tiny" style="display:block;margin-top:1px">'+pr.t+' · '+esc(t.due)+'</span></span>'+
+    '<button class="btn btn-sm" style="width:28px;height:28px;padding:0;flex:none" data-act="taskEdit" data-arg="'+t.id+'">'+ic('pen')+'</button></div>';
+}
+function taskModal(t){
+  return '<h3>'+(t?'Правка задачи':'Новая задача')+'</h3>'+
+  '<input id="tm-title" placeholder="Что сделать" value="'+esc(t?t.title:'')+'" style="margin-top:8px">'+
+  '<div class="row mt10" style="gap:8px">'+
+    '<select id="tm-pr" style="flex:1">'+['high','normal','low'].map(p=>'<option value="'+p+'"'+(t&&t.priority===p?' selected':'')+'>'+PRIO[p].t+'</option>').join('')+'</select>'+
+    '<select id="tm-pj" style="flex:1">'+DB.sections.map(s=>'<option'+(t&&t.project===s.name?' selected':'')+'>'+esc(s.name)+'</option>').join('')+'</select>'+
+  '</div>'+
+  '<input id="tm-due" placeholder="Срок (сегодня / до вс / дата)" value="'+esc(t?t.due:'')+'" style="margin-top:8px">'+
+  '<div class="row mt14" style="gap:8px">'+
+    '<button class="btn btn-amber" style="flex:1" data-act="taskSave" data-arg="'+(t?t.id:'')+'">Сохранить</button>'+
+    (t?'<button class="btn btn-danger" data-act="taskDel" data-arg="'+t.id+'">Удалить</button>':'')+
+  '</div>';
+}
+function sectMngModal(){
+  return '<h3>Разделы задач</h3><div class="tiny" style="margin:2px 0 10px">Группируют задачи. Удалять можно любые, кроме «Личное» — задачи из удалённого раздела переедут туда.</div>'+
+  DB.sections.map(s=>{
+    const n = DB.tasks.filter(t=>t.project===s.name).length;
+    return '<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line)"><span class="dot" style="background:'+s.c+'"></span><span style="flex:1">'+esc(s.name)+'</span><span class="tiny">'+n+' задач</span>'+
+      (s.name==='Личное'?'':'<button class="btn btn-sm btn-danger" style="width:26px;height:26px;padding:0" data-act="sectDel" data-arg="'+s.id+'">✕</button>')+'</div>';
+  }).join('')+
+  '<div class="row mt10" style="gap:8px"><input id="sm-name" placeholder="Название раздела" style="flex:1"></div>'+
+  '<div class="row mt10" style="gap:7px;flex-wrap:wrap" id="sm-colors">'+SECT_COLORS.map((c,i)=>'<button class="dot" data-act="sectColor" data-arg="'+c+'" style="width:22px;height:22px;background:'+c+';border:2px solid '+(i===0?'var(--t1)':'transparent')+'"></button>').join('')+'</div>'+
+  '<button class="btn btn-amber mt14" style="width:100%" data-act="sectAdd">Добавить раздел</button>';
+}
+
+/* ── РАСПИСАНИЕ (редактируемое: сетка из чата + свои события) ── */
+function scrSchedule(){
+  const today = (new Date().getDay()+6)%7;
+  const evByDay = i => DB.events.filter(e=>e.day===i).sort((a,b)=>a.start.localeCompare(b.start));
+  let body='';
+  if(S.schedView==='week'){
+    body = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px">'+
+      WEEKDAYS.map((wd,i)=>'<div style="min-width:0"><div class="row" style="gap:5px;padding:2px 4px 6px"><span style="font-size:12px;font-weight:700;color:'+(i===today?'var(--amber)':'var(--t2)')+'">'+wd+'</span>'+(i===today?'<span class="tiny" style="color:var(--amber)">·сегодня</span>':'')+'</div>'+
+        evByDay(i).map(e=>evtChip(e)).join('')+'</div>').join('')+'</div>';
+  } else {
+    body = '<div class="row wrap" style="gap:6px">'+WEEKDAYS.map((wd,i)=>'<button class="pill click'+(S.schedDay===i?' on':'')+'" data-act="schedDay" data-arg="'+i+'">'+wd+'</button>').join('')+'</div>'+
+      (evByDay(S.schedDay).length? evByDay(S.schedDay).map(e=>evtRow(e)).join('') : '<div class="empty">В этот день пусто</div>');
+  }
+  return '<div class="stack">'+
+    '<div class="row between wrap"><div style="font-size:19px;font-weight:800">Расписание</div>'+
+    '<button class="btn btn-amber btn-sm" data-act="evtNew">'+ic('plus')+'Событие</button></div>'+
+    '<div class="tabs">'+[['week','Сетка недели'],['day','День (список)']].map(x=>'<button class="tab'+(S.schedView===x[0]?' on':'')+'" data-act="schedView" data-arg="'+x[0]+'">'+x[1]+'</button>').join('')+'</div>'+
+    '<div class="card">'+body+'</div>'+
+    '<div class="tiny">Сетка собрана из плана тренировок, айкидо, физры и академии (импорт из GLM-чата) — и теперь редактируемая: нажми на событие, чтобы изменить или удалить, «+ Событие» добавляет своё.</div>'+
+    '<button class="tiny" data-act="evtRestore" style="color:var(--t3);text-align:left;padding:2px 4px">↺ вернуть исходную сетку из чата (свои события сохранятся)</button>'+
+  '</div>';
+}
+function evtChip(e){
+  return '<div class="card" style="padding:8px;margin-bottom:6px;cursor:pointer" data-act="evtEdit" data-arg="'+e.id+'">'+
+    '<div class="row" style="gap:5px"><span class="dot" style="background:'+((KIND_STYLE[e.kind]||{}).c)+'"></span><span class="tiny" style="font-variant-numeric:tabular-nums">'+e.start+'–'+e.end+'</span></div>'+
+    '<div style="font-size:11.5px;margin-top:4px;line-height:1.4">'+esc(e.title)+'</div>'+
+    (e.place?'<div class="tiny" style="margin-top:2px;color:var(--t4)">'+esc(e.place)+'</div>':'')+'</div>';
+}
+function evtRow(e){
+  return '<div class="row" style="padding:10px 4px;border-bottom:1px solid var(--line);cursor:pointer" data-act="evtEdit" data-arg="'+e.id+'">'+
+    '<span class="dot" style="background:'+((KIND_STYLE[e.kind]||{}).c)+'"></span>'+
+    '<span style="font-variant-numeric:tabular-nums;font-size:13px;color:var(--t2);width:96px;flex:none">'+e.start+'–'+e.end+'</span>'+
+    '<span style="min-width:0;flex:1"><span style="font-size:13.5px">'+esc(e.title)+'</span>'+(e.place?'<span class="tiny" style="display:block">'+esc(e.place)+'</span>':'')+'</span></div>';
+}
+function evtModal(e){
+  return '<h3>'+(e?'Правка события':'Новое событие')+'</h3>'+
+  '<input id="em-title" placeholder="Название" value="'+esc(e?e.title:'')+'" style="margin-top:8px">'+
+  '<div class="row mt10" style="gap:8px">'+
+    '<select id="em-day" style="flex:1">'+WEEKFULL.map((w,i)=>'<option value="'+i+'"'+((e?e.day:S.schedDay)===i?' selected':'')+'>'+w+'</option>').join('')+'</select>'+
+    '<select id="em-kind" style="flex:1">'+Object.keys(KIND_STYLE).map(k=>'<option'+(e&&e.kind===k?' selected':'')+'>'+k+'</option>').join('')+'</select>'+
+  '</div>'+
+  '<div class="row mt10" style="gap:8px"><input id="em-start" type="time" value="'+esc(e?e.start:'18:00')+'" style="flex:1"><input id="em-end" type="time" value="'+esc(e?e.end:'19:00')+'" style="flex:1"></div>'+
+  '<input id="em-place" placeholder="Место" value="'+esc(e?e.place:'')+'" style="margin-top:8px">'+
+  '<div class="row mt14" style="gap:8px">'+
+    '<button class="btn btn-amber" style="flex:1" data-act="evtSave" data-arg="'+(e?e.id:'')+'">Сохранить</button>'+
+    (e?'<button class="btn btn-danger" data-act="evtDel" data-arg="'+e.id+'">Удалить</button>':'')+
+  '</div>';
+}
+
+/* ── ЗАМЕТКИ (плитки-квадратики + темы) ── */
+function topicClr(name){ const t=DB.topics.find(x=>x.name===name); return t?t.c:'#a1a1aa'; }
+function noteTile(n, secret){
+  const c = secret ? 'var(--em)' : topicClr(n.topic||'Личное');
+  const lock = secret ? ic('lock').replace('class="ic"','class="ic" style="width:11px;height:11px;vertical-align:-1px;color:var(--em)"')+' ' : '';
+  return '<div class="ntile" style="border-top-color:'+c+'" data-act="'+(secret?'snoteOpen':'noteOpen')+'" data-arg="'+n.id+'">'+
+    '<div class="nt-t">'+lock+esc(n.title)+'</div>'+
+    '<div class="nt-b">'+esc((n.content||'').split('\n')[0]||' ')+'</div>'+
+    '<div class="nt-m"><span class="nt-dot" style="background:'+c+'"></span>'+esc(secret?'закрытая зона':(n.topic||'Личное'))+' · '+esc(n.updatedAt||'')+'</div></div>';
+}
+function scrNotes(){
+  if(S.noteOpen){
+    const n = DB.notes.find(x=>x.id===S.noteOpen);
+    if(!n){ S.noteOpen=null; return scrNotes(); }
+    return '<div class="stack"><div class="row between"><button class="btn btn-sm" data-act="noteClose">'+ic('back')+'Заметки</button><button class="btn btn-danger btn-sm" data-act="noteDel" data-arg="'+n.id+'">Удалить</button></div>'+
+    '<div class="card"><input id="ne-title" value="'+esc(n.title)+'" style="font-weight:700;font-size:15px">'+
+    '<select id="ne-topic" style="margin-top:10px">'+DB.topics.map(t=>'<option'+((n.topic||'Личное')===t.name?' selected':'')+'>'+esc(t.name)+'</option>').join('')+'</select>'+
+    '<textarea id="ne-body" style="margin-top:10px;min-height:280px">'+esc(n.content)+'</textarea>'+
+    '<div class="row between mt10"><span class="tiny">'+esc(n.updatedAt)+'</span><button class="btn btn-amber btn-sm" data-act="noteSave" data-arg="'+n.id+'">Сохранить</button></div></div></div>';
+  }
+  const topic = S.noteTopic||null;
+  let list = DB.notes.slice();
+  if(topic) list=list.filter(n=>(n.topic||'Личное')===topic);
+  const cnt = tn => DB.notes.filter(n=>(n.topic||'Личное')===tn).length;
+  return '<div class="stack">'+
+    '<div class="row between wrap"><div style="font-size:19px;font-weight:800">Заметки</div><div class="row" style="gap:8px">'+
+      '<button class="btn btn-sm" data-act="topicMng" title="Добавить или убрать тему">'+ic('grid')+'Темы</button>'+
+      '<button class="btn btn-amber btn-sm" data-act="noteNew">'+ic('plus')+'Заметка</button></div></div>'+
+    '<div class="row wrap" style="gap:6px">'+
+      '<button class="pill click'+(topic?'':' on')+'" data-act="noteTopic" data-arg="">Все · '+DB.notes.length+'</button>'+
+      DB.topics.map(t=>'<button class="pill click'+(topic===t.name?' on':'')+'" data-act="noteTopic" data-arg="'+esc(t.name)+'"><span class="dot" style="background:'+t.c+'"></span>'+esc(t.name)+' · '+cnt(t.name)+'</button>').join('')+
+    '</div>'+
+    (list.length? '<div class="ngrid">'+list.map(n=>noteTile(n)).join('')+'</div>' : '<div class="empty">В этой теме пусто. Создай заметку или выбери «Все».</div>')+
+    (S.secretActive? '<div class="card" style="cursor:pointer;border-style:dashed" data-act="go" data-arg="snotes"><h3>'+ic('lock')+'Закрытые заметки<span class="h-note">зашифрованы</span></h3><div class="dim">Закрытая зона открыта — секретные заметки появились рядом с обычными. Нажми, чтобы открыть.</div></div>' : '')+
+  '</div>';
+}
+function topicMngModal(){
+  return '<h3>Темы заметок</h3><div class="tiny" style="margin:2px 0 10px">Заметки группируются по темам. Удалять можно любые, кроме «Личное» — заметки из удалённой темы переедут туда.</div>'+
+  DB.topics.map(t=>{
+    const n = DB.notes.filter(x=>(x.topic||'Личное')===t.name).length;
+    return '<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line)"><span class="dot" style="background:'+t.c+'"></span><span style="flex:1">'+esc(t.name)+'</span><span class="tiny">'+n+' заметок</span>'+
+      (t.name==='Личное'?'':'<button class="btn btn-sm btn-danger" style="width:26px;height:26px;padding:0" data-act="topicDel" data-arg="'+t.id+'">✕</button>')+'</div>';
+  }).join('')+
+  '<div class="row mt10" style="gap:8px"><input id="tm2-name" placeholder="Новая тема" style="flex:1"></div>'+
+  '<div class="row mt10" style="gap:7px;flex-wrap:wrap" id="tm2-colors">'+SECT_COLORS.map((c,i)=>'<button class="dot" data-act="topicColor" data-arg="'+c+'" style="width:22px;height:22px;background:'+c+';border:2px solid '+(i===0?'var(--t1)':'transparent')+'"></button>').join('')+'</div>'+
+  '<button class="btn btn-amber mt14" style="width:100%" data-act="topicAdd">Добавить тему</button>';
+}
+/* ── ТРЕНИРОВКИ ── */
+const TRAIN_TABS = [['today','Сегодня'],['week','Неделя'],['w','Силовые'],['wrist','Кисть'],['os','Осанка'],['run','Бег'],['measure','Замеры'],['life','Жизнь']];
+function scrTrain(){
+  return '<div class="stack">'+
+    '<div class="row between wrap"><div style="font-size:19px;font-weight:800">Тренировки</div><span class="pill">'+trainHeaderPill()+'</span></div>'+
+    '<div class="tabs">'+TRAIN_TABS.map(t=>'<button class="tab'+(S.trainTab===t[0]?' on':'')+'" data-act="trainTab" data-arg="'+t[0]+'">'+t[1]+'</button>').join('')+'</div>'+
+    ({today:trainToday,week:trainWeek,w:trainWrist2,wrist:trainWrist,os:trainOs,run:trainRun,measure:trainMeasure,life:trainLife})[S.trainTab]()+
+  '</div>';
+}
+function trainHeaderPill(){
+  const {w,ph}=weekOf(new Date());
+  return (w?w+'/39':'–')+' · '+(ph?('Ф'+ph.n):'–');
+}
+function tbl(head, rows){
+  return '<div style="overflow-x:auto"><table class="tw"><tr>'+head.map(h=>'<th>'+h+'</th>').join('')+'</tr>'+
+    rows.map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join('')+'</tr>').join('')+'</table></div>';
+}
+function trainToday(){
+  const d=new Date(), {w,ph}=weekOf(d), day=DAYS[d.getDay()];
+  const sp = SPECIAL.filter(s=>weekMatch(s[0],w));
+  return (sp.length?'<div class="banner mb10"><b>'+esc(sp[0][0])+'.</b> '+esc(sp[0][1])+'</div>':'')+
+  '<div class="card"><h3>'+ic('cal')+esc(day.type)+'<span class="h-note">'+d.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'})+'</span></h3>'+
+    '<div class="dim" style="margin-bottom:10px">'+esc(day.plan)+(ph?(' · '+ph.name):'')+'</div>'+
+    checkList('tr', day.train, '')+'</div>'+
+  '<details><summary>Еда по плану '+chev()+'</summary><div class="dbody">'+MEALS.map(m=>'<div style="padding:6px 0;border-bottom:1px solid var(--line);font-size:13px;color:var(--t2)">'+esc(m)+'</div>').join('')+'</div></details>'+
+  '<details><summary>Сон '+chev()+'</summary><div class="dbody">'+SLEEP.map(m=>'<div style="padding:6px 0;border-bottom:1px solid var(--line);font-size:13px;color:var(--t2)">'+esc(m)+'</div>').join('')+'</div></details>';
+}
+function trainWeek(){
+  return '<div class="card"><h3>Фазы плана · 39 недель</h3>'+tbl(['Фаза','Период','Суть'],
+    [['Ф1 Фундамент','07.10.2026 – 29.11.2026','техника, база, привычки'],
+     ['Ф2 Сила+бег','30.11.2026 – 31.01.2027','сила тяги, спринты, 3 км ≤ 13:00'],
+     ['Ф3 Нормативы','01.02.2027 – 04.04.2027','тесты: подтягивания, 3 км, 100 м. Бал 4.04'],
+     ['Ф4 Лето к 21','05.04.2027 – 06.07.2027','руки/плечи (D), фотосет к 21-летию 6.07']])+'</div>'+
+  '<div class="card"><h3>Особые недели</h3>'+SPECIAL.map(s=>'<div style="padding:8px 0;border-bottom:1px solid var(--line)"><b style="font-size:13px">'+esc(s[0])+'</b><div class="dim" style="margin-top:2px">'+esc(s[1])+'</div></div>').join('')+'</div>'+
+  '<div class="card"><h3>Правило недель</h3><div class="sub">Силовые пн/ср/пт (A/B/C) · вт/чт — осанка + айкидо · сб — бег по фазе + айкидо · вс — замеры + D. Неделя начинается в понедельник. Сорвался — не навёрстываешь двойным объёмом, просто продолжаешь по плану.</div></div>';
+}
+function trainWrist2(){
+  return ['A','B','C'].map((k,i)=>'<details><summary>Силовая '+k+' · '+['НОГИ + ТЯГА + ЖИМ','НОГИ + ЖИМ + ПЛЕЧИ + КОР','ВЕРХ + КОР, БЕЗ ТЯЖЁЛЫХ НОГ'][i]+chev()+'</summary><div class="dbody">'+
+    tbl(HEAD_W, [W_A,W_B,W_C][i])+'<div class="note mt10">'+NOTE_W+'</div></div></details>').join('')+
+  '<details><summary>Силовая D · РУКИ + ПЛЕЧИ + ПРЕДПЛЕЧЬЯ (вс, 30–35 мин)'+chev()+'</summary><div class="dbody">'+
+    tbl(HEAD_W, W_D)+'<div class="note mt10">'+NOTE_D+'</div></div></details>'+
+  '<div class="card"><h3>Порядок сенсея — везде</h3><div class="sub">Сначала простой вис на турнике 2×60 с → затем «парашютист» → потом разводка гантелей в наклоне → остальное. Внесён во все таблицы и в протокол кисти.</div></div>';
+}
+function chev(){ return ic('chevR').replace('class="ic"','class="ic chev"'); }
+function trainWrist(){
+  return '<div class="banner red">Макивара — СТОП до снимка. Резиновые колёса с железными прутами + ноющая кисть = путь к хронической травме, которая убьёт подтягивания и айкидо.</div>'+
+  '<div class="card"><h3>'+ic('alert')+'Бесплатный путь (по ОМС)</h3><div class="sub" style="line-height:1.7">Тебе 20 — полис твой, мать не нужна.<br>1. <b>Травмпункт при больнице скорой помощи</b> — примут без записи, рентген кисти бесплатно.<br>2. Или поликлиника к травматологу-ортопеду — направление на снимок тоже бесплатное.<br>3. Платное УЗИ для старта не нужно.</div></div>'+
+  '<div class="card"><h3>После вердикта врача</h3>'+tbl(['Правило','Как'],
+    [['Сила удара','20–30% от максимума, первые две костяшки'],['Запястье','прямая линия с предплечьем — не гнётся'],['Объём','2–3 минуты через день'],['Хват вместо макивары','вис 2×60 с, «парашютист», полотенце-вис, фермер']])+'</div>'+
+  '<div class="card"><h3>Хват-блок по сенсею</h3>'+tbl(['Упражнение','Дозировка'],
+    [['Вис на турнике (всегда первый)','2×60 с'],['Вис «парашютиста»','3×20–60 с → 90 с к лету'],['Разводка гантелей в наклоне','3×12–20']])+
+    '<div class="note mt10">Разгрузка спины, хват и предплечья, лопатки вниз-назад.</div></div>';
+}
+function trainOs(){
+  return '<div class="card"><h3>Полный блок осанки · 12–15 мин (вт/чт/сб)</h3>'+tbl(HEAD_O, OS_FULL)+'<div class="note mt10">'+OS_NOTE+'</div></div>'+
+  '<div class="card"><h3>Хруст в спине</h3><div class="sub">'+OS_CRUNCH+'</div></div>'+
+  '<div class="card"><h3>Картинки-схемы</h3><div class="vgrid">'+TECH_IMG.map(i=>'<div><img src="'+i[1]+'" alt="'+esc(i[0])+'" loading="lazy" style="width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:10px;border:1px solid var(--line2)" onerror="this.style.display=\'none\'"><div class="vname">'+esc(i[0])+'</div></div>').join('')+'</div><div class="tiny mt6">Картинки грузятся из сети; офлайн они скрыты — таблица выше самодостаточна.</div></div>';
+}
+function trainRun(){
+  const {ph}=weekOf(new Date()); const n = ph?ph.n:1;
+  return '<div class="card"><h3>'+ic('flame')+esc(RUNS[n][0])+'</h3><div class="sub">'+esc(RUNS[n][1])+'</div></div>'+
+  [1,2,3,4].map(k=>'<details'+(k===n?' open':'')+'><summary>Бег-блок · Ф'+k+chev()+'</summary><div class="dbody"><div class="sub">'+esc(RUNS[k][1])+'</div></div></details>').join('');
+}
+function trainMeasure(){
+  const log = DB.weights.slice(-10).reverse();
+  return '<div class="card"><h3>Вес</h3><div class="row"><input id="w-in" type="number" step="0.1" placeholder="Вес утром натощак, кг" style="flex:1"><button class="btn btn-amber" data-act="weightSave">Записать</button></div>'+
+  '<div class="row wrap mt10" style="gap:6px" id="w-log">'+(log.length?log.map(x=>'<span class="pill">'+x.d.slice(5)+': '+x.w+' кг</span>').join(''):'<span class="dim">Пока пусто. Взвешивайся утром натощак.</span>')+'</div></div>'+
+  '<div class="card"><h3>Замеры воскресенья</h3>'+checkList('mm',['Вес, талия по пупку, тест у стены','Вис «парашютиста» на время — 3 подхода, запиши лучший','Фото спереди/сбоку — по графику'],'')+'</div>';
+}
+function trainLife(){
+  return '<div class="banner mb10"><b>Декабрь-протокол</b> (написан заранее на тяжёлый период): минимум дня не отменяется, айкидо не пропускается, один живой разговор в день, экраны закрыты после 22:00.</div>'+
+  '<div class="card"><h3>Контракт до 30 ноября</h3><div class="sub" style="line-height:1.65">Пробный формат — до 30.11, финал совпадает с концом Фазы 1 (29.11): одна дата закрывает две вещи.<br><br>— не «парень»: никаких подарков-инвестиций и логистики за неё<br>— 1–2 встречи в неделю, не каждый день<br>— ни разу не спрашивать «появились?»<br>— спорт неприкосновенен<br>— триггер выхода: 15–20.11 самопроверка</div></div>'+
+  '<div class="card"><h3>После 30 ноября</h3><div class="sub">Чистый разрыв, 2–4 недели тишины. Скрипт: «Слушай, я не могу дружить сразу после всего. Не обижаюсь, зла нет — просто нужно время. Через месяц-два вернёмся к нормальному общению. На айкидо всё уважительно.»</div></div>'+
+  '<div class="card"><h3>Деньги и переезд</h3><div class="sub" style="line-height:1.65">Долг 6к → гасить с первой зп. Степуха 27к ~27.12. Малая степуха 2900 → зал.<br>С марта (диплом + зарплата) 3–4 месяца копить → <b>своя комната к 6.07.2027</b>. Каждая тренировка работает и на это.</div></div>'+
+  '<div class="card"><h3>Кожа — протокол за 400 ₽</h3><div class="sub" style="line-height:1.65">Гель 2×/день + после тренировки · бензоилпероксид 2,5% или адапален 0,1% на ночь через день · наволчка раз в 2–3 дня · не давить. Эффект 8–12 недель.</div></div>';
+}
+
+/* ── ВИДЕО ── */
+function scrVideo(){
+  return '<div class="stack">'+
+    '<div class="row between wrap"><div style="font-size:19px;font-weight:800">Видео</div><div class="row" style="gap:8px"><label class="btn btn-amber btn-sm" style="cursor:pointer">'+ic('plus')+'Файл<input type="file" accept="video/*" multiple style="display:none" onchange="ACTIONS.vidFileAdd(this)"></label><button class="btn btn-sm" data-act="vidNew">'+ic('plus')+'Ссылка</button></div></div>'+
+    '<div class="card"><h3>Мои видео<span class="h-note">играют прямо здесь, без интернета</span></h3>'+
+      (DB.media.filter(m=>m.kind==='video').length? DB.media.filter(m=>m.kind==='video').map(v=>'<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer" data-act="vidFilePlay" data-arg="'+v.id+'">'+ic('video')+'<span style="min-width:0;flex:1"><span style="font-size:13.5px;color:var(--t1)">'+esc(v.name)+'</span><span class="tiny" style="display:block">'+fmtSize(v.size)+' · добавлено '+esc(v.added)+'</span></span><button class="btn btn-sm" style="width:28px;height:28px;padding:0" data-act="vidFileDel" data-arg="'+v.id+'">✕</button></div>').join('') : '<div class="dim">Пока пусто — добавь mp4/webm/mkv кнопкой «Файл»</div>')+'</div>'+
+    '<div class="card"><h3>Мои ссылки<span class="h-note">сохранённые из чатов</span></h3>'+
+      (DB.myvideos.length?DB.myvideos.map(v=>'<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line)">'+ic('video')+'<span style="min-width:0;flex:1"><a href="'+esc(v.url)+'" target="_blank" rel="noopener" style="font-size:13.5px">'+esc(v.title)+'</a><span class="tiny" style="display:block">'+esc(v.note||'')+' · '+esc(v.added)+'</span></span><button class="btn btn-sm" style="width:28px;height:28px;padding:0" data-act="vidDel" data-arg="'+v.id+'">✕</button></div>').join(''):'<div class="dim">Пока пусто</div>')+'</div>'+
+    TECH.map(c=>'<details><summary>'+esc(c[0])+' — '+c[1].length+' видео'+chev()+'</summary><div class="dbody">'+
+      '<div class="vgrid">'+c[1].map(v=>'<div><button class="vthumb" data-act="vidEmbed" data-arg="'+v[1]+'"><img loading="lazy" alt="превью" src="https://i.ytimg.com/vi/'+v[1]+'/hqdefault.jpg" onerror="this.style.display=\'none\'"><span class="play">▶</span></button><div class="vname">'+esc(v[0])+'</div></div>').join('')+'</div></div></details>').join('')+
+    '<div class="tiny">Превью грузятся из сети. Клик — видео открывается прямо здесь (youtube-nocookie, без куки). Офлайн превью скрыты.</div>'+
+  '</div>';
+}
+
+/* ── ЛЕКЦИИ ── */
+function scrLectures(){
+  return '<div class="stack">'+
+    '<div class="row between wrap"><div style="font-size:19px;font-weight:800">Лекции</div><button class="btn '+(S.lectRec?'btn-danger':'btn-amber')+' btn-sm" data-act="lectRec">'+(S.lectRec?'■ Стоп запись':'● Записать лекцию')+'</button></div>'+
+    (S.lectRec?'<div class="banner">'+ic('lect')+' Идёт запись (демо): в нативной версии звук пишется на устройство, потом whisper.cpp расшифрует и соберёт конспект.</div>':'')+
+    DB.lectures.map(l=>'<div class="card"><h3>'+ic('lect')+esc(l.title)+'<span class="h-note">'+l.dur+' · '+l.date+'</span></h3>'+
+      '<div class="dim">'+esc(l.text)+'</div>'+
+      '<details style="margin-top:8px"><summary class="sub" style="font-size:12.5px;font-weight:500;padding:8px 0 0">Отрывок из транскрипта '+chev()+'</summary><div class="dbody dim" style="padding-top:4px">'+esc(l.excerpt)+'</div></details></div>').join('')+
+  '</div>';
+}
+
+/* ── МУЗЫКА ── */
+function scrMusic(){
+  const tr = currentTrack();
+  const tot = (tr.seconds||tr.dur)||1;
+  const my = DB.media.filter(m=>m.kind==='audio');
+  return '<div class="stack">'+
+    '<div class="card" style="text-align:center;padding:22px 16px">'+
+      '<div class="logo-tile" style="margin:0 auto 10px;width:52px;height:52px;font-size:26px;border-radius:16px">'+ic('music').replace('class="ic"','class="ic" style="width:22px;height:22px;color:#0b0d11"')+'</div>'+
+      '<div style="font-size:16px;font-weight:800">'+esc(tr.title)+'</div><div class="tiny" style="margin-top:2px">'+esc(tr.artist||'')+'</div>'+
+      '<div class="row mt14" style="gap:10px"><span class="tiny" style="font-variant-numeric:tabular-nums" id="mpos">'+fmtSec(S.music.progress)+'</span><div class="bar"><i id="mbar" style="width:'+Math.min(100,Math.round(100*S.music.progress/tot))+'%"></i></div><span class="tiny" style="font-variant-numeric:tabular-nums" id="mtot">'+fmtSec(tot)+'</span></div>'+
+      '<button class="btn btn-amber mt14" style="width:130px" data-act="musicToggle">'+ic(S.music.playing?'pause':'play')+(S.music.playing?'Пауза':'Слушать')+'</button>'+
+    '</div>'+
+    '<div class="card"><h3>Мои треки<span class="h-note">файлы с устройства · играют по-настоящему</span></h3>'+
+      '<label class="btn btn-amber btn-sm" style="cursor:pointer;margin-bottom:8px">'+ic('plus')+'Добавить музыку<input type="file" accept="audio/*" multiple style="display:none" onchange="ACTIONS.musicFileAdd(this)"></label>'+
+      (my.length? my.map(t=>'<div class="trow" data-act="musicFilePlay" data-arg="'+t.id+'">'+
+        '<span class="eq'+(S.music.playing&&PLAYER.mode==='file'&&PLAYER.fileId===t.id?' play':'')+'"><span></span><span></span><span></span></span>'+
+        '<span style="min-width:0;flex:1"><span style="font-size:13.5px;color:var(--t1)">'+esc(t.name)+'</span><span class="tiny" style="display:block">'+fmtSize(t.size)+(t.dur?' · '+fmtSec(t.dur):'')+'</span></span>'+
+        '<button class="btn btn-sm" style="width:28px;height:28px;padding:0" data-act="musicFileDel" data-arg="'+t.id+'">✕</button></div>').join('') : '<div class="dim">Пока пусто — добавь mp3/m4a/ogg с телефона или ПК</div>')+'</div>'+
+    '<div class="card"><h3>Демо-плейлист<span class="h-note">звучит встроенным синтезатором — звук настоящий</span></h3>'+TRACKS.map(t=>'<div class="trow" data-act="musicPick" data-arg="'+t.id+'">'+
+      '<span class="eq'+(S.music.playing&&PLAYER.mode!=='file'&&S.music.trackId===t.id?' play':'')+'"><span></span><span></span><span></span></span>'+
+      '<span style="min-width:0;flex:1"><span style="font-size:13.5px;color:var(--t1)">'+esc(t.title)+'</span><span class="tiny" style="display:block">'+esc(t.artist)+' · '+fmtSec(t.seconds)+'</span></span></div>').join('')+'</div>'+
+    (S.secretActive
+      ? '<div class="card" style="cursor:pointer;border-style:dashed" data-act="go" data-arg="smusic"><h3>'+ic('lock')+'Закрытая музыка<span class="h-note">галерея и плееры не видят</span></h3><div class="dim">Закрытая зона открыта — секретные треки появились рядом с обычными. Нажми, чтобы открыть.</div></div>'
+      : '<div class="note">Секретная музыка (то, что не должно попадать в галерею и другие плееры) прячется в закрытой зоне: два клика по логотипу «А» → пароль — и раздел появляется в меню.</div>')+
+  '</div>';
+}
+
+/* ── ФОТО (обычная галерея) ── */
+function scrPhotos(){
+  const ph = DB.media.filter(m=>m.kind==='photo');
+  return '<div class="stack">'+
+    '<div class="row between wrap"><div style="font-size:19px;font-weight:800">Фото</div>'+
+    '<label class="btn btn-amber btn-sm" style="cursor:pointer">'+ic('up')+'Добавить фото<input type="file" accept="image/*" multiple style="display:none" onchange="ACTIONS.openPhotoAdd(this)"></label></div>'+
+    (ph.length? '<div class="pgrid">'+ph.map(p=>'<div class="ph"><img data-mid="'+p.id+'" alt="" style="background:var(--panel4)" data-act="openPhotoOpen" data-arg="'+p.id+'"><button class="phdel" data-act="openPhotoDel" data-arg="'+p.id+'">✕</button></div>').join('')+'</div>'
+      : '<div class="empty">Пока пусто. Добавь фото — сожмутся и будут храниться только в Арми.</div>')+
+    '<div class="tiny">Обычная галерея Арми: фото лежат в памяти приложения на этом устройстве и в системную галерею не попадают. Надёжнее спрятать (шифрование) — держи такие снимки в закрытой зоне.</div></div>';
+}
+
+/* ── РАЗВЛЕЧЕНИЯ И САМОРАЗВИТИЕ ── */
+const FUN_TABS = [['fact','Факт'],['book','Книга'],['idea','Идея'],['mix','Сюрприз']];
+function scrFun(){
+  const tab = S.funTab==='mix' ? ['fact','book','idea'][Math.floor(Math.random()*3)] : S.funTab;
+  let body='';
+  if(tab==='fact'){
+    body = '<div class="card" style="padding:20px 18px"><div class="tiny" style="letter-spacing:.08em;text-transform:uppercase">Интересный факт</div>'+
+    '<div style="font-size:16.5px;font-weight:600;line-height:1.6;margin-top:10px">'+esc(FACTS[S.funFact%FACTS.length])+'</div>'+
+    '<div class="row between mt14"><span class="tiny">Факт '+((S.funFact%FACTS.length)+1)+' из '+FACTS.length+'</span><button class="btn btn-amber btn-sm" data-act="funNext" data-arg="fact">'+ic('spark')+'Ещё факт</button></div></div>';
+  } else if(tab==='book'){
+    const p = S.funBook && BOOKS.find(b=>b.id===S.funBook) ? {book:BOOKS.find(b=>b.id===S.funBook), reason:S.funReason} : pickBook();
+    if(!S.funBook){ S.funBook=p.book.id; S.funReason=p.reason; }
+    body = '<div class="card" style="padding:20px 18px"><div class="tiny" style="letter-spacing:.08em;text-transform:uppercase">'+ic('book').replace('class="ic"','class="ic" style="width:12px;height:12px;vertical-align:-2px"')+' Книга под тебя · подобрала локальная нейронка</div>'+
+    '<div style="font-size:18px;font-weight:800;margin-top:10px">'+esc(p.book.t)+'</div>'+
+    '<div class="sub" style="margin-top:2px">'+esc(p.book.a)+'</div>'+
+    '<div class="dim mt10" style="line-height:1.65">'+esc(p.book.why)+'</div>'+
+    '<div class="note mt10">Почему тебе: '+esc(p.reason)+'</div>'+
+    '<div class="row between mt14"><span class="tiny">Всего в библиотеке: '+BOOKS.length+'</span><button class="btn btn-amber btn-sm" data-act="funNext" data-arg="book">'+ic('book')+'Другая книга</button></div></div>';
+  } else {
+    body = '<div class="card" style="padding:20px 18px"><div class="tiny" style="letter-spacing:.08em;text-transform:uppercase">Идея на вечер</div>'+
+    '<div style="font-size:16.5px;font-weight:600;line-height:1.6;margin-top:10px">'+esc(IDEAS[S.funIdea%IDEAS.length])+'</div>'+
+    '<div class="row between mt14"><span class="tiny">Идея '+((S.funIdea%IDEAS.length)+1)+' из '+IDEAS.length+'</span><button class="btn btn-amber btn-sm" data-act="funNext" data-arg="idea">'+ic('bulb')+'Ещё идея</button></div></div>';
+  }
+  return '<div class="stack">'+
+    '<div><div style="font-size:19px;font-weight:800">Развлечения и саморазвитие</div><div class="tiny mt6">Факты, книги под твой контекст и идеи на вечер — всё остаётся здесь, ничего не удаляется. Работает офлайн, подбор — локально.</div></div>'+
+    '<div class="tabs">'+FUN_TABS.map(t=>'<button class="tab'+(S.funTab===t[0]?' on':'')+'" data-act="funTab" data-arg="'+t[0]+'">'+t[1]+'</button>').join('')+'</div>'+
+    body+
+    (S.funTab==='mix'?'<div class="tiny">«Сюрприз» каждый раз выбирает случайно: факт, книгу или идею.</div>':'')+
+    '<details><summary>Вся библиотека · '+BOOKS.length+' книг '+chev()+'</summary><div class="dbody">'+
+      BOOKS.map(b=>'<div style="padding:8px 0;border-bottom:1px solid var(--line)"><b style="font-size:13px">'+esc(b.t)+'</b> <span class="tiny">— '+esc(b.a)+'</span><div class="dim" style="font-size:12px;margin-top:2px">'+esc(b.why)+'</div></div>').join('')+'</div></details>'+
+    '<details><summary>Все факты · '+FACTS.length+' '+chev()+'</summary><div class="dbody">'+
+      FACTS.map((f,i)=>'<div style="padding:7px 0;border-bottom:1px solid var(--line)"><span class="tiny" style="color:var(--amber);font-weight:700">'+(i+1)+'.</span> <span class="dim" style="font-size:12.5px">'+esc(f)+'</span></div>').join('')+'</div></details>'+
+    '<details><summary>Все идеи · '+IDEAS.length+' '+chev()+'</summary><div class="dbody">'+
+      IDEAS.map((f,i)=>'<div class="dim" style="font-size:12.5px;padding:7px 0;border-bottom:1px solid var(--line)"><span class="tiny" style="color:var(--amber);font-weight:700">'+(i+1)+'.</span> '+esc(f)+'</div>').join('')+'</div></details>'+
+  '</div>';
+}
+/* ── НАСТРОЙКИ ── */
+function scrSettings(){
+  const sec = Secret.status();
+  return '<div class="stack">'+
+    '<div style="font-size:19px;font-weight:800">Настройки</div>'+
+    '<div class="card"><h3>'+ic('grid')+'Профиль устройства</h3>'+
+      Object.entries(PROFILES).map(([k,p])=>'<button class="btn'+(S.deviceProfile===k?' btn-amber':'')+' btn-sm" style="width:100%;justify-content:flex-start;margin-bottom:6px" data-act="profile" data-arg="'+k+'">'+
+        '<span style="min-width:0;text-align:left"><span style="display:block;font-size:12.5px">'+p.t+'</span><span style="display:block;font-size:10.5px;opacity:.75;font-weight:500">'+p.m+'</span></span></button>').join('')+
+      '<div class="tiny mt6">Локальная модель всегда бесплатна. Платно — только облако, и только когда своих мощностей не хватает.</div></div>'+
+    '<div class="card"><h3>'+ic('zap')+'ИИ-режим<span class="h-note">гибрид: локально + облако</span></h3><div class="row wrap" style="gap:8px">'+
+      '<button class="btn'+(S.aiMode==='offline'?' btn-amber':'')+' btn-sm" data-act="aiMode" data-arg="offline">Локально · 0 ₽</button>'+
+      '<button class="btn'+(S.aiMode==='online'?' btn-amber':'')+' btn-sm" data-act="aiMode" data-arg="online">Онлайн · 100–200 ₽/мес</button></div>'+
+      (S.aiMode==='online'?'<div class="note mt10">Облако подключается только для сложных запросов: длинный контекст, код, анализ. Простые вопросы остаются локальными.</div>':'<div class="note mt10">Всё считается на устройстве. Данные не покидают телефон/ПК никуда.</div>')+
+      '<div class="note mt10">Бесплатные онлайн-модели — да, существуют. У большинства провайдеров есть free tier с лимитами (запросов в минуту/день, размер контекста). Рабочая схема Арми: локально → бесплатный тир → платный 100–200 ₽. Ограничение: бесплатные тиры отправляют данные провайдеру, поэтому секретный контур на них не рассчитан.</div></div>'+
+    '<div class="card"><h3>'+ic('lock')+'Секретный режим</h3>'+
+      '<div class="sub">'+(sec.configured
+        ? 'Настроен. Два клика по логотипу «А» → пароль — и закрытые разделы (чаты, заметки, фото, музыка, второй контур) появляются в общем меню рядом с обычными. Отдельного окна нет: тот же Арми, просто с дополнительными разделами, пока ты не вышел.'
+        : 'Спрятанная зона: секретные чаты, заметки, фото и музыка, второй контур с мощной моделью. После входа закрытые разделы появляются в меню рядом с обычными — без отдельного окна. Код восстановления показывается один раз: потерял его и пароль — данные не восстановить.')+'</div>'+
+      '<div class="row wrap mt10" style="gap:8px">'+
+      '<button class="btn btn-amber btn-sm" data-act="secretGate">Открыть / настроить</button>'+
+      (sec.configured?'<button class="btn btn-danger btn-sm" data-act="secretWipe">Стереть зону</button>':'')+'</div>'+
+      '<div class="tiny mt10">Шифрование: AES-256-GCM, ключ выводится из пароля (PBKDF2, 150 000 итераций). Другие приложения не могут ни прочитать, ни удалить эти данные — они лежат в изолированном хранилище приложения. Удалить их можешь только ты сам (кнопка выше или очистка данных сайта).</div></div>'+
+    '<div class="card"><h3>'+ic('spark')+'Мультиагенты «Сара» · локальный рой</h3>'+
+      '<div class="sub">Адаптация архитектуры Сары под Арми: роутер + узкие агенты, каждый получает только свой контекст.</div>'+
+      tbl(['Агент','Зона','Иконка'],
+        [['Роутер','разбирает запрос и отдаёт профильному агенту','grid'],
+         ['Планировщик','день, неделя, приоритеты из задач и плана','cal'],
+         ['Тело','тренировки, восстановление, кисть','dumb'],
+         ['Учёба','лекции, конспекты, диплом до марта','lect'],
+         ['Бюджет','долг 6к, степуха 27к, комната к 6.07','task']])+
+      '<div class="banner red mt10" style="font-size:11.5px">Красная линия соблюдена: корпоративный кошелёк не подключён. «Router ai» никогда не подключался и в прототипе отсутствует — все сетевые вызовы только через твой личный ключ.</div></div>'+
+    '<div class="card"><h3>'+ic('up')+'Импорт из GLM-чата</h3>'+
+      tbl(['Что','Откуда'],
+        [['План 39 недель (фазы, A/B/C/D, хват, осанка, бег)','трекер v4 из чата'],
+         ['Расписание недели (айкидо, физра, силовые, академия)','из анализа диалогов — редактируется'],
+         ['Задачи: рентген по ОМС, хакама, диплом, зп, долг','из анализа жизни'],
+         ['Заметки: контракт до 30.11, кисть, финансы, кожа, цель','из анализа жизни'],
+         ['Видео-техника: 15 роликов + 4 схемы осанки','ID проверены через oembed'],
+         ['Развлечения и саморазвитие: факты, книги, идеи','подобрано под контекст плана']])+
+      '<div class="tiny mt10">Импортировано 8 ноября. Источник — твой чат «Анализ диалогов и составление плана» (GLM-5.3-Flash).</div></div>'+
+    '<div class="card"><h3>'+ic('grid')+'Вид интерфейса</h3><div class="row wrap" style="gap:8px">'+
+      [['auto','Авто'],['pc','Как ПК'],['phone','Как телефон']].map(v=>'<button class="btn'+(S.view===v[0]?' btn-amber':'')+' btn-sm" data-act="view" data-arg="'+v[0]+'">'+v[1]+'</button>').join('')+'</div>'+
+      '<div class="tiny mt6">Авто подстраивается под ширину экрана. Переключи «Как телефон» на компьютере, чтобы проверить мобильную раскладку.</div></div>'+
+    '<div class="card"><h3>'+ic('down')+'Данные</h3><div class="row wrap" style="gap:8px">'+
+      '<button class="btn btn-amber btn-sm" data-act="exportData">'+ic('down')+'Скачать бэкап (обычные данные)</button>'+
+      '<button class="btn btn-danger btn-sm" data-act="resetData">Сбросить прототип</button></div>'+
+      '<div class="tiny mt10">Секретные данные экспортируются только из закрытого режима, отдельным ключом.</div></div>'+
+    '<div class="card"><h3>'+ic('check')+'Версия и данные</h3><div class="sub">Эта копия: <b>Арми v5.0</b> (сборка 12 ноября). Если приложение и браузерная версия выглядят по-разному — версии одинаковые, просто данные разные: браузер помнит твои старые записи, а новое приложение начинает с демо-набора. Привести всё к демо-виду — кнопка «Сбросить прототип» ниже.</div></div>'+
+    '<div class="card"><h3>Как пользоваться</h3><div class="sub" style="line-height:1.7">'+
+      '<b>ПК:</b> скачай файл → двойной клик → откроется в браузере.<br>'+
+      '<b>Телефон:</b> скачай файл → открой через Chrome («Файлы» → поделиться → Chrome). Прогресс хранится в браузере.<br>'+
+      '<b>Задачи:</b> клик по тексту задачи — правка; свои разделы — маленькая кнопка «＋ раздел» справа в строке фильтров.<br>'+
+      '<b>Заметки:</b> плитки делятся на темы; свои темы — кнопка «Темы» справа сверху.<br>'+
+      '<b>Музыка:</b> «Добавить музыку» — свои mp3/m4a играют по-настоящему; демо-плейлист звучит встроенным синтезатором.<br>'+
+      '<b>Видео:</b> кнопка «Файл» — свои ролики играют прямо в приложении, без интернета.<br>'+
+      '<b>Фото:</b> обычная галерея — раздел «Фото» в меню; секретные фото — в закрытой зоне (зашифрованы).<br>'+
+      '<b>Чат:</b> спрашивай «100 на 5», «сколько будет 2+2×2», «25% от 4000» — считаю сразу.<br>'+
+      '<b>Расписание:</b> нажми на любое событие — правка или удаление; «+ Событие» добавляет своё.<br>'+
+      '<b>Секретный режим:</b> два клика по жёлтой «А» → пароль → закрытые разделы появляются в меню рядом с обычными (плюс блоки в «Заметках», «Музыке» и чип в чате).<br>'+
+      '<b>Паника:</b> кнопка «Быстрый выход», кнопка «Закрыто» в шапке или клавиша Esc.</div></div>'+
+    '<div class="tiny" style="text-align:center;padding:4px 0 10px">Арми · прототип v5.0 · один файл, офлайн, без сборки<br>Данные: '+DB.notes.length+' заметок · '+DB.topics.length+' тем · '+DB.tasks.length+' задач · '+DB.sections.length+' разделов · '+DB.media.length+' медиафайлов · план 39 недель</div>'+
+  '</div>';
+}
+
+/* ══════════ ЧАТ АРМИ ══════════ */
+let CHAT = loadJSON('armi_chat', null) || [ {id:'c0', role:'ai', content:'Привет! Я Арми — работаю на твоём устройстве, без интернета. Вижу план тренировок, задачи, заметки и расписание. Спроси что угодно — отвечу локально, а если подключишь облако (100–200 ₽/мес, только когда локально не тянет) — задачи посложнее уйдут туда.', time:'09:00', local:true} ];
+function seedChat(){ return CHAT; }
+function scrChat(){
+  const online = S.aiMode==='online';
+  return '<div style="height:100%;display:flex;flex-direction:column">'+
+    '<div class="msgs" id="msgs">'+CHAT.map(m=>'<div class="msg '+(m.role==='user'?'user':'ai')+'">'+esc(m.content)+(m.local?'<div class="mt">локально · офлайн</div>':(m.cloud?'<div class="mt">облако · 100–200 ₽/мес</div>':'<div class="mt">'+m.time+'</div>'))+'</div>').join('')+'</div>'+
+    '<div style="padding:0 16px 8px;display:flex;gap:6px;overflow-x:auto">'+
+      ['что сегодня?','100 на 5','сколько будет 2+2×2','неделя и фаза','кисть','дай факт','подбери книгу','идея на вечер'].map(c=>'<button class="chip" data-act="chip" data-arg="'+esc(c)+'">'+esc(c)+'</button>').join('')+
+      (S.secretActive? '<button class="chip" style="border-color:rgba(52,211,153,.45);color:var(--em)" data-act="go" data-arg="schat">'+ic('lock').replace('class="ic"','class="ic" style="width:12px;height:12px;vertical-align:-2px"')+'закрытые чаты</button>' : '')+'</div>'+
+    '<div class="chatbar"><input id="chat-in" placeholder="'+(online?'Облако подключено — спроси посложнее':'Спроси локально — офлайн')+'" onkeydown="if(event.key===\'Enter\')ACTIONS.chatSend()"><button class="btn btn-amber" style="width:42px;height:40px;padding:0" data-act="chatSend">'+ic('chat')+'</button></div></div>';
+}
+function localAnswer(q){
+  const has = s => q.toLowerCase().includes(s);
+  const d=new Date(), {w,ph}=weekOf(d), day=DAYS[d.getDay()], online=S.aiMode==='online';
+  const pre = online?'[облако · развёрнуто]\n\n':'';
+  const calc = calcAnswer(q);
+  if(calc) return pre+calc;
+  if(has('который час')||has('сколько времени')) return pre+'Сейчас '+d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})+'.';
+  if(has('какое числ')||has('какая дат')) return pre+'Сегодня '+d.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long',year:'numeric'})+'.';
+  if(has('сколько дней до бала')) return pre+'До бала (4.04.2027) — '+Math.max(0,Math.round((BALL-d)/864e5))+' дн.';
+  if(has('сколько дней до 21')) return pre+'До 21 года (6.07.2027) — '+Math.max(0,Math.round((BIRTH-d)/864e5))+' дн.';
+  if(has('спасиб')) return 'Всегда пожалуйста.';
+  if(has('как дела')) return 'По плану: '+dayLow(day.type)+'. Открытых задач: '+DB.tasks.filter(x=>!x.done).length+'. А у тебя?';
+  if(has('что умеешь')||has('умеешь')) return 'Считаю в чате («100 на 5», «сколько будет 2+2×2», «25% от 4000»), знаю время и дату, веду план и тренировки («что сегодня?», «неделя и фаза»), задачи, расписание, протокол кисти, факты, книги и идеи. Секретный контур — по двойному клику на логотип.';
+  if(has('факт')){
+    const f = FACTS[Math.floor(Math.random()*FACTS.length)];
+    return (online?'[облако · развёрнуто]\n\n':'')+'Держи факт:\n'+f+'\n\nЕщё — в разделе «Развитие», там их '+FACTS.length+'.';
+  }
+  if(has('книг')){
+    const p = pickBook();
+    return (online?'[облако · развёрнуто]\n\n':'')+'Под твою неделю подойдёт:\n«'+p.book.t+'» — '+p.book.a+'.\n'+p.book.why+'\nПолная подборка — раздел «Развитие».';
+  }
+  if(has('идея')){
+    const i = IDEAS[Math.floor(Math.random()*IDEAS.length)];
+    return (online?'[облако · развёрнуто]\n\n':'')+'Идея на вечер:\n'+i+'\nЕщё — в разделе «Развитие».';
+  }
+  if(has('сегодня')||has('план на день')){
+    return (online?'[облако · развёрнуто]\n\n':'')+'Сегодня '+dayLow(day.type)+'.\n'+day.train.map(x=>'— '+x).join('\n')+'\n\nПорядок сенсея: вис 2×60 с → «парашютист» → разводка → остальное. После — отметь галочки в разделе «Тренировки», серия сегодня: '+streak()+' дн.';
+  }
+  if(has('недел')||has('фаз')){
+    return 'Неделя '+(w||'–')+' из 39 · '+(ph?ph.name:'между фазами')+'.\nБлижайшие вехи: тесты фазы — нед. 8 (29.11), бал — 4.04.2027, 21 год — 6.07.2027.\nСегодня: '+dayLow(day.type)+'.';
+  }
+  if(has('кист')){
+    return 'Протокол кисти:\n— макивара СТОП до снимка\n— травмпункт при больнице скорой помощи: рентген по ОМС, без записи, бесплатно\n— после вердикта: 20–30% силы, первые две костяшки, запястье прямое, 2–3 мин через день.\nПолная версия — «Тренировки» → вкладка «Кисть».';
+  }
+  if(has('привет')||has('здрав')){
+    return 'Привет! План на сегодня: '+dayLow(day.type)+'. Открытых задач: '+DB.tasks.filter(x=>!x.done).length+'. Спроси «что сегодня?» или открой «Тренировки».';
+  }
+  if(has('задач')){
+    const open = DB.tasks.filter(x=>!x.done);
+    return 'Открытых задач: '+open.length+'.\n'+open.slice(0,5).map(t=>'— '+t.title+' ('+t.project+')').join('\n')+(open.length>5?'\n…и ещё '+(open.length-5):'')+'\nРаздел «Задачи» — там же управление своими разделами.';
+  }
+  if(has('расписан')){
+    return 'Расписание на сегодня:\n'+DB.events.filter(e=>e.day===(d.getDay()+6)%7).sort((a,b)=>a.start.localeCompare(b.start)).map(e=>e.start+'–'+e.end+' '+e.title).join('\n')+'\nТеперь его можно править: нажми на событие в разделе «Расписание».';
+  }
+  return 'Такого я пока не знаю — я офлайн-прототип и отвечаю без интернета.\nУверенно умею:\n— считать: «100 на 5», «сколько будет 2+2×2», «25% от 4000»\n— время и дата: «который час», «какое число»\n— план: «что сегодня?», «неделя и фаза», «кисть»\n— задачи, расписание, факты, книги, идеи\nСейчас открытых задач: '+DB.tasks.filter(x=>!x.done).length+'. Спроси что-нибудь из этого.';
+}
+async function doChatSend(preset){
+  const inp = document.getElementById('chat-in');
+  const q = (preset!==undefined? preset : (inp?inp.value.trim():''));
+  if(!q) return;
+  CHAT.push({id:uid('c'), role:'user', content:q, time:nowHM()});
+  saveJSON('armi_chat', CHAT);
+  if(inp) inp.value='';
+  render();
+  setTimeout(async()=>{
+    CHAT.push({id:uid('c'), role:'ai', content:localAnswer(q), time:nowHM(), local:S.aiMode==='offline', cloud:S.aiMode==='online'});
+    saveJSON('armi_chat', CHAT);
+    render();
+  }, 450);
+}
+/* ══════════ ДЕЙСТВИЯ ══════════ */
+const ACTIONS = {
+  go(arg){ if(isSecretId(arg)){ S.secretScreen=arg; } else { S.screen=arg; S.secretScreen=null; } S.moreOpen=false; render(); },
+  toOpen(){ S.secretScreen=null; S.moreOpen=false; render(); },
+  more(){ S.moreOpen=true; render(); },
+  moreClose(arg, el, e){ if(e && e.target.closest && e.target.closest('.sheet')) return; S.moreOpen=false; render(); },
+  modalBack(arg, el, e){ if(e && e.target.closest && e.target.closest('.modal')) return; closeModal(); },
+  logoTap(){ logoTap(); },
+  viewCycle(){ S.view = resolveView()==='pc'?'phone':'pc'; persist(); render(); },
+  view(arg){ S.view=arg; persist(); render(); },
+  aiToggle(){ ACTIONS.aiMode(S.aiMode==='online'?'offline':'online'); },
+  aiMode(arg){ S.aiMode=arg; persist(); render(); toast(arg==='online'?'Облако подключено (100–200 ₽/мес, только для сложного)':'Только локальная модель — 0 ₽'); },
+  profile(arg){ S.deviceProfile=arg; persist(); render(); toast('Профиль: '+PROFILES[arg].t); },
+  chk(arg){ const [p,dk,i]=arg.split('|'); const k=p+'_'+dk+'_'+i; chkSet(k,!chkGet(k)); render(); },
+  /* задачи */
+  taskNew(){ modal(taskModal(null)); },
+  taskEdit(arg){ modal(taskModal(DB.tasks.find(t=>t.id===arg)||null)); },
+  taskFilter(arg){ S.taskFilter=arg; render(); },
+  taskSect(arg){
+    const names = DB.sections.map(s=>s.name);
+    const idx = S.taskSect ? names.indexOf(S.taskSect) : -1;
+    S.taskSect = (idx+1 < names.length) ? names[idx+1] : null;
+    render();
+  },
+  taskToggle(arg){ const t=DB.tasks.find(x=>x.id===arg); if(t){ t.done=!t.done; saveDB(); render(); } },
+  taskDel(arg){ DB.tasks=DB.tasks.filter(x=>x.id!==arg); saveDB(); closeModal(); render(); toast('Задача удалена'); },
+  taskSave(arg){
+    const title=document.getElementById('tm-title').value.trim(); if(!title){ toast('Введи название'); return; }
+    const pr=document.getElementById('tm-pr').value;
+    const pjRaw=document.getElementById('tm-pj').value, pj=DB.sections.some(s=>s.name===pjRaw)?pjRaw:'Личное';
+    const due=document.getElementById('tm-due').value.trim()||'сегодня';
+    if(arg){ const t=DB.tasks.find(x=>x.id===arg); Object.assign(t,{title,priority:pr,project:pj,due}); }
+    else DB.tasks.unshift({id:uid('t'), title, done:false, priority:pr, project:pj, due});
+    saveDB(); closeModal(); render(); toast('Сохранено');
+  },
+  chatTaskAdd(arg){ DB.tasks.unshift({id:uid('t'), title:arg, done:false, priority:'high', project:'Здоровье', due:'сегодня'}); saveDB(); render(); toast('Добавлено в задачи: '+arg); },
+  /* разделы задач */
+  sectMng(){ S._sectColor=SECT_COLORS[0]; modal(sectMngModal()); },
+  sectColor(arg){ S._sectColor=arg; document.querySelectorAll('#sm-colors .dot').forEach(d=>d.style.borderColor='transparent'); event.target.style.borderColor='var(--t1)'; },
+  sectAdd(){
+    const name=document.getElementById('sm-name').value.trim();
+    if(!name){ toast('Введи название'); return; }
+    if(DB.sections.some(s=>s.name.toLowerCase()===name.toLowerCase())){ toast('Такой раздел уже есть'); return; }
+    DB.sections.push({id:uid('s'), name, c:S._sectColor||SECT_COLORS[0]});
+    saveDB(); modal(sectMngModal()); toast('Раздел «'+name+'» добавлен');
+  },
+  sectDel(arg){
+    const s=DB.sections.find(x=>x.id===arg); if(!s) return;
+    DB.tasks.forEach(t=>{ if(t.project===s.name) t.project='Личное'; });
+    DB.sections=DB.sections.filter(x=>x.id!==arg);
+    if(S.taskSect===s.name) S.taskSect=null;
+    saveDB(); modal(sectMngModal()); toast('Раздел удалён, задачи переехали в «Личное»');
+  },
+  /* расписание */
+  schedView(arg){ S.schedView=arg; render(); },
+  schedDay(arg){ S.schedDay=+arg; render(); },
+  evtNew(){ modal(evtModal(null)); },
+  evtEdit(arg){ modal(evtModal(DB.events.find(e=>e.id===arg)||null)); },
+  evtSave(arg){
+    const title=document.getElementById('em-title').value.trim(); if(!title){ toast('Введи название'); return; }
+    const day=+document.getElementById('em-day').value, kind=document.getElementById('em-kind').value;
+    const start=document.getElementById('em-start').value||'18:00', end=document.getElementById('em-end').value||'19:00';
+    const place=document.getElementById('em-place').value.trim();
+    if(arg){ Object.assign(DB.events.find(e=>e.id===arg), {day,start,end,title,place,kind}); }
+    else DB.events.push({id:uid('e'), day, start, end, title, place, kind});
+    saveDB(); closeModal(); render(); toast('Событие сохранено');
+  },
+  evtDel(arg){ DB.events=DB.events.filter(e=>e.id!==arg); saveDB(); closeModal(); render(); toast('Событие удалено'); },
+  evtRestore(){
+    let added=0;
+    SEED_EVENTS.forEach(s=>{ if(!DB.events.some(e=>e.day===s.day&&e.start===s.start&&e.title===s.title)){ DB.events.push({...s, id:uid('e')}); added++; } });
+    saveDB(); render(); toast(added?('Возвращено событий из чата: '+added):'Исходная сетка уже на месте');
+  },
+  /* заметки (+ темы) */
+  noteNew(){ modal('<h3>Новая заметка</h3><input id="nn-title" placeholder="Заголовок" style="margin-top:8px">'+
+    '<select id="nn-topic" style="margin-top:8px">'+DB.topics.map(t=>'<option'+((S.noteTopic||'Личное')===t.name?' selected':'')+'>'+esc(t.name)+'</option>').join('')+'</select>'+
+    '<textarea id="nn-body" placeholder="Текст" style="margin-top:8px"></textarea><button class="btn btn-amber mt14" style="width:100%" data-act="noteCreate">Создать</button>'); },
+  noteCreate(){
+    const title=document.getElementById('nn-title').value.trim(); if(!title){ toast('Введи заголовок'); return; }
+    const body=document.getElementById('nn-body').value.trim();
+    const topic=document.getElementById('nn-topic').value||'Личное';
+    const n={id:uid('n'), title, content:body, topic, updatedAt:'сейчас'};
+    DB.notes.unshift(n); saveDB(); closeModal(); S.noteOpen=n.id; S.screen='notes'; S.secretScreen=null; render();
+  },
+  noteOpen(arg){ S.noteOpen=arg; render(); },
+  noteClose(){ S.noteOpen=null; render(); },
+  noteTopic(arg){ S.noteTopic=arg||null; render(); },
+  noteSave(arg){
+    const n=DB.notes.find(x=>x.id===arg); if(!n) return;
+    n.title=document.getElementById('ne-title').value.trim()||n.title;
+    n.content=document.getElementById('ne-body').value;
+    const ts=document.getElementById('ne-topic'); if(ts && DB.topics.some(t=>t.name===ts.value)) n.topic=ts.value;
+    n.updatedAt='только что'; saveDB(); toast('Заметка сохранена'); render();
+  },
+  noteDel(arg){ DB.notes=DB.notes.filter(x=>x.id!==arg); S.noteOpen=null; saveDB(); render(); toast('Заметка удалена'); },
+  /* темы заметок */
+  topicMng(){ S._topicColor=SECT_COLORS[0]; modal(topicMngModal()); },
+  topicColor(arg){ S._topicColor=arg; document.querySelectorAll('#tm2-colors .dot').forEach(d=>d.style.borderColor='transparent'); event.target.style.borderColor='var(--t1)'; },
+  topicAdd(){
+    const name=document.getElementById('tm2-name').value.trim();
+    if(!name){ toast('Введи название'); return; }
+    if(DB.topics.some(t=>t.name.toLowerCase()===name.toLowerCase())){ toast('Такая тема уже есть'); return; }
+    DB.topics.push({id:uid('tp'), name, c:S._topicColor||SECT_COLORS[0]});
+    saveDB(); modal(topicMngModal()); toast('Тема «'+name+'» добавлена');
+  },
+  topicDel(arg){
+    const t=DB.topics.find(x=>x.id===arg); if(!t) return;
+    DB.notes.forEach(n=>{ if((n.topic||'Личное')===t.name) n.topic='Личное'; });
+    DB.topics=DB.topics.filter(x=>x.id!==arg);
+    if(S.noteTopic===t.name) S.noteTopic=null;
+    saveDB(); modal(topicMngModal()); toast('Тема удалена, заметки переехали в «Личное»');
+  },
+  /* тренировки */
+  trainTab(arg){ S.trainTab=arg; render(); },
+  weightSave(){
+    const v=parseFloat(document.getElementById('w-in').value); if(!v){ toast('Введи вес'); return; }
+    DB.weights.push({d:dkey(new Date()), w:v}); saveDB(); render(); toast('Вес записан: '+v+' кг');
+  },
+  /* чат */
+  chip(arg){ doChatSend(arg); },
+  chatSend(){ doChatSend(); },
+  /* музыка */
+  musicToggle(){ PLAYER.toggle(); },
+  musicPick(arg){ PLAYER.playDemo(arg); },
+  async musicFileAdd(inp){ await mediaAdd(inp,'audio',200); },
+  musicFilePlay(arg){ PLAYER.playFile(arg); },
+  musicFileDel(arg){ mediaDel(arg); },
+  /* видео */
+  vidNew(){ modal('<h3>Ссылка из чата</h3><input id="vv-title" placeholder="Название" style="margin-top:8px"><input id="vv-url" placeholder="https://…" style="margin-top:8px"><input id="vv-note" placeholder="Заметка (необязательно)" style="margin-top:8px"><button class="btn btn-amber mt14" style="width:100%" data-act="vidSave">Сохранить</button>'); },
+  vidSave(){
+    const title=document.getElementById('vv-title').value.trim(); if(!title){ toast('Введи название'); return; }
+    const url=document.getElementById('vv-url').value.trim(); if(!/^https?:\/\//.test(url)){ toast('Ссылка должна начинаться с http(s)://'); return; }
+    const note=document.getElementById('vv-note').value.trim();
+    DB.myvideos.unshift({id:uid('mv'), title, url, note, added:'сейчас'}); saveDB(); closeModal(); render(); toast('Ссылка сохранена');
+  },
+  vidDel(arg){ DB.myvideos=DB.myvideos.filter(v=>v.id!==arg); saveDB(); render(); },
+  async vidFileAdd(inp){ await mediaAdd(inp,'video',500); },
+  vidFilePlay(arg){
+    mediaUrl(arg).then(u=>{ if(!u){ toast('Файл не найден'); return; }
+      modal('<h3>'+ic('video')+'Моё видео</h3><video controls autoplay playsinline src="'+u+'" style="width:100%;max-height:56vh;border-radius:12px;margin-top:8px;background:#000;display:block"></video><button class="btn mt12" style="width:100%" data-act="modalBack">Закрыть</button>'); });
+  },
+  vidFileDel(arg){ mediaDel(arg); },
+  async openPhotoAdd(inp){ await mediaAdd(inp,'photo',50); },
+  openPhotoOpen(arg){
+    mediaUrl(arg).then(u=>{ if(!u){ toast('Файл не найден'); return; }
+      modal('<h3>'+ic('img')+'Фото</h3><img src="'+u+'" style="width:100%;border-radius:12px;margin-top:8px;display:block"><button class="btn mt12" style="width:100%" data-act="modalBack">Закрыть</button>'); });
+  },
+  openPhotoDel(arg, el, ev){ if(ev) ev.stopPropagation(); mediaDel(arg); },
+  vidEmbed(arg, el){ const f=document.createElement('iframe'); f.className='vframe'; f.allowFullscreen=true; f.allow='autoplay; encrypted-media; picture-in-picture'; f.src='https://www.youtube-nocookie.com/embed/'+arg+'?autoplay=1&rel=0'; el.replaceWith(f); },
+  /* лекции */
+  lectRec(){ S.lectRec=!S.lectRec; render(); toast(S.lectRec?'Запись начата (демо)':'Запись остановлена'); },
+  /* развлечения и саморазвитие */
+  funTab(arg){ S.funTab=arg; if(arg==='book'){ S.funBook=null; } render(); },
+  funNext(arg){
+    if(arg==='fact') S.funFact=(S.funFact+1+Math.floor(Math.random()*3))%FACTS.length;
+    if(arg==='idea') S.funIdea=(S.funIdea+1+Math.floor(Math.random()*3))%IDEAS.length;
+    if(arg==='book'){ S.funBook=null; }
+    render();
+  },
+  /* данные */
+  exportData(){
+    const blob = new Blob([JSON.stringify({v:5, exported:new Date().toISOString(), tasks:DB.tasks, notes:DB.notes, events:DB.events, sections:DB.sections, topics:DB.topics, lectures:DB.lectures, myvideos:DB.myvideos, weights:DB.weights, media:DB.media},null,2)],{type:'application/json'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='armi-backup.json'; a.click(); toast('Бэкап скачан');
+  },
+  resetData(){
+    modal('<h3>Сбросить прототип?</h3><div class="sub mt6">Удалятся обычные данные и вернутся демо-данные (задачи, разделы, расписание, заметки). Секретный контур не трогается (его сброс — отдельно).</div><div class="row mt14" style="gap:8px"><button class="btn btn-danger" style="flex:1" data-act="resetDataYes">Сбросить</button><button class="btn" data-act="modalBack">Отмена</button></div>');
+  },
+  resetDataYes(){
+    PLAYER.stopAll(); PLAYER.mode=null; PLAYER.fileId=null; PLAYER.custom=null; S.music.playing=false; S.music.progress=0;
+    IDB.clear(); Object.keys(MEDIA_URLS).forEach(k=>{ try{URL.revokeObjectURL(MEDIA_URLS[k]);}catch(e){} delete MEDIA_URLS[k]; });
+    ['armi_tasks','armi_notes','armi_events','armi_sections','armi_topics','armi_lectures','armi_myvideos','armi_weights','armi_chat','armi_media'].forEach(k=>store.removeItem(k));
+    Object.keys(store).forEach(k=>{ if(k.startsWith('m_')||k.startsWith('tr_')||k.startsWith('mm_')) store.removeItem(k); });
+    DB.tasks=SEED_TASKS.map(t=>({...t})); DB.notes=SEED_NOTES.map(n=>({...n})); DB.events=SEED_EVENTS.map(e=>({...e})); DB.sections=SEED_SECTIONS.map(s=>({...s})); DB.topics=SEED_TOPICS.map(t=>({...t})); DB.lectures=SEED_LECTURES.map(l=>({...l})); DB.myvideos=SEED_MYVIDEOS.map(v=>({...v})); DB.weights=[]; DB.media=[];
+    CHAT=[{id:'c0', role:'ai', content:'Привет! Я Арми — работаю на твоём устройстве, без интернета. Вижу план тренировок, задачи, заметки и расписание. Спроси что угодно — отвечу локально.', time:'09:00', local:true}];
+    closeModal(); render(); toast('Прототип сброшен');
+  },
+  /* секретный режим */
+  secretGate(){ Secret.openGate(); },
+  secretWipe(){ Secret.wipePrompt(); },
+  armLock(){ Secret.armLock(); },
+  /* закрытая зона: чаты/заметки */
+  sthread(arg){ S.secretThread=arg; render(); },
+  stBack(){ S.secretThread=null; render(); },
+  stNew(){ Secret.newThread(); },
+  sSend(){ Secret.send(); },
+  snoteNew(){ Secret.noteNew(); },
+  snoteOpen(arg){ S.secretNoteOpen=arg; render(); },
+  snoteBack(){ S.secretNoteOpen=null; render(); },
+  snoteSave(arg){ Secret.noteSave(arg); },
+  snoteDel(arg){ Secret.noteDel(arg); },
+  /* закрытая зона: фото/музыка */
+  photoAdd(inp){ Secret.photoAdd(inp); },
+  photoDel(arg, el, ev){ if(ev) ev.stopPropagation(); Secret.photoDel(arg); },
+  photoView(arg){ Secret.photoView(arg); },
+  strackNew(){ Secret.trackNew(); },
+  strackPlay(arg){ Secret.trackPlay(arg); },
+  strackDel(arg){ Secret.trackDel(arg); },
+};
+document.addEventListener('click', e=>{
+  const el=e.target.closest('[data-act]');
+  if(S.secretActive) Secret.armLock();
+  if(!el) return;
+  const fn=ACTIONS[el.dataset.act]; if(fn) fn(el.dataset.arg, el, e);
+  if(S.moreOpen && !['more'].includes(el.dataset.act) && !el.closest('.sheet')){ /* клик внутри sheet обработан */ }
+});
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){
+    if(document.querySelector('.modal')) closeModal();
+    else if(S.secretActive) Secret.panic();
+  }
+});
+window.addEventListener('resize', ()=>{ if(S.view==='auto') render(); });
+/* ══════════ СЕКРЕТНЫЙ РЕЖИМ ══════════
+   Закрытые разделы живут в том же интерфейсе, что и открытый Арми: после входа
+   в меню рядом с обычными появляются «Чаты», «Заметки», «Фото», «Музыка»,
+   «Второй контур» и «Синхронизация» закрытой зоны. Отдельного окна нет.
+   Шифрование: AES-256-GCM, ключ из пароля (PBKDF2, 150k итераций).
+   Мастер-ключ хранится в двух слотах (пароль + код восстановления) — как в LUKS.
+   Пароль-приманка открывает правдоподобную «пустую» зону.
+   Синхронизация ПК↔телефон — отдельным ключом, только по явному разрешению. */
+const Secret = (() => {
+const B = {
+  enc: buf => btoa(String.fromCharCode(...new Uint8Array(buf))),
+  dec: s => Uint8Array.from(atob(s), c => c.charCodeAt(0)),
+};
+async function derive(pass, salt){
+  const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(pass), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2', salt, iterations:150000, hash:'SHA-256'}, km, {name:'AES-GCM', length:256}, false, ['encrypt','decrypt']);
+}
+async function sha(s){
+  const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return B.enc(d);
+}
+const META_K='armi_sec_meta', DATA_K='armi_sec_data', DECOY_K='armi_decoy_data', SYNC_K='armi_sec_sync';
+function meta(){ return loadJSON(META_K, null); }
+function status(){ return {configured: !!meta()}; }
+
+let MK=null;            /* мастер-ключ в памяти после разблокировки */
+let DATA=null;          /* расшифрованные секретные данные */
+let MODE='real';        /* real | decoy */
+let LOCK_T=null;
+
+const DECOY_DEFAULT = {
+  notes:[{id:'d1', title:'Пароль от вайфая', content:'home_2026_net', tags:['дом'], updatedAt:'окт'}],
+  chats:[{id:'dc1', title:'Личное', msgs:[{role:'ai', content:'Привет! Это закрытая зона.', time:'09:00'}]}],
+  photos:[], music:[], contour:null, created:new Date().toISOString(),
+};
+function freshData(){
+  return { notes:[], chats:[{id:uid('sc'), title:'Личное', msgs:[{role:'ai', content:'Секретный чат. История хранится только в зашифрованном контуре и не покидает устройство.', time:nowHM()}]}],
+    photos:[], music:[{id:'sm1', title:'Ночной плейлист', artist:'закрытая зона', seconds:240}], contour:{model:'GLM-4.6 · мощная', key:'', msgs:[]}, created:new Date().toISOString() };
+}
+function data(){ return MODE==='decoy' ? loadJSON(DECOY_K, DECOY_DEFAULT) : DATA; }
+async function persistData(){
+  if(MODE!=='real' || !MK) return;
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await crypto.subtle.importKey('raw', MK, 'AES-GCM', false, ['encrypt']);
+  const ct = await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, new TextEncoder().encode(JSON.stringify(DATA)));
+  saveJSON(DATA_K, {iv:B.enc(iv), ct:B.enc(ct)});
+}
+async function decryptData(mk){
+  const blob = loadJSON(DATA_K, null); if(!blob) return freshData();
+  const key = await crypto.subtle.importKey('raw', mk, 'AES-GCM', false, ['decrypt']);
+  const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv:B.dec(blob.iv)}, key, B.dec(blob.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+async function openSlot(secret, slot){
+  try{
+    const key = await derive(secret, B.dec(slot.salt));
+    const mk = await crypto.subtle.decrypt({name:'AES-GCM', iv:B.dec(slot.iv)}, key, B.dec(slot.ct));
+    return new Uint8Array(mk);
+  }catch(e){ return null; }
+}
+
+/* ── ВХОД (шлюз) ── */
+function openGate(){ if(S.secretActive) return; status().configured ? loginModal() : setupModal(); }
+function loginModal(){
+  modal('<h3>'+ic('lock')+' Вход в закрытый режим</h3><div class="tiny" style="margin:4px 0 12px">Зона не видна в интерфейсе. Неверный пароль = вход невозможен.</div>'+
+  '<input id="sg-pass" type="password" placeholder="Пароль" autocomplete="off" onkeydown="if(event.key===\'Enter\')Secret.tryLogin()">'+
+  '<div id="sg-err" class="banner red mt10" style="display:none"></div>'+
+  '<div class="row mt14" style="gap:8px"><button class="btn btn-amber" style="flex:1" onclick="Secret.tryLogin()">Войти</button>'+
+  '<button class="btn" onclick="Secret.recoveryModal()">Код восстановления</button></div>'+
+  '<div class="tiny mt10">Esc — закрыть окно. Автоблокировка — 5 минут.</div>');
+  setTimeout(()=>{const i=document.getElementById('sg-pass'); if(i) i.focus();},50);
+}
+async function tryLogin(){
+  const pass = document.getElementById('sg-pass').value; if(!pass) return;
+  const m = meta(); if(!m){ closeModal(); return; }
+  let mk = await openSlot(pass, m.slots.pass);
+  if(mk){ await enterReal(mk); return; }
+  /* пароль-приманка: открывает правдоподобную «пустую» зону */
+  if(m.decoy && (await sha(m.decoy.salt + pass)) === m.decoy.vhash){ await enterDecoy(); return; }
+  const err = document.getElementById('sg-err');
+  err.style.display='block'; err.textContent='Неверный пароль';
+}
+async function recoveryModal(){
+  modal('<h3>'+ic('key')+' Вход по коду восстановления</h3><div class="tiny" style="margin:4px 0 12px">Код показывался один раз при настройке. С ним можно задать новый пароль, данные сохранятся.</div>'+
+  '<input id="sr-code" placeholder="XXX-XXX-XXX-XXX" autocomplete="off" onkeydown="if(event.key===\'Enter\')Secret.tryRecovery()">'+
+  '<div id="sr-err" class="banner red mt10" style="display:none"></div>'+
+  '<div class="row mt14" style="gap:8px"><button class="btn btn-amber" style="flex:1" onclick="Secret.tryRecovery()">Проверить код</button><button class="btn" onclick="Secret.loginModal()">Назад</button></div>');
+}
+async function tryRecovery(){
+  const code = document.getElementById('sr-code').value.trim(); const m=meta(); if(!m||!code) return;
+  const mk = await openSlot(code, m.slots.rec);
+  if(!mk){ const e=document.getElementById('sr-err'); e.style.display='block'; e.textContent='Код не подходит'; return; }
+  MK = mk; DATA = await decryptData(MK);
+  newPassModal(true);
+}
+function newPassModal(fromRecovery){
+  modal('<h3>Новый пароль</h3>'+(fromRecovery?'<div class="tiny" style="margin:4px 0 12px">Данные расшифрованы кодом восстановления. Задай новый пароль — старый больше не работает.</div>':'')+
+  '<input id="np1" type="password" placeholder="Новый пароль" autocomplete="off">'+
+  '<input id="np2" type="password" placeholder="Ещё раз" autocomplete="off" style="margin-top:8px">'+
+  '<div id="np-err" class="banner red mt10" style="display:none"></div>'+
+  '<button class="btn btn-amber mt14" style="width:100%" onclick="Secret.setNewPass()">Сохранить и войти</button>');
+}
+async function setNewPass(){
+  const p1=document.getElementById('np1').value, p2=document.getElementById('np2').value, err=document.getElementById('np-err');
+  if(p1.length<4){ err.style.display='block'; err.textContent='Минимум 4 символа'; return; }
+  if(p1!==p2){ err.style.display='block'; err.textContent='Пароли не совпадают'; return; }
+  const m = meta();
+  m.slots.pass = await mkSlot(p1);
+  saveJSON(META_K, m);
+  await enterReal(MK);
+}
+async function mkSlot(secret){
+  const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await derive(secret, salt);
+  const mk = MK || crypto.getRandomValues(new Uint8Array(32));
+  const ct = await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, mk);
+  return {salt:B.enc(salt), iv:B.enc(iv), ct:B.enc(ct)};
+}
+
+/* ── НАСТРОЙКА ── */
+function setupModal(){
+  modal('<h3>'+ic('moon')+' Настройка закрытого режима</h3>'+
+  '<div class="tiny" style="margin:4px 0 12px">После входа закрытые разделы появятся в общем меню рядом с обычными: чаты, заметки, фото и музыка, которых нет в открытой версии, плюс второй контур с мощной моделью. Отдельного окна нет. Всё шифруется AES-256-GCM.</div>'+
+  '<input id="su1" type="password" placeholder="Пароль (не короче 4)" autocomplete="off">'+
+  '<input id="su2" type="password" placeholder="Ещё раз" autocomplete="off" style="margin-top:8px">'+
+  '<input id="su-decoy" type="password" placeholder="Пароль-приманка (необязательно)" autocomplete="off" style="margin-top:8px">'+
+  '<div class="note mt10">Пароль-приманка: если кто-то заставит открыть — введёшь его, и откроется правдоподобная «пустая» зона с безобидными данными.</div>'+
+  '<div id="su-err" class="banner red mt10" style="display:none"></div>'+
+  '<button class="btn btn-amber mt14" style="width:100%" onclick="Secret.setupStep2()">Далее — коды</button>');
+}
+async function setupStep2(){
+  const p1=document.getElementById('su1').value, p2=document.getElementById('su2').value, decoy=document.getElementById('su-decoy').value;
+  const err=document.getElementById('su-err');
+  if(p1.length<4){ err.style.display='block'; err.textContent='Минимум 4 символа'; return; }
+  if(p1!==p2){ err.style.display='block'; err.textContent='Пароли не совпадают'; return; }
+  if(decoy && decoy===p1){ err.style.display='block'; err.textContent='Приманка не должна совпадать с паролем'; return; }
+  MK = crypto.getRandomValues(new Uint8Array(32));
+  DATA = freshData();
+  const rec = Array.from(crypto.getRandomValues(new Uint8Array(6))).map(b=>(b%36).toString(36)).join('').toUpperCase().match(/.{3}/g).join('-');
+  const rec2 = Array.from(crypto.getRandomValues(new Uint8Array(6))).map(b=>(b%36).toString(36)).join('').toUpperCase().match(/.{3}/g).join('-');
+  Secret._rec = rec+'-'+rec2;
+  Secret._pass = p1; Secret._decoy = decoy;
+  modal('<h3>'+ic('alert')+' Код восстановления</h3>'+
+  '<div class="banner red">Показывается <b>один раз</b>. Забыл пароль и потерял код — данные не восстановит никто: это цена настоящей приватности. Запиши на бумаге и спрячь.</div>'+
+  '<div class="code mt10">'+Secret._rec+'</div>'+
+  '<button class="btn mt14" style="width:100%" onclick="Secret.setupStep3()">'+ic('check')+' Я записал код</button>');
+}
+async function setupStep3(){
+  const sync = B.enc(crypto.getRandomValues(new Uint8Array(32)));
+  store.setItem(SYNC_K, sync);
+  Secret._sync = sync;
+  modal('<h3>'+ic('sync')+' Ключ синхронизации</h3>'+
+  '<div class="tiny" style="margin:4px 0 10px">Отдельный ключ для переноса секретных данных между ПК и телефоном. Секреты синхронизируются <b>только по твоему явному разрешению</b> и никогда — обычным каналом.</div>'+
+  '<div class="code" style="font-size:11px">'+sync+'</div>'+
+  '<button class="btn btn-amber mt14" style="width:100%" onclick="Secret.setupFinish()">Готово — войти в зону</button>');
+}
+async function setupFinish(){
+  const dsalt = crypto.randomUUID();
+  const m = { v:1, created:new Date().toISOString(),
+    slots:{ pass: await mkSlot(Secret._pass), rec: await mkSlot(Secret._rec) },
+    decoy: Secret._decoy ? {salt: dsalt, vhash: await sha(dsalt + Secret._decoy)} : null };
+  saveJSON(META_K, m);
+  await persistData();
+  await enterReal(MK);
+  toast('Закрытый режим настроен');
+}
+async function enterReal(mk){
+  MK = mk; DATA = await decryptData(MK); MODE='real';
+  S.secretActive=true; S.secretMode='real'; S.secretScreen=null; S.secretThread=null; S.secretNoteOpen=null;
+  document.title='Заметки'; /* маскировка вкладки */
+  closeModal(); armLock(); render(); toast('Закрытая зона открыта — разделы появились в меню');
+}
+async function enterDecoy(){
+  MODE='decoy';
+  S.secretActive=true; S.secretMode='decoy'; S.secretScreen=null; S.secretThread=null; S.secretNoteOpen=null;
+  document.title='Заметки';
+  closeModal(); armLock(); render(); toast('Закрытая зона открыта — разделы появились в меню');
+}
+function panic(){
+  S.secretActive=false; S.secretMode='real'; MODE='real'; MK=null; DATA=null;
+  S.secretScreen=null; S.secretThread=null; S.secretNoteOpen=null; S.moreOpen=false;
+  clearTimeout(LOCK_T);
+  document.title='Арми — прототип v5';
+  render(); toast('Закрытая зона закрыта');
+}
+function counts(){
+  const d = data()||{};
+  return { schat:(d.chats||[]).length, snotes:(d.notes||[]).length, sphotos:(d.photos||[]).length, smusic:(d.music||[]).length };
+}
+function armLock(){
+  clearTimeout(LOCK_T);
+  LOCK_T = setTimeout(()=>{ if(S.secretActive){ panic(); toast('Автоблокировка: 5 минут без активности'); } }, 5*60*1000);
+}
+
+/* ── СБРОС ── */
+function wipePrompt(){
+  modal('<h3>Сбросить закрытый режим?</h3><div class="sub mt6">Сотрутся зашифрованные данные, пароль, приманка и слоты. Это необратимо.</div>'+
+  '<div class="row mt14" style="gap:8px"><button class="btn btn-danger" style="flex:1" onclick="Secret.wipeYes()">Стереть навсегда</button><button class="btn" onclick="modalBack()">Отмена</button></div>');
+}
+function wipeYes(){
+  [META_K, DATA_K, DECOY_K, SYNC_K].forEach(k=>store.removeItem(k));
+  panic(); toast('Секретные данные стёрты');
+}
+
+/* ── ЭКСПОРТ / ИМПОРТ (синхронизация) ── */
+async function exportBackup(){
+  if(MODE!=='real'){ toast('Экспорт недоступен'); return; }
+  const syncKey = store.getItem(SYNC_K); if(!syncKey){ toast('Ключ синхронизации не найден'); return; }
+  await persistData();
+  const m = meta();
+  const payload = { meta:m, data: loadJSON(DATA_K, null) };
+  const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await derive(syncKey, salt);
+  const ct = await crypto.subtle.encrypt({name:'AES-GCM', iv}, key, new TextEncoder().encode(JSON.stringify(payload)));
+  const out = { app:'armi', v:3, kind:'secret-backup', salt:B.enc(salt), iv:B.enc(iv), ct:B.enc(ct) };
+  const blob = new Blob([JSON.stringify(out)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='armi-secret-backup.armisecret'; a.click();
+  toast('Зашифрованный бэкап скачан');
+}
+function importModal(){
+  modal('<h3>'+ic('up')+' Импорт секретного бэкапа</h3>'+
+  '<div class="tiny" style="margin:4px 0 12px">Файл .armisecret с другого устройства + ключ синхронизации. Текущие секретные данные будут заменены.</div>'+
+  '<input type="file" id="si-file" accept=".armisecret,.json" style="padding:7px">'+
+  '<input id="si-key" placeholder="Ключ синхронизации" style="margin-top:8px" autocomplete="off">'+
+  '<div id="si-err" class="banner red mt10" style="display:none"></div>'+
+  '<div class="row mt14" style="gap:8px"><button class="btn btn-amber" style="flex:1" onclick="Secret.importRun()">Расшифровать и заменить</button><button class="btn" onclick="modalBack()">Отмена</button></div>');
+}
+async function importRun(){
+  const err=document.getElementById('si-err');
+  const f=document.getElementById('si-file').files[0], keyStr=document.getElementById('si-key').value.trim();
+  const fail=t=>{ err.style.display='block'; err.textContent=t; };
+  if(!f) return fail('Выбери файл');
+  if(!keyStr) return fail('Введи ключ синхронизации');
+  let out; try{ out = JSON.parse(await f.text()); }catch(e){ return fail('Файл повреждён'); }
+  if(out.kind!=='secret-backup') return fail('Это не бэкап закрытого режима');
+  try{
+    const key = await derive(keyStr, B.dec(out.salt));
+    const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv:B.dec(out.iv)}, key, B.dec(out.ct));
+    const payload = JSON.parse(new TextDecoder().decode(pt));
+    saveJSON(META_K, payload.meta); saveJSON(DATA_K, payload.data);
+    closeModal(); toast('Импортировано. Войди паролем с того устройства');
+    loginModal();
+  }catch(e){ return fail('Ключ не подходит или файл повреждён'); }
+}
+
+/* ── ЭКРАНЫ ЗАКРЫТОЙ ЗОНЫ: рендерятся в общем интерфейсе рядом с обычными разделами ── */
+function renderSecretScreen(){
+  const map = {schat:scChats, snotes:scNotes, sphotos:scPhotos, smusic:scMusic, contour:scContour, ssync:scSync};
+  return (map[S.secretScreen]||scChats)();
+}
+
+/* ── ЧАТЫ ЗОНЫ ── */
+function msgHTML(m){ return '<div class="msg '+(m.role==='user'?'user':'ai')+'">'+esc(m.content)+'<div class="mt">'+esc(m.time||'')+'</div></div>'; }
+function scChats(){
+  const d = data();
+  if(S.secretThread){
+    const th = d.chats.find(c=>c.id===S.secretThread);
+    if(!th){ S.secretThread=null; return scChats(); }
+    return '<div style="height:100%;display:flex;flex-direction:column">'+
+      '<div class="row" style="padding:10px 14px;border-bottom:1px solid var(--line);flex:none"><button class="btn btn-sm" data-act="stBack">'+ic('back')+'Чаты</button><span style="font-weight:700;font-size:14px;margin-left:4px">'+esc(th.title)+'</span></div>'+
+      '<div class="msgs" id="smsgs">'+th.msgs.map(msgHTML).join('')+'</div>'+
+      '<div class="chatbar"><input id="st-in" placeholder="Сообщение…" onkeydown="if(event.key===\'Enter\')Secret.send()"><button class="btn btn-amber" style="width:42px;height:40px;padding:0" onclick="Secret.send()">'+ic('chat')+'</button></div></div>';
+  }
+  return '<div class="stack">'+
+    '<div class="row between wrap"><div style="font-size:19px;font-weight:800">Чаты</div><button class="btn btn-amber btn-sm" data-act="stNew">'+ic('plus')+'Чат</button></div>'+
+    d.chats.map(c=>'<div class="card" style="cursor:pointer" data-act="sthread" data-arg="'+c.id+'"><h3>'+ic('chat')+esc(c.title)+'<span class="h-note">'+c.msgs.length+' сообщ.</span></h3><div class="dim" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">'+esc((c.msgs[c.msgs.length-1]||{}).content||'')+'</div></div>').join('')+
+    '<div class="note">Эти чаты есть только здесь. В открытой версии Арми их не существует. История хранится зашифрованной и не покидает устройство.</div></div>';
+}
+function newThread(){
+  const d=data(); const c={id:uid('sc'), title:'Чат '+(d.chats.length+1), msgs:[{role:'ai', content:'Секретный чат. История — только в зашифрованном контуре.', time:nowHM()}]};
+  d.chats.unshift(c); S.secretThread=c.id;
+  persistData().then(render);
+}
+async function send(){
+  const inp=document.getElementById('st-in'); const q=inp?inp.value.trim():''; if(!q) return;
+  const th=data().chats.find(c=>c.id===S.secretThread); if(!th) return;
+  th.msgs.push({role:'user', content:q, time:nowHM()});
+  inp.value='';
+  await persistData(); render();
+  setTimeout(async()=>{
+    th.msgs.push({role:'ai', content:'[локально · зашифровано]\n\nПринято. В нативной версии здесь отвечает локальная модель, а история остаётся в контуре. Демо-прототип отвечает заглушкой.', time:nowHM()});
+    await persistData(); render();
+  }, 600);
+}
+
+/* ── ЗАМЕТКИ ЗОНЫ ── */
+function scNotes(){
+  const d = data();
+  if(S.secretNoteOpen){
+    const n = d.notes.find(x=>x.id===S.secretNoteOpen);
+    if(!n){ S.secretNoteOpen=null; return scNotes(); }
+    return '<div class="stack"><div class="row between"><button class="btn btn-sm" data-act="snoteBack">'+ic('back')+'Заметки</button><button class="btn btn-danger btn-sm" data-act="snoteDel" data-arg="'+n.id+'">Удалить</button></div>'+
+    '<div class="card"><input id="sne-title" value="'+esc(n.title)+'" style="font-weight:700;font-size:15px"><textarea id="sne-body" style="margin-top:10px;min-height:280px">'+esc(n.content)+'</textarea>'+
+    '<div class="row between mt10"><span class="tiny">'+esc(n.updatedAt||'')+'</span><button class="btn btn-amber btn-sm" data-act="snoteSave" data-arg="'+n.id+'">Сохранить</button></div></div></div>';
+  }
+  return '<div class="stack">'+
+    '<div class="row between wrap"><div style="font-size:19px;font-weight:800">Заметки<span class="h-note" style="margin-left:8px">закрытая зона</span></div><button class="btn btn-amber btn-sm" data-act="snoteNew">'+ic('plus')+'Заметка</button></div>'+
+    (d.notes.length? '<div class="ngrid">'+d.notes.map(n=>noteTile(n,true)).join('')+'</div>' : '<div class="empty">Пока пусто</div>')+
+    '<div class="note">Заметки закрытой зоны зашифрованы и не появляются в поиске открытой версии.</div></div>';
+}
+function noteNew(){
+  modal('<h3>Секретная заметка</h3><input id="snn-title" placeholder="Заголовок" style="margin-top:8px"><textarea id="snn-body" placeholder="Текст" style="margin-top:8px"></textarea><button class="btn btn-amber mt14" style="width:100%" onclick="Secret.noteCreate()">Создать</button>');
+}
+async function noteCreate(){
+  const title=document.getElementById('snn-title').value.trim(); if(!title){ toast('Введи заголовок'); return; }
+  const n={id:uid('sn'), title, content:document.getElementById('snn-body').value.trim(), updatedAt:'сейчас'};
+  data().notes.unshift(n); S.secretNoteOpen=n.id;
+  closeModal(); await persistData(); render();
+}
+async function noteSave(arg){
+  const n=data().notes.find(x=>x.id===arg); if(!n) return;
+  n.title=document.getElementById('sne-title').value.trim()||n.title;
+  n.content=document.getElementById('sne-body').value;
+  n.updatedAt='только что';
+  await persistData(); toast('Сохранено в зашифрованном виде'); render();
+}
+async function noteDel(arg){
+  const d=data(); d.notes=d.notes.filter(x=>x.id!==arg); S.secretNoteOpen=null;
+  await persistData(); render(); toast('Заметка удалена');
+}
+
+/* ── ФОТО ЗОНЫ ── */
+function scPhotos(){
+  const d = data();
+  return '<div class="stack">'+
+    '<div class="row between wrap"><div style="font-size:19px;font-weight:800">Фото</div>'+
+    '<label class="btn btn-amber btn-sm" style="cursor:pointer">'+ic('up')+'Добавить фото<input type="file" accept="image/*" style="display:none" onchange="Secret.photoAdd(this)"></label></div>'+
+    (d.photos.length? '<div class="pgrid">'+d.photos.map(p=>'<div class="ph"><img src="'+p.d+'" alt="" data-act="photoView" data-arg="'+p.id+'"><button class="phdel" data-act="photoDel" data-arg="'+p.id+'">✕</button></div>').join('')+'</div>' : '<div class="empty">Пусто. Добавь фото — оно сожмётся и зашифруется.</div>')+
+    '<div class="tiny">Фото хранятся зашифрованными внутри зоны: галерея телефона и другие приложения их не видят. Лимит браузерного хранилища ~5 МБ (несколько десятков сжатых фото); в нативной версии лимита нет.</div></div>';
+}
+async function photoAdd(inp){
+  const f = inp.files && inp.files[0]; if(!f) return;
+  try{
+    const rd = await new Promise(res=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(f); });
+    const img = await new Promise(res=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=()=>res(null); i.src=rd; });
+    if(!img){ toast('Не удалось прочитать файл'); return; }
+    const max=1280, k=Math.min(1, max/Math.max(img.width,img.height));
+    const cv=document.createElement('canvas'); cv.width=Math.max(1,Math.round(img.width*k)); cv.height=Math.max(1,Math.round(img.height*k));
+    cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+    data().photos.unshift({id:uid('p'), d:cv.toDataURL('image/jpeg',0.72), t:new Date().toISOString()});
+    await persistData(); render(); toast('Фото зашифровано и сохранено');
+  }catch(e){ toast('Слишком большой файл'); }
+}
+async function photoDel(arg){
+  const d=data(); d.photos=d.photos.filter(p=>p.id!==arg);
+  await persistData(); render();
+}
+function photoView(arg){
+  const p=data().photos.find(x=>x.id===arg); if(!p) return;
+  modal('<h3>'+ic('img')+'Фото</h3><img src="'+p.d+'" style="width:100%;border-radius:12px;margin-top:8px;display:block"><button class="btn mt14" style="width:100%" onclick="modalBack()">Закрыть</button>');
+}
+
+/* ── МУЗЫКА ЗОНЫ ── */
+function scMusic(){
+  const d = data();
+  return '<div class="stack">'+
+    '<div class="row between wrap"><div style="font-size:19px;font-weight:800">Музыка</div><button class="btn btn-amber btn-sm" data-act="strackNew">'+ic('plus')+'Трек</button></div>'+
+    '<div class="card"><h3>Закрытая зона<span class="h-note">галерея и плееры не видят</span></h3>'+
+    (d.music.length? d.music.map(t=>'<div class="trow" data-act="strackPlay" data-arg="'+t.id+'">'+
+      '<span class="eq'+(S.music.playing&&PLAYER.mode==='custom'&&PLAYER.custom&&PLAYER.custom.id===t.id?' play':'')+'"><span></span><span></span><span></span></span>'+
+      '<span style="min-width:0;flex:1"><span style="font-size:13.5px;color:var(--t1)">'+esc(t.title)+'</span><span class="tiny" style="display:block">'+esc(t.artist||'закрытая зона')+' · '+fmtSec(t.seconds||210)+'</span></span>'+
+      '<button class="btn btn-sm" style="width:28px;height:28px;padding:0" data-act="strackDel" data-arg="'+t.id+'">✕</button></div>').join('') : '<div class="dim">Пусто</div>')+'</div>'+
+    '<div class="note">Треки закрытой зоны не попадают в галерею и системные плееры — играют внутри Арми через встроенный синтезатор, а список хранится зашифрованным. Нажми на трек, чтобы послушать.</div></div>';
+}
+function trackNew(){
+  modal('<h3>Трек</h3><input id="st-title" placeholder="Название" style="margin-top:8px"><input id="st-artist" placeholder="Исполнитель (необязательно)" style="margin-top:8px"><button class="btn btn-amber mt14" style="width:100%" onclick="Secret.trackSave()">Добавить</button>');
+}
+async function trackSave(){
+  const t=document.getElementById('st-title').value.trim(); if(!t){ toast('Введи название'); return; }
+  const a=document.getElementById('st-artist').value.trim()||'закрытая зона';
+  data().music.push({id:uid('sm'), title:t, artist:a, seconds:210});
+  await persistData(); closeModal(); render();
+}
+function trackPlay(arg){
+  const t=data().music.find(x=>x.id===arg);
+  PLAYER.playCustom({id:arg, title:t?t.title:'Трек', artist:'закрытая зона', seconds:(t&&t.seconds)||210});
+}
+async function trackDel(arg){
+  const d=data(); d.music=d.music.filter(t=>t.id!==arg);
+  await persistData(); render();
+}
+
+/* ── ВТОРОЙ КОНТУР ── */
+function scContour(){
+  if(MODE==='decoy'){ return '<div class="stack"><div style="font-size:19px;font-weight:800">Второй контур</div><div class="empty">Не настроен. Здесь подключается мощная модель по личному ключу.</div></div>'; }
+  const c=data().contour;
+  return '<div class="stack">'+
+  '<div class="banner">Зона внутри закрытого режима: мощная нейросеть доступна только отсюда. Кто возьмёт твой телефон или сядет за ПК — в обычном интерфейсе её не найдёт и твоим платным доступом не воспользуется.</div>'+
+  '<div class="card"><h3>'+ic('zap')+'Модель</h3><div class="tabs">'+
+    ['GLM-4.6 · мощная','Claude-класс','GPT-класс','DeepSeek-R1'].map(m=>'<button class="tab'+(c.model===m?' on':'')+'" onclick="Secret.setModel(\''+m+'\')">'+m+'</button>').join('')+'</div>'+
+  '<input id="ct-key" type="password" placeholder="Личный API-ключ (хранится зашифрованным)" value="'+esc(c.key||'')+'" style="margin-top:10px" autocomplete="off">'+
+  '<div class="row mt10" style="gap:8px"><button class="btn btn-amber btn-sm" onclick="Secret.keySave()">'+ic('check')+'Сохранить ключ</button><button class="btn btn-sm" onclick="Secret.keyTest()">'+ic('wifi')+'Проверить связь</button></div>'+
+  '<div id="ct-status" class="tiny mt6">'+(c.key?'ключ сохранён · оплата с твоего личного счёта':'ключ не задан')+'</div></div>'+
+  '<div class="card" style="display:flex;flex-direction:column;height:min(50vh,460px);padding:0">'+
+    '<div class="msgs" id="cmsgs" style="padding:14px">'+(c.msgs.length?c.msgs.map(m=>msgHTML(m)).join(''):'<div class="dim" style="margin:auto">Диалог с мощной моделью. История — только в зашифрованном контуре.</div>')+'</div>'+
+    '<div class="chatbar" style="border-top:1px solid var(--line)"><input id="ct-in" placeholder="Сложный вопрос…" onkeydown="if(event.key===\'Enter\')Secret.contourSend()"><button class="btn btn-amber" style="width:42px;height:40px;padding:0" onclick="Secret.contourSend()">'+ic('zap')+'</button></div></div>'+
+  '<div class="note">Оплата — только с твоего личного ключа. Корпоративный кошелёк и «router ai» не подключены и не будут.</div></div>';
+}
+async function setModel(m){ data().contour.model=m; await persistData(); render(); }
+async function keySave(){ data().contour.key=document.getElementById('ct-key').value.trim(); await persistData(); render(); toast('Ключ сохранён в зашифрованном виде'); }
+function keyTest(){
+  const st=document.getElementById('ct-status'); st.textContent='проверяю…';
+  setTimeout(()=>{ st.innerHTML='<span style="color:var(--em)">200 OK · связь есть (демо)</span>'; }, 700);
+}
+async function contourSend(){
+  const inp=document.getElementById('ct-in'); const q=inp?inp.value.trim():''; if(!q) return;
+  const c=data().contour;
+  c.msgs.push({role:'user', content:q, time:nowHM()});
+  const reply='['+c.model+' · второй контур]\n\nЗапрос ушёл с твоего личного ключа, ответ вернулся только в зашифрованную зону.\n\nПо сути (демо-прототип): это самая мощная модель — сюда отправляй то, что локальная не тянет: длинный контекст, сложный код, анализ файлов из закрытых заметок.';
+  await persistData(); render();
+  const m=document.getElementById('cmsgs'); if(m) m.scrollTop=m.scrollHeight;
+  setTimeout(async()=>{ c.msgs.push({role:'ai', content:reply, time:nowHM()}); await persistData(); render();
+    const m2=document.getElementById('cmsgs'); if(m2) m2.scrollTop=m2.scrollHeight; }, 600);
+}
+
+/* ── СИНХРОНИЗАЦИЯ ── */
+function scSync(){
+  if(MODE==='decoy'){ return '<div class="stack"><div style="font-size:19px;font-weight:800">Синхронизация</div><div class="empty">Не настроена.</div></div>'; }
+  const sync = store.getItem(SYNC_K);
+  return '<div class="stack">'+
+  '<div class="note">Секретные данные синхронизируются <b>только по явному разрешению</b>: ты сам скачиваешь зашифрованный файл и сам вводишь ключ на другом устройстве. Автоматической отправки куда-либо нет и не будет.</div>'+
+  '<div class="card"><h3>'+ic('key')+'Ключ синхронизации</h3><div class="code" style="font-size:10.5px" id="sync-key">'+(Secret._syncShown? sync : '••••••••••••••••••••••••••••••••')+'</div>'+
+  '<div class="row mt10" style="gap:8px"><button class="btn btn-sm" onclick="Secret.syncToggle()">'+ic('eye')+(Secret._syncShown?'Скрыть':'Показать')+'</button><button class="btn btn-sm" onclick="Secret.syncCopy()">'+ic('copy')+'Скопировать</button></div></div>'+
+  '<div class="card"><h3>'+ic('down')+'Перенос</h3><div class="row wrap" style="gap:8px">'+
+  '<button class="btn btn-amber btn-sm" onclick="Secret.exportBackup()">'+ic('down')+'Скачать бэкап</button>'+
+  '<button class="btn btn-sm" onclick="Secret.importModal()">'+ic('up')+'Импортировать</button></div>'+
+  '<div class="tiny mt10">Файл зашифрован ключом синхронизации. На другом устройстве: закрытый режим → синхронизация → импорт → войти своим паролем.</div></div></div>';
+}
+function syncToggle(){ Secret._syncShown=!Secret._syncShown; render(); }
+function syncCopy(){
+  const k=store.getItem(SYNC_K); if(!k) return;
+  (navigator.clipboard?navigator.clipboard.writeText(k):Promise.reject()).then(()=>toast('Ключ скопирован')).catch(()=>{ modal('<h3>Ключ синхронизации</h3><div class="code mt10" style="font-size:10.5px">'+k+'</div><button class="btn mt10" style="width:100%" onclick="modalBack()">Закрыть</button>'); });
+}
+
+function paint(){ render(); }
+return { status, openGate, loginModal, tryLogin, recoveryModal, tryRecovery, newPassModal, setNewPass,
+  setupModal, setupStep2, setupStep3, setupFinish, panic, armLock, counts, renderSecretScreen,
+  wipePrompt, wipeYes, exportBackup, importModal, importRun,
+  newThread, send,
+  noteNew, noteCreate, noteSave, noteDel,
+  photoAdd, photoDel, photoView,
+  trackNew, trackSave, trackPlay, trackDel,
+  setModel, keySave, keyTest, contourSend, syncToggle, syncCopy, _syncShown:false };
+})();
+
+window.modalBack = closeModal;
+render();
+</script></body></html>
