@@ -1,0 +1,123 @@
+import { NextRequest, NextResponse } from "next/server";
+import ZAI from "z-ai-web-dev-sdk";
+
+export const runtime = "nodejs";
+export const maxDuration = 120;
+
+interface SearchBody {
+  query: string;
+  kind?: "fact" | "book"; // fact — интересные факты, book — книги
+  count?: number;
+}
+
+/* Убирает HTML-теги и лишние пробелы из сниппетов */
+function clean(s: string): string {
+  return s
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = (await req.json()) as SearchBody;
+    const query = (body.query || "").trim();
+    if (!query) {
+      return NextResponse.json({ error: "Пустой запрос" }, { status: 400 });
+    }
+    const count = Math.min(10, Math.max(3, body.count || 6));
+    const zai = await ZAI.create();
+
+    const queries =
+      body.kind === "book"
+        ? [`книги подборка ${query}`, `лучшие книги про ${query}`]
+        : [`интересные факты ${query}`, `${query} факты любопытное`];
+
+    /* два запроса параллельно — факты по теме + смежное */
+    const results = await Promise.all(
+      queries.map((q) =>
+        zai.functions
+          .invoke("web_search", { query: q, num: count })
+          .catch(() => [] as { url: string; name: string; snippet: string; host_name: string; date: string }[])
+      )
+    );
+
+    /* собираем, чистим, убираем дубли по URL */
+    const seen = new Set<string>();
+    const items: {
+      url: string;
+      title: string;
+      snippet: string;
+      host: string;
+      date: string;
+    }[] = [];
+    for (const rs of results) {
+      for (const r of rs as { url: string; name: string; snippet: string; host_name: string; date: string }[]) {
+        const url = r.url || "";
+        if (!url || seen.has(url)) continue;
+        seen.add(url);
+        const snippet = clean(r.snippet || "");
+        if (!snippet) continue;
+        items.push({
+          url,
+          title: clean(r.name || "").slice(0, 120),
+          snippet: snippet.slice(0, 400),
+          host: r.host_name || "",
+          date: r.date || "",
+        });
+      }
+    }
+
+    if (!items.length) {
+      return NextResponse.json({ error: "Ничего не нашлось — попробуй другую тему" }, { status: 404 });
+    }
+
+    /* нейронка собирает из найденного короткую подборку с указанием источников */
+    const sourcesBlock = items
+      .slice(0, 8)
+      .map((it, i) => `[${i + 1}] ${it.title} (${it.host})\n${it.snippet}`)
+      .join("\n\n");
+
+    const sys =
+      body.kind === "book"
+        ? `Ты — Арми, библиотекарь-ассистент. По источникам ниже составь подборку книг на тему «${query}»: 3-5 книг.
+Формат строго такой (без вступлений):
+**Название** — Автор
+Суть в 1-2 предложениях, чем полезна.
+В конце строка: Источники: [1], [3] (номера использованных).
+Пиши по-русски.`
+        : `Ты — Арми, ассистент. По источникам ниже выбери 3-4 самых интересных факта на тему «${query}» и перескажи каждый одним-двумя предложениями, живо и по-русски.
+Формат строго такой (без вступлений):
+• **Краткая суть факта** — пояснение. [1]
+В конце строка: Источники: [1], [2] (номера использованных).`;
+
+    let digest = "";
+    try {
+      const completion = await zai.chat.completions.create({
+        messages: [
+          { role: "assistant", content: sys + "\n\nИСТОЧНИКИ:\n" + sourcesBlock },
+          { role: "user", content: "Составь подборку" },
+        ],
+        thinking: { type: "disabled" },
+      });
+      digest = completion.choices[0]?.message?.content ?? "";
+    } catch {
+      digest = "";
+    }
+
+    return NextResponse.json({
+      digest: digest.trim(),
+      items: items.slice(0, 8),
+      agent: "web",
+    });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Ошибка поиска";
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
+}

@@ -1,0 +1,48 @@
+import { NextRequest, NextResponse } from "next/server";
+import ZAI from "z-ai-web-dev-sdk";
+
+export const runtime = "nodejs";
+export const maxDuration = 120;
+
+// Автоконспект из расшифровки лекции: краткое резюме, тезисы, термины.
+export async function POST(req: NextRequest) {
+  try {
+    const body = (await req.json()) as { transcript?: string; title?: string };
+    const transcript = (body.transcript ?? "").trim();
+    if (transcript.length < 40) {
+      return NextResponse.json({ error: "Слишком короткая расшифровка для конспекта" }, { status: 400 });
+    }
+
+    const title = (body.title ?? "").trim() || "Лекция";
+
+    const zai = await ZAI.create();
+    const completion = await zai.chat.completions.create({
+      messages: [
+        {
+          role: "assistant",
+          content:
+            "Ты — помощник студента. Из расшифровки лекции делаешь конспект на русском в Markdown. " +
+            "Формат ответа строго такой:\n" +
+            "**Кратко**\n2-3 предложения о главном.\n\n" +
+            "**Тезисы**\n— 5-9 пунктов по существу.\n\n" +
+            "**Термины**\n— термин: определение в одну строку (только реальные термины из лекции).\n\n" +
+            "Не выдумывай того, чего нет в расшифровке. Если что-то неразборчиво — пропусти.",
+        },
+        {
+          role: "user",
+          content: `Лекция: «${title}»\n\nРасшифровка:\n${transcript.slice(0, 60000)}`,
+        },
+      ],
+      thinking: { type: "disabled" },
+    });
+
+    const notes = completion.choices[0]?.message?.content ?? "";
+    if (!notes.trim()) {
+      return NextResponse.json({ error: "Пустой конспект" }, { status: 502 });
+    }
+    return NextResponse.json({ notes });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Ошибка конспекта";
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
+}

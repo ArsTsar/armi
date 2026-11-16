@@ -1,0 +1,57 @@
+import { NextRequest, NextResponse } from "next/server";
+import ZAI from "z-ai-web-dev-sdk";
+
+export const runtime = "nodejs";
+export const maxDuration = 120;
+
+interface ChatMsg {
+  role: "user" | "assistant";
+  content: string;
+}
+
+interface ChatBody {
+  messages: ChatMsg[];
+  context?: string; // краткая сводка данных пользователя (задачи, расписание…)
+  deep?: boolean;   // режим «Думать глубже»
+}
+
+const SYSTEM_BASE = `Ты — Арми, личный ассистент, который живёт на устройстве пользователя и видит его данные.
+Стиль: по-русски, тепло и по делу, без канцелярита. Отвечай кратко и структурно (списки, абзацы по 1-3 предложения).
+Ты видишь данные пользователя (задачи, заметки, расписание, лекции) — опирайся на них, когда уместно, и упоминай конкретику.
+Если пользователь просит что-то запомнить/создать — предложи, как это оформить в разделе (задачи/заметки/событие).
+Не выдумывай факты о пользователе, которых нет в данных. Честно говори, если чего-то не знаешь.`;
+
+const SYSTEM_DEEP = `\n\nСейчас включён режим «Думать глубже»: сначала кратко размеченируй задачу (что важно, какие есть варианты), потом дай развёрнутый, хорошо структурированный ответ с выводом.`;
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = (await req.json()) as ChatBody;
+    const history = Array.isArray(body.messages) ? body.messages.slice(-16) : [];
+    if (!history.length) {
+      return NextResponse.json({ error: "Пустая история" }, { status: 400 });
+    }
+
+    const contextBlock = body.context?.trim()
+      ? `\n\nДАННЫЕ ПОЛЬЗОВАТЕЛЯ (сейчас):\n${body.context.trim()}`
+      : "";
+
+    const zai = await ZAI.create();
+    const completion = await zai.chat.completions.create({
+      messages: [
+        { role: "assistant", content: SYSTEM_BASE + (body.deep ? SYSTEM_DEEP : "") + contextBlock },
+        ...history,
+      ],
+      thinking: { type: body.deep ? "enabled" : "disabled" },
+    });
+
+    const content = completion.choices[0]?.message?.content ?? "";
+    if (!content.trim()) {
+      return NextResponse.json({ error: "Пустой ответ модели" }, { status: 502 });
+    }
+
+    return NextResponse.json({ reply: content, agent: body.deep ? "deep" : "cloud" });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Ошибка облака";
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
+}

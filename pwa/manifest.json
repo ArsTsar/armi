@@ -1,0 +1,17 @@
+{
+  "name": "Арми — локальный ассистент",
+  "short_name": "Арми",
+  "description": "ИИ-ассистент и органайзер: чат, задачи, заметки, лекции с расшифровкой, музыка и видео. Данные — на устройстве.",
+  "lang": "ru",
+  "start_url": "/armi/",
+  "scope": "/armi/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b0d11",
+  "theme_color": "#0b0d11",
+  "icons": [
+    { "src": "/armi/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/armi/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/armi/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
