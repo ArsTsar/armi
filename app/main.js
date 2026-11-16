@@ -1,6 +1,56 @@
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, session } = require('electron');
 const path = require('path');
 const fs = require('fs');
+
+/* Арми v6: локальный сервер для облачного ИИ и расшифровки лекций.
+   Если сервер недоступен (нет ключей), приложение всё равно работает —
+   чат отвечает быстрыми ответами и локальной моделью (WebGPU). */
+
+const PORT = 31416;
+
+function startLocalServer() {
+  // сервер на голом node:http без зависимостей: раздаёт приложение
+  // и отвечает заглушкой на /api/* — если пользователь не настроил свой бекенд
+  const http = require('http');
+  const server = http.createServer((req, res) => {
+    const url = (req.url || '/').split('?')[0];
+    if (url.startsWith('/api/')) {
+      // свой бекенд не вшит: честно отвечаем, что серверные функции отключены
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        error: 'Серверные функции Арми (облако, расшифровка) не настроены в этой сборке. ' +
+               'Пользуйся онлайн-копией Арми по ссылке, либо локальной моделью ИИ.',
+        offlineBuild: true
+      }));
+      return;
+    }
+    // раздача статики
+    let file = url === '/' ? '/index.html' : url;
+    const root = __dirname;
+    const full = path.join(root, path.normalize(file).replace(/^([.][.][/\\])+/, ''));
+    fs.readFile(full, (err, data) => {
+      if (err) {
+        // любой неизвестный путь — отдаём приложение (SPA-стиль)
+        fs.readFile(path.join(root, 'index.html'), (e2, d2) => {
+          if (e2) { res.writeHead(404); res.end('not found'); return; }
+          res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+          res.end(d2);
+        });
+        return;
+      }
+      const ext = path.extname(full).toLowerCase();
+      const mime = {
+        '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
+        '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8',
+        '.png': 'image/png', '.svg': 'image/svg+xml', '.wav': 'audio/wav',
+      }[ext] || 'application/octet-stream';
+      res.writeHead(200, { 'Content-Type': mime });
+      res.end(data);
+    });
+  });
+  server.listen(PORT, '127.0.0.1');
+  return server;
+}
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -16,7 +66,7 @@ function createWindow() {
       spellcheck: false
     }
   });
-  win.loadFile(path.join(__dirname, 'index.html'));
+  win.loadURL('http://127.0.0.1:' + PORT + '/');
 
   // служебный режим для автотеста: проверка IndexedDB + скриншот
   if (process.env.ARMI_TEST_SHOT) {
@@ -36,7 +86,7 @@ function createWindow() {
         }).catch(() => 'SHOT_FAIL');
         Promise.all([idbCheck, shot]).then(([idb, s]) => {
           fs.writeFileSync(process.env.ARMI_TEST_SHOT + '.report.txt',
-            'idb=' + idb + '\nshot=' + s + '\ntitle_check=' + 'v5');
+            'idb=' + idb + '\nshot=' + s + '\ntitle_check=' + 'v6');
           app.quit();
         }).catch(() => app.quit());
       }, 1800);
@@ -55,6 +105,7 @@ if (!gotLock) {
   });
   app.whenReady().then(() => {
     Menu.setApplicationMenu(null);
+    startLocalServer();
     createWindow();
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) createWindow();

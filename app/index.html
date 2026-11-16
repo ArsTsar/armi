@@ -9,7 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Арми">
-<title>Арми — v6.5</title>
+<title>Арми — v6.6</title>
 <style>
 :root{
   color-scheme:dark;
@@ -276,7 +276,7 @@ details[open] .ic.chev{transform:rotate(90deg)}
 .bar.seek{height:22px;background:transparent;overflow:visible;position:relative;cursor:pointer;touch-action:none}
 .bar.seek::before{content:'';position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);height:4px;background:var(--panel4);border-radius:99px}
 .bar.seek i{height:4px;top:50%;transform:translateY(-50%);position:absolute;left:0}
-.bar.seek::after{content:'';position:absolute;top:50%;width:13px;height:13px;border-radius:99px;background:var(--amber3);box-shadow:0 0 0 3px rgba(251,191,36,.18);transform:translate(-50%,-50%);left:0;pointer-events:none}
+.bar.seek i::after{content:'';position:absolute;top:50%;left:100%;width:13px;height:13px;border-radius:99px;background:var(--amber3);box-shadow:0 0 0 3px rgba(251,191,36,.18);transform:translate(-50%,-50%);pointer-events:none}
 .bar.seek .scrub-b{position:absolute;inset:0;z-index:2}
 
 /* модалки/тосты */
@@ -284,7 +284,7 @@ details[open] .ic.chev{transform:rotate(90deg)}
 .modal{width:min(460px,100%);max-height:86vh;overflow-y:auto;background:var(--panel2);border:1px solid var(--line2);border-radius:16px;padding:18px;animation:fi .15s ease-out}
 /* полноэкранный просмотр фото: чёрный фон, зум, свайп */
 .modal-back.fullscreen{background:rgba(0,0,0,.96);padding:0;align-items:stretch;justify-content:stretch}
-.modal.fullview{width:100%;max-height:100vh;height:100vh;background:transparent;border:none;border-radius:0;padding:0;overflow:hidden;display:flex;align-items:center;justify-content:center;position:relative}
+.modal.fullview{width:100%;max-height:100vh;max-height:100dvh;height:100vh;height:100dvh;background:transparent;border:none;border-radius:0;padding:0;overflow:hidden;display:flex;align-items:center;justify-content:center;position:relative}
 .fv-img{max-width:100%;max-height:100%;object-fit:contain;transition:transform .12s ease-out;touch-action:none;cursor:grab;user-select:none;-webkit-user-drag:none}
 .fv-img.drag{cursor:grabbing;transition:none}
 .fv-bar{position:fixed;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;gap:10px;padding:10px 14px;background:linear-gradient(rgba(0,0,0,.72),transparent);color:#fff}
@@ -300,9 +300,9 @@ details[open] .ic.chev{transform:rotate(90deg)}
 
 /* телефон */
 .pwrap{flex:1;display:flex;flex-direction:column;height:100vh;height:100dvh;min-width:0;position:relative}
-.statusbar{flex:none;height:38px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font-size:12.5px;color:var(--t2)}
+.statusbar{flex:none;height:38px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font-size:12.5px;color:var(--t2);padding-top:env(safe-area-inset-top)}
 .pheader{flex:none;display:flex;align-items:center;gap:10px;padding:6px 14px 10px}
-.pcontent{flex:1;overflow-y:auto;padding:4px 16px 20px}
+.pcontent{flex:1;overflow-y:auto;padding:4px 16px 20px;overscroll-behavior:contain}
 .bottomnav{flex:none;display:flex;border-top:1px solid var(--line);background:var(--panel);padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
 .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;color:var(--t3);font-size:10px;border-radius:10px}
 .bn-item.act{color:var(--amber)}
@@ -319,6 +319,13 @@ details[open] .ic.chev{transform:rotate(90deg)}
   .content{padding:14px}
   .pcontent .stack{gap:10px}
 }
+@media (pointer:coarse){
+  input,textarea,select{font-size:16px}
+  .phdel{width:34px;height:34px}
+  .clst-x{display:grid;width:36px;height:36px}
+  .btn-sm{min-height:38px}
+}
+.overscroll-contain{overscroll-behavior:contain}
 </style></head><body>
 <div id="app" class="app"></div><div id="overlays"></div>
 <div id="toast" class="toast"></div>
@@ -712,7 +719,7 @@ const store = (function(){
 })();
 function loadJSON(k, d){ try{ const v = store.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
 function saveJSON(k, v){ try{ store.setItem(k, JSON.stringify(v)); }catch(e){ toast('Хранилище переполнено'); } }
-const dkey = d => d.toISOString().slice(0,10);
+const dkey = d => { const x=new Date(d.getTime()-d.getTimezoneOffset()*6e4); return x.toISOString().slice(0,10); };
 function chkGet(k){ return store.getItem(k)==='1'; }
 function chkSet(k,v){ v?store.setItem(k,'1'):store.removeItem(k); }
 function esc(s){ return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -723,6 +730,7 @@ function fmtSize(b){ return b>1048576? (b/1048576).toFixed(1)+' МБ' : Math.rou
 
 /* ══════════ МЕДИА-ХРАНИЛИЩЕ (IndexedDB: файлы музыки/видео/фото) ══════════ */
 const IDB = {
+  async ok(){ return !!(await this.open()); },
   _p:null,
   open(){ if(!this._p) this._p = new Promise((res)=>{ try{ const rq=indexedDB.open('armi_files',2);
     rq.onupgradeneeded=()=>{ if(!rq.result.objectStoreNames.contains('files')) rq.result.createObjectStore('files'); };
@@ -751,6 +759,13 @@ async function compressImage(file, max=1600, q=.82){
   const blob = await new Promise(r=>cv.toBlob(r,'image/jpeg',q));
   return blob||file;
 }
+const probeDur=blob=>new Promise(r=>{ try{
+  const u=URL.createObjectURL(blob); const a=new Audio();
+  const done=v=>{ try{a.src='';}catch(e){} URL.revokeObjectURL(u); r(v); };
+  a.onloadedmetadata=()=>done(isFinite(a.duration)?Math.round(a.duration):0);
+  a.onerror=()=>done(0);
+  a.src=u;
+}catch(e){ r(0); } });
 async function mediaAdd(inp, kind, maxMB){
   const files=[...(inp.files||[])]; inp.value=''; if(!files.length) return;
   let n=0;
@@ -761,9 +776,11 @@ async function mediaAdd(inp, kind, maxMB){
       if(kind==='photo') blob=await compressImage(f);
       const id=uid(kind==='audio'?'aud':kind==='video'?'vid':'img');
       await IDB.put(id, blob);
-      DB.media.unshift({id, kind, name:f.name.replace(/\.[^.]+$/,''), size:blob.size, type:blob.type||'', added:'сегодня', dur:0});
+      if(!await IDB.ok()) throw new Error('хранилище недоступно');
+      const dur=(kind==='audio')?await probeDur(blob):0;
+      DB.media.unshift({id, kind, name:f.name.replace(/\.[^.]+$/,''), size:blob.size, type:blob.type||'', added:'сегодня', dur});
       n++;
-    }catch(e){ toast('Не удалось добавить «'+f.name+'»'); }
+    }catch(e){ toast('Не удалось добавить «'+f.name+'» — '+(e.message||'ошибка')); }
   }
   saveDB(); render();
   toast(n>1?('Добавлено файлов: '+n):n?(kind==='audio'?'Трек добавлен — жми по нему':'Добавлено — файл на устройстве'):'Ничего не добавлено');
@@ -939,6 +956,7 @@ function b64ToBlob(b64, type){
   return new Blob([u], {type:type||'application/octet-stream'});
 }
 async function mediaDel(arg){  if(PLAYER.fileId===arg){ PLAYER.stopAll(); PLAYER.mode=null; PLAYER.fileId=null; PLAYER.custom=null; S.music.playing=false; S.music.progress=0; }
+  if(PLAYER.queue){ PLAYER.queue=PLAYER.queue.filter(x=>x!==arg); if(PLAYER.queuePos>=PLAYER.queue.length) PLAYER.queuePos=Math.max(0,PLAYER.queue.length-1); }
   if(PLAYER.custom && PLAYER.custom.id===arg){ PLAYER.stopAll(); PLAYER.mode=null; PLAYER.custom=null; S.music.playing=false; S.music.progress=0; }
   await IDB.del(arg);
   if(MEDIA_URLS[arg]){ try{URL.revokeObjectURL(MEDIA_URLS[arg]);}catch(e){} delete MEDIA_URLS[arg]; }
@@ -970,10 +988,10 @@ const PLAYER = {
   },
   playFile(id){
     this.stopAll(); this.mode='file'; this.fileId=id; this.custom=null; S.music.trackId=null;
-    if(!this.queue || !this.queue.includes(id)) this.setQueue('all');
+    if(!this.queue || !this.queue.includes(id)) this.setQueue(DB.media.filter(m=>m.kind==='audio'&&!m.secret).map(m=>m.id));
     this.queuePos = this.queue ? this.queue.indexOf(id) : 0;
     S.music.progress=0; S.music.playing=true; render();
-    mediaUrl(id).then(u=>{ if(!u){ toast('Файл не найден'); return; }
+    mediaUrl(id).then(u=>{ if(!u){ toast('Файл не найден'); S.music.playing=false; this.mode=null; this.fileId=null; render(); return; }
       const a=this.ensureAudio(); a.src=u; a.play().catch(()=>toast('Нажми «Слушать» ещё раз — браузер просит жест')); this.paint(); });
   },
   /* очередь треков: список id медиа-файлов */
@@ -1002,6 +1020,7 @@ const PLAYER = {
     this.playFile(this.queue[this.queuePos]);
   },
   prev(){
+    if(this.mode==='custom'){ this.playCustom(this.custom); return; }
     if(this.mode!=='file' || !this.queue || !this.queue.length){ this.playDemo(S.music.trackId||TRACKS[0].id); return; }
     if(this.queuePos>0) this.queuePos--;
     else this.queuePos=this.queue.length-1;
@@ -1027,7 +1046,7 @@ const PLAYER = {
   },
   stopAll(){ if(this.audio) this.audio.pause(); this.stopEngine(); },
   startEngine(){
-    const tr=this.track(); this.synthStart(tr);
+    const tr=this.track(); this.stopEngine(); this.synthStart(tr);
     clearInterval(this.progT);
     this.progT=setInterval(()=>{ if(!S.music.playing) return;
       const t=this.track(); const dur=(t&&(t.seconds||t.dur))||180;
@@ -1073,7 +1092,7 @@ const PLAYER = {
     const tr=this.track(); const dur=(tr&&(tr.seconds||tr.dur))||0;
     const mp=document.getElementById('mp-sub'); if(mp) mp.textContent=(S.music.playing?'играет':'на паузе')+' · '+fmtSec(S.music.progress||0);
     const mpt=document.getElementById('mp-title'); if(mpt&&tr) mpt.textContent=tr.title;
-    const bar=document.getElementById('mbar'); if(bar&&dur) bar.style.width=Math.min(100,Math.round(100*(S.music.progress||0)/dur))+'%';
+    const bar=document.getElementById('mbar'); if(bar) bar.style.width=dur?Math.min(100,Math.round(100*(S.music.progress||0)/dur))+'%':'0%';
     const pos=document.getElementById('mpos'); if(pos) pos.textContent=fmtSec(S.music.progress||0);
     const tot=document.getElementById('mtot'); if(tot&&dur) tot.textContent=fmtSec(dur);
   },
@@ -1084,6 +1103,7 @@ function pf(x){ return parseFloat(String(x).replace(',','.')); }
 function fmtNum(v){ const r=Math.round(v*1e6)/1e6; return r.toLocaleString('ru-RU'); }
 function calcAnswer(qRaw){
   let q=' '+qRaw.toLowerCase().replace(/\s+/g,' ')+' ';
+  q=q.replace(/(\d)\s(?=\d{3}\b)/g,'$1');
   q=q.replace(/сколько будет|сколько|посчитай|реши|чему равно|посчитать|=|\?/g,' ');
   let m=q.match(/(\d+(?:[.,]\d+)?)\s*(?:%|процент[а-я]*)\s*от\s*(\d+(?:[.,]\d+)?)/);
   if(m){ const a=pf(m[1]), b=pf(m[2]); return fmtNum(a)+'% от '+fmtNum(b)+' = '+fmtNum(a*b/100); }
@@ -1159,7 +1179,8 @@ const DB = {
   media:loadJSON('armi_media', []),
 };
 /* миграция старых данных (v2/v3 → v4): задачи без priority/project и заметки без topic больше не роняют экраны */
-(function(){
+function migrateDB(){
+
   const sectNames = DB.sections.map(s=>s.name);
   const topicNames = DB.topics.map(t=>t.name);
   DB.tasks = (DB.tasks||[]).map(t=>({
@@ -1173,7 +1194,9 @@ const DB = {
     topic:topicNames.includes(n.topic)?n.topic:'Личное',
     updatedAt:n.updatedAt?String(n.updatedAt):'—',
   }));
-})();
+}
+/* миграция выполняется при загрузке и после импорта бэкапа */
+migrateDB();
 PERSIST_KEYS.forEach(k=>{ const v=store.getItem('armi_'+k); if(v!==null){ S[k] = v==='true' ? true : v==='false' ? false : v; } });
 function persist(){ PERSIST_KEYS.forEach(k=>store.setItem('armi_'+k, S[k])); }
 function saveDB(){ saveJSON('armi_tasks',DB.tasks); saveJSON('armi_notes',DB.notes); saveJSON('armi_events',DB.events); saveJSON('armi_sections',DB.sections); saveJSON('armi_topics',DB.topics); saveJSON('armi_lectures',DB.lectures); saveJSON('armi_myvideos',DB.myvideos); saveJSON('armi_weights',DB.weights); saveJSON('armi_media',DB.media); saveJSON('armi_playlists',DB.playlists); saveJSON('armi_books',DB.books); }
@@ -1252,16 +1275,22 @@ function phoneShell(){
   const t = new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
   const fullChat = (S.secretActive && S.secretScreen) ? (S.secretScreen==='schat'&&!!S.secretThread) : (S.screen==='chat');
   return '<div class="pwrap">'+
-    '<div class="statusbar"><span style="font-weight:600;color:var(--t1)">'+t+'</span><span style="display:flex;gap:6px;align-items:center">'+ic('signal')+ic('wifi')+ic('battery')+'</span></div>'+
+    '<div class="statusbar"><span id="sb-time" style="font-weight:600;color:var(--t1)">'+t+'</span><span style="display:flex;gap:6px;align-items:center">'+ic('signal')+ic('wifi')+ic('battery')+'</span></div>'+
     '<div class="pheader"><div class="logo-tile sm" data-act="logoTap">А</div><span style="font-weight:700">Арми</span>'+
       (S.secretActive
         ? '<button class="pill click on" style="margin-left:auto" onclick="Secret.panic()" title="Быстрый выход (Esc)">'+ic('lock')+'Закрыто</button>'
         : '<button class="pill click'+(online?' on':'')+'" style="margin-left:auto" data-act="aiToggle"><span class="dot" style="background:'+(online?'#0b0d11':'var(--amber)')+'"></span>'+modeName+'</button>')+
     '</div>'+
     '<div class="pcontent" style="'+(fullChat?'padding:0;display:flex;':'')+'"><div class="fade-in" style="'+(fullChat?'flex:1;min-height:0;':'')+'">'+renderScreen()+'</div></div>'+
+    (S.music.playing? '<div style="flex:none;border-top:1px solid var(--line);background:var(--panel);padding:2px 8px 0">'+miniPlayer()+'</div>' : '')+
     '<nav class="bottomnav">'+PHONE_MAIN.map(id=>bnItem(id)).join('')+bnMore()+'</nav>'+
     (S.moreOpen?moreSheet():'')+
   '</div>';
+}
+function sbTimeInit(){
+  if(window.__sbT) clearInterval(window.__sbT);
+  const set=()=>{ const el=document.getElementById('sb-time'); if(el) el.textContent=new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}); };
+  window.__sbT=setInterval(set, 20000);
 }
 function bnItem(id){
   const act=S.screen===id && !S.secretScreen;
@@ -1328,6 +1357,7 @@ const SCROLLMEM = {};
 function scrollHost(){ return document.querySelector('.content') || document.querySelector('.pcontent'); }
 function viewKey(){ return (S.secretActive&&S.secretScreen ? S.secretScreen : S.screen)+'|'+(S.noteOpen||'')+'|'+(S.secretNoteOpen||'')+'|'+(S.secretThread||''); }
 function render(){
+  sbTimeInit();
   const prev = scrollHost(); if(prev) SCROLLMEM[render._vk || ''] = prev.scrollTop;
   const app = document.getElementById('app');
   const pv = resolveView();
@@ -1339,6 +1369,66 @@ function render(){
 }
 /* перетаскивание «Мои треки»: HTML5 drag-and-drop, порядок в DB.media */
 function initTrackDrag(){
+  /* палец: long-press → перетаскивание (HTML5 DnD не работает на тач) */
+  (function(){
+    const rows=[...document.querySelectorAll('[data-drag-track]')];
+    if(rows.length<2) return;
+    let dragRow=null, ghost=null, started=false, t0=null, sx=0, sy=0;
+    const applyVisibleOrder=()=>{
+      const inFolder = S.folder && S.folder.zone==='music';
+      const ordered=[...document.querySelectorAll('[data-drag-track]')].map(r=>r.getAttribute('data-drag-track'));
+      let k=0;
+      DB.media=DB.media.map(m=>(m.kind==='audio'&&ordered.includes(m.id))?ordered2obj(ordered)[k++]:m);
+      function ordered2obj(a){ return a.map(id=>DB.media.find(m=>m.id===id)); }
+      saveDB(); render(); toast('Порядок треков обновлён');
+    };
+    const hoverIdx=e=>{
+      const list=dragRow?dragRow.parentElement:null; if(!list) return -1;
+      const rs=[...list.querySelectorAll('[data-drag-track]')];
+      for(let i=0;i<rs.length;i++){ const r=rs[i].getBoundingClientRect(); if(e.clientY<r.top+r.height/2) return i; }
+      return rs.length;
+    };
+    const paintMarker=e=>{
+      const list=dragRow?dragRow.parentElement:null; if(!list) return;
+      const idx=hoverIdx(e);
+      let mk=document.getElementById('tr-drag-mk');
+      if(!mk){ mk=document.createElement('div'); mk.id='tr-drag-mk'; mk.style.cssText='height:3px;background:var(--amber);border-radius:2px;margin:1px 0'; list.appendChild(mk); }
+      const rs=[...list.querySelectorAll('[data-drag-track]')];
+      if(idx>=rs.length) list.appendChild(mk); else list.insertBefore(mk, rs[idx]);
+    };
+    const clearMarker=()=>{ const mk=document.getElementById('tr-drag-mk'); if(mk) mk.remove(); };
+    rows.forEach(row=>{
+      row.addEventListener('touchstart', e=>{
+        if(e.touches.length!==1) return;
+        dragRow=row; started=false; t0=Date.now();
+        const tt=e.touches[0]; sx=tt.clientX; sy=tt.clientY;
+      }, {passive:true});
+      row.addEventListener('touchmove', e=>{
+        if(!dragRow) return;
+        const tt=e.touches[0];
+        if(!started){
+          if(Date.now()-t0<220) return;
+          if(Math.abs(tt.clientY-sy)<12 || Math.abs(tt.clientX-sx)>Math.abs(tt.clientY-sy)) return;
+          started=true;
+          dragRow.classList.add('dragging');
+          ghost=dragRow.cloneNode(true);
+          ghost.style.cssText='position:fixed;left:'+dragRow.getBoundingClientRect().left+'px;width:'+dragRow.getBoundingClientRect().width+'px;z-index:999;pointer-events:none;opacity:.92;box-shadow:0 10px 30px rgba(0,0,0,.5)';
+          document.body.appendChild(ghost);
+        }
+        e.preventDefault();
+        ghost.style.top=(tt.clientY-24)+'px';
+        paintMarker(tt);
+      }, {passive:false});
+      row.addEventListener('touchend', ()=>{
+        if(!started||!dragRow){ dragRow=null; return; }
+        dragRow.classList.remove('dragging');
+        if(ghost){ ghost.remove(); ghost=null; }
+        clearMarker();
+        applyVisibleOrder();
+        dragRow=null;
+      });
+    });
+  })();
   document.querySelectorAll('[data-drag-track]').forEach(row=>{
     row.addEventListener('dragstart', e=>{
       row.classList.add('dragging');
@@ -1357,13 +1447,10 @@ function initTrackDrag(){
       const fi=ids.indexOf(from), ti=ids.indexOf(to);
       if(fi<0||ti<0) return;
       ids.splice(ti,0,ids.splice(fi,1)[0]);
-      /* пересобираем DB.media: не-аудио как было, аудио в новом порядке */
-      const audioAll=DB.media.filter(m=>m.kind==='audio');
-      const newOrder=ids.map(id=>audioAll.find(m=>m.id===id));
-      const rest=DB.media.filter(m=>m.kind!=='audio');
-      const posFirst = DB.media.findIndex(m=>m.kind==='audio');
-      const before=DB.media.slice(0,posFirst).filter(m=>m.kind!=='audio');
-      DB.media = before.concat(newOrder, rest.filter(m=>!before.includes(m)));
+      /* пересобираем порядок ТОЛЬКО видимых треков, остальные записи не трогаем */
+      let k=0;
+      DB.media=DB.media.map(m=>(m.kind==='audio'&&ids.includes(m.id))?ids2obj(ids)[k++]:m);
+      function ids2obj(a){ return a.map(id=>DB.media.find(m=>m.id===id)); }
       saveDB(); render(); toast('Порядок треков обновлён');
     });
   });
@@ -1457,6 +1544,8 @@ function initPlaylistDrag(plId){
   });
 }
 function afterRender(){
+  const rdBody=document.getElementById('rdBody');
+  if(rdBody && S.readBook){ const bk=DB.books.find(x=>x.id===S.readBook); if(bk) rdBody.scrollTop=bk.scroll||0; }
   const m=document.getElementById('msgs')||document.getElementById('smsgs')||document.getElementById('cmsgs');
   if(m) m.scrollTop=m.scrollHeight;
   hydrateMedia();
@@ -1465,16 +1554,19 @@ function afterRender(){
   const seek=document.getElementById('mseek');
   if(seek && !seek._seekInit){
     seek._seekInit=true;
+    if(window.__seekCtl){ try{window.__seekCtl.abort();}catch(e){} }
+    const ctl=window.__seekCtl=new AbortController();
     let drag=false;
-    const frac=e=>{ const r=seek.getBoundingClientRect(); const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left; return Math.max(0,Math.min(1,x/r.width)); };
+    const frac=e=>{ const p=(e.changedTouches&&e.changedTouches[0])||(e.touches&&e.touches[0])||e; const r=seek.getBoundingClientRect(); const x=p.clientX-r.left; return Math.max(0,Math.min(1,x/r.width)); };
     const paintLive=f=>{ const b=document.getElementById('mbar'); const tr=PLAYER.track(); const dur=(tr&&(tr.seconds||tr.dur))||0;
       if(b) b.style.width=Math.round(f*100)+'%'; const p=document.getElementById('mpos'); if(p&&dur) p.textContent=fmtSec(f*dur); };
     seek.addEventListener('mousedown', e=>{ drag=true; paintLive(frac(e)); });
-    window.addEventListener('mousemove', e=>{ if(drag) paintLive(frac(e)); });
-    window.addEventListener('mouseup', e=>{ if(drag){ drag=false; PLAYER.seekTo(frac(e)); } });
+    window.addEventListener('mousemove', e=>{ if(drag) paintLive(frac(e)); }, {signal:ctl.signal});
+    window.addEventListener('mouseup', e=>{ if(drag){ drag=false; PLAYER.seekTo(frac(e)); } }, {signal:ctl.signal});
     seek.addEventListener('touchstart', e=>{ drag=true; paintLive(frac(e)); }, {passive:true});
     seek.addEventListener('touchmove', e=>{ if(drag) paintLive(frac(e)); }, {passive:true});
-    seek.addEventListener('touchend', e=>{ if(drag){ drag=false; PLAYER.seekTo(frac(e.changedTouches?frac(e):e)); } });
+    seek.addEventListener('touchend', e=>{ if(drag){ drag=false; PLAYER.seekTo(frac(e)); } });
+    seek.addEventListener('touchcancel', ()=>{ if(drag){ drag=false; const t=PLAYER.track(); const dur=(t&&(t.seconds||t.dur))||1; paintLive((S.music.progress||0)/dur); } });
   }
   const inst=document.getElementById('pwa-install');
   if(inst){
@@ -1595,7 +1687,7 @@ function scrHome(){
       (lecturesTotal? '<div class="tiny" style="margin-top:8px;color:var(--t4)">'+lecturesTotal+' записей · '+notesTotal+' заметок</div>' : '')+
     '</div>'+
     /* 6. Глубокая работа */
-    '<div class="card" data-act="deepStart" style="cursor:pointer">'+
+    '<div class="card"'+(S.deepRun?'':' data-act="deepStart"')+' style="cursor:'+(S.deepRun?'default':'pointer')+'">'+
       '<div class="row" style="align-items:flex-start;gap:14px">'+
         '<div class="deep-ic">'+ic('brain')+'</div>'+
         '<div style="min-width:0;flex:1">'+
@@ -1706,6 +1798,7 @@ function sectMngModal(){
 
 /* ── РАСПИСАНИЕ (редактируемое: сетка из чата + свои события) ── */
 function scrSchedule(){
+  if(resolveView()==='phone' && !S.schedTouched){ S.schedView='day'; }
   const today = (new Date().getDay()+6)%7;
   const evByDay = i => DB.events.filter(e=>e.day===i).sort((a,b)=>a.start.localeCompare(b.start));
   let body='';
@@ -1728,14 +1821,14 @@ function scrSchedule(){
 }
 function evtChip(e){
   return '<div class="card" style="padding:8px;margin-bottom:6px;cursor:pointer" data-act="evtEdit" data-arg="'+e.id+'">'+
-    '<div class="row" style="gap:5px"><span class="dot" style="background:'+((KIND_STYLE[e.kind]||{}).c)+'"></span><span class="tiny" style="font-variant-numeric:tabular-nums">'+e.start+'–'+e.end+'</span></div>'+
+    '<div class="row" style="gap:5px"><span class="dot" style="background:'+((KIND_STYLE[e.kind]||{}).c)+'"></span><span class="tiny" style="font-variant-numeric:tabular-nums">'+esc(e.start)+'–'+esc(e.end)+'</span></div>'+
     '<div style="font-size:11.5px;margin-top:4px;line-height:1.4">'+esc(e.title)+'</div>'+
     (e.place?'<div class="tiny" style="margin-top:2px;color:var(--t4)">'+esc(e.place)+'</div>':'')+'</div>';
 }
 function evtRow(e){
   return '<div class="row" style="padding:10px 4px;border-bottom:1px solid var(--line);cursor:pointer" data-act="evtEdit" data-arg="'+e.id+'">'+
     '<span class="dot" style="background:'+((KIND_STYLE[e.kind]||{}).c)+'"></span>'+
-    '<span style="font-variant-numeric:tabular-nums;font-size:13px;color:var(--t2);width:96px;flex:none">'+e.start+'–'+e.end+'</span>'+
+    '<span style="font-variant-numeric:tabular-nums;font-size:13px;color:var(--t2);width:96px;flex:none">'+esc(e.start)+'–'+esc(e.end)+'</span>'+
     '<span style="min-width:0;flex:1"><span style="font-size:13.5px">'+esc(e.title)+'</span>'+(e.place?'<span class="tiny" style="display:block">'+esc(e.place)+'</span>':'')+'</span></div>';
 }
 function evtModal(e){
@@ -1905,7 +1998,8 @@ function scrVideo(){
 const PhotoView = {
   idx:0, list:[], scale:1, ox:0, oy:0, dragging:null, pinch:null,
   open(id){
-    const list = DB.media.filter(m=>m.kind==='photo' && !m.secret);
+    const inFolder = S.folder && S.folder.zone==='photos';
+    const list = DB.media.filter(m=>m.kind==='photo' && !m.secret && (inFolder ? m.folder===S.folder.id : !m.folder));
     if(!list.length){ toast('Фото не найдены'); return; }
     let idx = list.findIndex(m=>m.id===id); if(idx<0) idx=0;
     this.idx=idx; this.list=list;
@@ -1918,7 +2012,7 @@ const PhotoView = {
         '<button class="fv-btn" title="Увеличить" data-act="fvZoom" data-arg="1">+</button>'+
         '<button class="fv-btn" title="1:1" data-act="fvZoom" data-arg="0">1:1</button>'+
         '<button class="fv-btn" title="Скачать" data-act="fvSave">⤓</button>'+
-        '<button class="fv-btn" title="Закрыть" data-act="modalBack">✕</button>'+
+        '<button class="fv-btn" title="Закрыть (Esc)" data-act="modalBack" style="font-size:18px">✕</button>'+
       '</div>'+
       (list.length>1? '<button class="fv-btn fv-nav prev" data-act="fvPrev">‹</button>'+
                       '<button class="fv-btn fv-nav next" data-act="fvNext">›</button>'+
@@ -1935,7 +2029,7 @@ const PhotoView = {
       this.ox=this.dragging.ox+dx; this.oy=this.dragging.oy+dy; this.apply();
       if(e.cancelable) e.preventDefault();
     };
-    const up=()=>{ this.dragging=null; img.classList.remove('drag'); };
+    const up=()=>{ this.dragging=null; img.classList.remove('drag'); if(this.scale<=1.05){ this.ox=this.oy=0; this.apply(); } };
     /* щипок двумя пальцами */
     const tstart=e=>{
       if(e.touches.length===2){
@@ -1955,7 +2049,7 @@ const PhotoView = {
     /* двойной клик/тап — зум 1↔2.5 в точке */
     let lastTap=0, lastX=0, lastY=0;
     const dbl=e=>{
-      const t=e.touches?e.touches[0]:e, now=Date.now();
+      const t=(e.changedTouches&&e.changedTouches[0])||e, now=Date.now();
       if(now-lastTap<320 && Math.abs(t.clientX-lastX)<40 && Math.abs(t.clientY-lastY)<40){
         this.scale = this.scale>1.05 ? 1 : 2.5; this.ox=this.oy=0; this.apply();
         lastTap=0;
@@ -1969,10 +2063,13 @@ const PhotoView = {
       this.ox=cx+(this.ox-cx)*(ns/this.scale); this.oy=cy+(this.oy-cy)*(ns/this.scale);
       this.scale=ns; this.apply();
     }, {passive:false});
-    img.addEventListener('mousedown', down); window.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
+    img.addEventListener('mousedown', down);
+    if(this._mm){ window.removeEventListener('mousemove', this._mm); window.removeEventListener('mouseup', this._mu); }
+    this._mm=move; this._mu=up;
+    window.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
     img.addEventListener('touchstart', e=>{ down(e); tstart(e); }, {passive:false});
     img.addEventListener('touchmove', e=>{ move(e); tmove(e); }, {passive:false});
-    img.addEventListener('touchend', e=>{ up(); tend(); if(!this.dragging) dbl(e); });
+    img.addEventListener('touchend', e=>{ const moved=this.dragging&&this.dragging.moved; up(); tend(); if(!moved) dbl(e); });
     img.addEventListener('dblclick', dbl);
     /* свайп (когда без зума) — переключение фото */
     let sx=null, sy=null;
@@ -1996,15 +2093,16 @@ const PhotoView = {
   apply(){ const img=document.getElementById('fvImg'); if(!img) return;
     img.style.transform='translate('+this.ox+'px,'+this.oy+'px) scale('+this.scale+')'; },
   async show(){
+    const g=this._gen=(this._gen||0)+1;
     const m=this.list[this.idx]; if(!m) return;
     const img=document.getElementById('fvImg'); if(!img) return;
     this.scale=1; this.ox=this.oy=0; this.apply();
     img.style.opacity='.25';
     const u=await mediaUrl(m.id);
-    if(!document.getElementById('fvBack')) return;
+    if(g!==this._gen || !document.getElementById('fvBack')) return;
     if(!u){ toast('Файл не найден'); img.style.opacity='1'; return; }
     img.src=u; img.style.opacity='1';
-    const t=document.getElementById('fvTitle'); if(t) t.textContent=(m.title||'Фото');
+    const t=document.getElementById('fvTitle'); if(t) t.textContent=(m.name||'Фото');
     const c=document.getElementById('fvCount'); if(c) c.textContent=(this.idx+1)+' / '+this.list.length;
   },
   next(){ if(this.list.length<2) return; this.idx=(this.idx+1)%this.list.length; this.show(); },
@@ -2015,12 +2113,14 @@ const PhotoView = {
   async save(){
     const m=this.list[this.idx]; const b=await IDB.get(m.id); if(!b){ toast('Файл не найден'); return; }
     const a=document.createElement('a'); a.href=URL.createObjectURL(b);
-    a.download=(m.title||'armi-photo')+'.jpg'; a.click();
+    a.download=(m.name||'armi-photo')+'.jpg'; a.click();
     setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
     toast('Фото скачано');
   },
   /* сброс при закрытии */
-  destroy(){ if(this._key){ window.removeEventListener('keydown', this._key); this._key=null; } this.list=[]; }
+  destroy(){ if(this._key){ window.removeEventListener('keydown', this._key); this._key=null; }
+    if(this._mm){ window.removeEventListener('mousemove', this._mm); window.removeEventListener('mouseup', this._mu); this._mm=this._mu=null; }
+    this.list=[]; }
 };
 const _closeModalPhoto = closeModal;
 closeModal = function(){ PhotoView.destroy(); _closeModalPhoto(); };
@@ -2182,7 +2282,7 @@ function scrLectures(){
 /* ── МУЗЫКА ── */
 function scrMusic(){
   const tr = currentTrack();
-  const tot = (tr.seconds||tr.dur)||1;
+  const tot = (tr.seconds||tr.dur)||0;
   const inFolder = S.folder && S.folder.zone==='music';
   let my = DB.media.filter(m=>m.kind==='audio');
   if(inFolder) my = my.filter(m=>m.folder===S.folder.id);
@@ -2193,8 +2293,8 @@ function scrMusic(){
       '<div class="logo-tile" style="margin:0 auto 10px;width:52px;height:52px;font-size:26px;border-radius:16px">'+ic('music').replace('class="ic"','class="ic" style="width:22px;height:22px;color:#0b0d11"')+'</div>'+
       '<div style="font-size:16px;font-weight:800">'+esc(tr.title)+'</div><div class="tiny" style="margin-top:2px">'+esc(tr.artist||'')+'</div>'+
       '<div class="row mt14" style="gap:10px"><span class="tiny" style="font-variant-numeric:tabular-nums" id="mpos">'+fmtSec(S.music.progress)+'</span>'+
-      '<div class="bar seek" id="mseek"><i id="mbar" style="width:'+Math.min(100,Math.round(100*S.music.progress/tot))+'%"></i></div>'+
-      '<span class="tiny" style="font-variant-numeric:tabular-nums" id="mtot">'+fmtSec(tot)+'</span></div>'+
+      '<div class="bar seek" id="mseek"><i id="mbar" style="width:'+(tot?Math.min(100,Math.round(100*S.music.progress/tot)):0)+'%"></i></div>'+
+      '<span class="tiny" style="font-variant-numeric:tabular-nums" id="mtot">'+(tot?fmtSec(tot):'–:––')+'</span></div>'+
     '<div class="row mt14" style="gap:8px;justify-content:center;flex-wrap:wrap">'+
       '<button class="btn btn-sm" data-act="musicPrev" title="Предыдущий трек">⏮</button>'+
       '<button class="btn btn-amber" style="min-width:130px" data-act="musicToggle">'+ic(S.music.playing?'pause':'play')+(S.music.playing?'Пауза':'Слушать')+'</button>'+
@@ -2267,7 +2367,7 @@ const Books = {
   /* парсинг файла -> {title, chapters:[{title, html}]}. fb2 и epub разбираем DOMParser'ом, txt — по абзацам */
   async parse(file){
     const ext=(file.name.split('.').pop()||'').toLowerCase();
-    if(ext==='txt' || file.type.startsWith('text/') && ext!=='fb2'){
+    if(ext==='txt' || (file.type.startsWith('text/') && !['fb2','epub'].includes(ext))){
       let text=await file.text();
       /* xml-заголовок у некоторых fb2 ошибочно сохраняют как txt */
       if(text.includes('<FictionBook')) return this.parseFb2Text(text);
@@ -2337,10 +2437,13 @@ const Books = {
     const order=[...opfDoc.querySelectorAll('spine itemref')].map(r=>manifest[r.getAttribute('idref')]).filter(Boolean);
     const chapters=[];
     for(const href of order){
-      const html=await zip.text(base+href).catch(()=>null);
+      let html=null;
+      try{ html=await zip.text(base+decodeURIComponent(href)); }catch(e){}
+      if(!html){ try{ html=await zip.text(base+href); }catch(e){} }
       if(!html) continue;
       const doc=new DOMParser().parseFromString(html,'text/html');
       doc.querySelectorAll('script,style,nav,*[hidden]').forEach(n=>n.remove());
+      doc.querySelectorAll('*').forEach(n=>{[...n.attributes].forEach(a=>{ if(/^on/i.test(a.name)||(a.name==='href'&&/^javascript:/i.test(a.value))) n.removeAttribute(a.name); });});
       /* убираем шапку/титул с служебным текстом */
       const inner=doc.body?doc.body.innerHTML:'';
       const textLen=(doc.body?doc.body.textContent:'').trim().length;
@@ -2425,7 +2528,7 @@ const JSZipLite = {
 };
 function scrBooks(){
   const inFolder = S.folder && S.folder.zone==='books';
-  let bs = inFolder ? DB.books.filter(b=>b.folder===S.folder.id) : DB.books.filter(b=>!b.folder);
+  let bs = (inFolder ? DB.books.filter(b=>b.folder===S.folder.id) : DB.books.filter(b=>!b.folder)).filter(b=>b.chapters && b.chapters.length);
   const folders = Folders.list('books');
   if(!DB.books.length){
     return '<div class="stack">'+
@@ -2625,7 +2728,7 @@ function scrSettings(){
       '<button class="btn btn-sm" data-act="importData">'+ic('up')+'Загрузить бэкап</button>'+
       '<button class="btn btn-danger btn-sm" data-act="resetData">Сбросить прототип</button></div>'+
       '<div class="tiny mt10">Секретная зона синхронизируется отдельно — из закрытого режима, своим ключом. Здесь она не трогается.</div></div>'+
-    '<div class="card"><h3>'+ic('check')+'Версия и данные</h3><div class="sub">Эта копия: <b>Арми v6.5</b> (сборка 13 ноября · новый экран «Сегодня») — настоящий ИИ: облако + локальная модель, настоящая запись лекций. Если приложение и браузерная версия выглядят по-разному — версии одинаковые, просто данные разные: браузер помнит твои старые записи, а новое приложение начинает с демо-набора. Привести всё к демо-виду — кнопка «Сбросить прототип» ниже.</div></div>'+
+    '<div class="card"><h3>'+ic('check')+'Версия и данные</h3><div class="sub">Эта копия: <b>Арми v6.6</b> (сборка 16 ноября · большой фикс-релиз: 60+ багов) — настоящий ИИ: облако + локальная модель, настоящая запись лекций. Если приложение и браузерная версия выглядят по-разному — версии одинаковые, просто данные разные: браузер помнит твои старые записи, а новое приложение начинает с демо-набора. Привести всё к демо-виду — кнопка «Сбросить прототип» ниже.</div></div>'+
     '<div class="card"><h3>'+ic('down')+'Приложение на ПК и телефон<span class="h-note">PWA · без магазинов</span></h3>'+
       '<div class="sub">Арми ставится как настоящее приложение: отдельное окно, иконка на рабочем столе, работает офлайн. Данные остаются на устройстве.</div>'+
       '<div class="row mt10"><button class="btn btn-amber" style="flex:1" id="pwa-install">'+ic('down')+'Установить Арми</button></div>'+
@@ -2642,7 +2745,7 @@ function scrSettings(){
       '<b>Расписание:</b> нажми на любое событие — правка или удаление; «+ Событие» добавляет своё.<br>'+
       '<b>Секретный режим:</b> два клика по жёлтой «А» → пароль → закрытые разделы появляются в меню рядом с обычными (плюс блоки в «Заметках», «Музыке» и чип в чате).<br>'+
       '<b>Паника:</b> кнопка «Быстрый выход», кнопка «Закрыто» в шапке или клавиша Esc.</div></div>'+
-    '<div class="tiny" style="text-align:center;padding:4px 0 10px">Арми · v6.5 · новый «Сегодня»: брифинг, быстрый ввод, глубокая работа<br>Данные: '+DB.notes.length+' заметок · '+DB.topics.length+' тем · '+DB.tasks.length+' задач · '+DB.sections.length+' разделов · '+DB.media.length+' медиафайлов · план 39 недель</div>'+
+    '<div class="tiny" style="text-align:center;padding:4px 0 10px">Арми · v6.6 · фикс-релиз: музыка, фото, модалки, телефон<br>Данные: '+DB.notes.length+' заметок · '+DB.topics.length+' тем · '+DB.tasks.length+' задач · '+DB.sections.length+' разделов · '+DB.media.length+' медиафайлов · план 39 недель</div>'+
   '</div>';
 }
 
@@ -2842,7 +2945,7 @@ function scrChat(){
 function buildContext(){
   const d=new Date(), {w,ph}=weekOf(d);
   const open=DB.tasks.filter(t=>!t.done).slice(0,8).map(t=>'- [задача] '+t.title+' ('+t.project+', '+t.due+')');
-  const evs=DB.events.filter(e=>e.day===(d.getDay()+6)%7).sort((a,b)=>a.start.localeCompare(b.start)).map(e=>'- [событие] '+e.start+'–'+e.end+' '+e.title);
+  const evs=DB.events.filter(e=>e.day===(d.getDay()+6)%7).sort((a,b)=>a.start.localeCompare(b.start)).map(e=>'- [событие] '+esc(e.start)+'–'+esc(e.end)+' '+e.title);
   const nts=DB.notes.slice(0,5).map(n=>'- [заметка] '+n.title+' ('+(n.topic||'Личное')+')');
   const lec=DB.lectures.slice(0,3).map(l=>'- [лекция] '+l.title);
   return ['Сегодня: '+d.toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'}), (w?('Неделя плана: '+w+'/39'):''), (ph?('Фаза: '+ph.name):'')]
@@ -2886,7 +2989,7 @@ function localAnswer(q){
     return 'Открытых задач: '+open.length+'.\n'+open.slice(0,5).map(t=>'— '+t.title+' ('+t.project+')').join('\n')+(open.length>5?'\n…и ещё '+(open.length-5):'')+'\nРаздел «Задачи» — там же управление своими разделами.';
   }
   if(has('расписан')){
-    return 'Расписание на сегодня:\n'+DB.events.filter(e=>e.day===(d.getDay()+6)%7).sort((a,b)=>a.start.localeCompare(b.start)).map(e=>e.start+'–'+e.end+' '+e.title).join('\n')+'\nТеперь его можно править: нажми на событие в разделе «Расписание».';
+    return 'Расписание на сегодня:\n'+DB.events.filter(e=>e.day===(d.getDay()+6)%7).sort((a,b)=>a.start.localeCompare(b.start)).map(e=>esc(e.start)+'–'+esc(e.end)+' '+e.title).join('\n')+'\nТеперь его можно править: нажми на событие в разделе «Расписание».';
   }
   return 'Интернета нет, а локальная модель ещё не скачана — отвечаю заготовками.\nУверенно умею офлайн:\n— считать: «100 на 5», «сколько будет 2+2×2», «25% от 4000»\n— время и дата: «который час», «какое число»\n— план: «что сегодня?», «неделя и фаза», «кисть»\n— задачи, расписание, факты, книги, идеи\nСкачай модель в Настройках → Локальный ИИ — и я буду отвечать по-настоящему без интернета.';
 }
@@ -2941,23 +3044,24 @@ async function doChatSend(preset){
   const inp = document.getElementById('chat-in');
   const q = (preset!==undefined? preset : (inp?inp.value.trim():''));
   if(!q) return;
+  const th=CHATS.find(x=>x.id===CHAT_ID)||CHATS[0]; const arr=th.msgs;
   chatAutoName(q);
-  CHAT.push({id:uid('c'), role:'user', content:q, time:nowHM()});
+  arr.push({id:uid('c'), role:'user', content:q, time:nowHM()});
   chatSave();
   if(inp) inp.value='';
   /* сообщение-заглушка «Арми печатает…» */
   const stub = {id:uid('c'), role:'ai', content:'', time:nowHM(), pending:true};
-  CHAT.push(stub);
+  arr.push(stub);
   render();
   const ans = await aiAsk(q);
-  const i = CHAT.findIndex(m=>m.id===stub.id);
+  const i = arr.findIndex(m=>m.id===stub.id);
   const out = {id:stub.id, role:'ai', content:ans.text, time:nowHM()};
   if(ans.agent==='fast') out.agent='fast';
   if(ans.cloud) out.cloud=true;
   if(ans.local) out.local=true;
   if(ans.deep) out.thinking=true;
   if(ans.fallback) out.fallback=true;
-  if(i>=0) CHAT[i]=out; else CHAT.push(out);
+  if(i>=0) arr[i]=out; else arr.push(out);
   chatSave();
   render();
 }
@@ -2987,7 +3091,7 @@ const ACTIONS = {
   toOpen(){ S.secretScreen=null; S.moreOpen=false; render(); },
   more(){ S.moreOpen=true; render(); },
   moreClose(arg, el, e){ if(e && e.target.closest && e.target.closest('.sheet')) return; S.moreOpen=false; render(); },
-  modalBack(arg, el, e){ if(e && e.target.closest && e.target.closest('.modal')) return; closeModal(); },
+  modalBack(arg, el, e){ if(el && el.classList && el.classList.contains('modal-back') && e && e.target.closest && e.target.closest('.modal')) return; closeModal(); },
   fvZoom(arg){ PhotoView.zoom(parseInt(arg,10)); },
   fvPrev(){ PhotoView.prev(); },
   fvNext(){ PhotoView.next(); },
@@ -3102,7 +3206,7 @@ const ACTIONS = {
     saveDB(); modal(sectMngModal()); toast('Раздел удалён, задачи переехали в «Личное»');
   },
   /* расписание */
-  schedView(arg){ S.schedView=arg; render(); },
+  schedView(arg){ S.schedView=arg; S.schedTouched=true; render(); },
   schedDay(arg){ S.schedDay=+arg; render(); },
   evtNew(){ modal(evtModal(null)); },
   evtEdit(arg){ modal(evtModal(DB.events.find(e=>e.id===arg)||null)); },
@@ -3181,10 +3285,6 @@ const ACTIONS = {
     render();
   },
   musicRepeat(){ S.music.repeat=!S.music.repeat; toast(S.music.repeat?'Повтор: плейлист играет по кругу':'Повтор выключен'); render(); },
-  musicSeek(arg, el, ev){
-    const r=el.getBoundingClientRect(); const x=(ev.touches?ev.touches[0].clientX:ev.clientX)-r.left;
-    PLAYER.seekTo(x/r.width);
-  },
   async musicFileAdd(inp){ await mediaAdd(inp,'audio',200); },
   musicFilePlay(arg){ PLAYER.playFile(arg); },
   musicFileDel(arg){
@@ -3225,9 +3325,10 @@ const ACTIONS = {
   plPlayFrom(arg){
     const [plId, i]=arg.split('|');
     const p=DB.playlists.find(x=>x.id===plId); if(!p) return;
-    const items=p.items||[]; const idx=parseInt(i,10);
+    const items=(p.items||[]).map(id=>DB.media.find(m=>m.id===id)).filter(Boolean);
+    const idx=parseInt(i,10);
     if(idx<0||idx>=items.length) return;
-    closeModal(); PLAYER.setQueue(items); PLAYER.queuePos=idx; PLAYER.playFile(items[idx]);
+    closeModal(); PLAYER.setQueue(items.map(m=>m.id)); PLAYER.queuePos=idx; PLAYER.playFile(items[idx].id);
   },
   plRemoveTrack(arg){
     const [plId, tId]=arg.split('|');
@@ -3260,7 +3361,7 @@ const ACTIONS = {
     const p=DB.playlists.find(x=>x.id===plId); if(!p) return;
     p.items=p.items||[];
     if(p.items.includes(tId)){ toast('Этот трек уже в плейлисте'); closeModal(); return; }
-    p.items.push(tId); saveDB(); closeModal();
+    p.items.push(tId); saveDB(); closeModal(); render();
     toast('Добавлено в «'+p.name+'»');
   },
   /* видео */
@@ -3280,7 +3381,8 @@ const ACTIONS = {
   vidFileDel(arg){ mediaDel(arg); },
   async openPhotoAdd(inp){ await mediaAdd(inp,'photo',50); },
   openPhotoOpen(arg){ PhotoView.open(arg); },
-  openPhotoDel(arg, el, ev){ if(ev) ev.stopPropagation(); mediaDel(arg); },
+  openPhotoDel(arg, el, ev){ if(ev) ev.stopPropagation(); modal('<h3>'+ic('img')+'Удалить фото?</h3><div class="sub mt6">Фото исчезнет безвозвратно — из Арми и из хранилища устройства.</div><div class="row mt14" style="gap:8px"><button class="btn btn-danger" style="flex:1" data-act="openPhotoDelYes" data-arg="'+arg+'">Удалить</button><button class="btn" data-act="modalBack">Отмена</button></div>'); },
+  openPhotoDelYes(arg){ mediaDel(arg); },
   vidEmbed(arg, el){ const f=document.createElement('iframe'); f.className='vframe'; f.allowFullscreen=true; f.allow='autoplay; encrypted-media; picture-in-picture'; f.src='https://www.youtube-nocookie.com/embed/'+arg+'?autoplay=1&rel=0'; el.replaceWith(f); },
   /* лекции: настоящая запись, расшифровка, конспект */
   lectRec(){ LectRec.start(); },
@@ -3289,7 +3391,7 @@ const ACTIONS = {
     const files=[...inp.files]; inp.value='';
     for(const f of files) await Books.add(f);
   },
-  bookOpen(arg){ const b=DB.books.find(x=>x.id===arg); if(!b){ toast('Книга не найдена'); return; } S.readBook=arg; b.scroll=0; saveDB(); render(); },
+  bookOpen(arg){ const b=DB.books.find(x=>x.id===arg); if(!b){ toast('Книга не найдена'); return; } S.readBook=arg; saveDB(); render(); },
   readerClose(){
     const b=DB.books.find(x=>x.id===S.readBook);
     if(b){ const body=document.getElementById('rdBody'); if(body) b.scroll=body.scrollTop; saveDB(); }
@@ -3480,6 +3582,7 @@ const ACTIONS = {
         store.setItem('armi_chat_current', CHAT_ID);
         saveJSON('armi_chats', CHATS);
       }
+      migrateDB(); saveDB();
       closeModal(); S.readBook=null; render();
       toast('Данные с другого устройства загружены: '+DB.tasks.length+' задач, '+DB.notes.length+' заметок'+(out.mediaFiles?', '+DB.media.length+' медиафайлов':''));
     }catch(e){ fail('Не удалось загрузить: '+(e.message||'ошибка')); }
@@ -3490,9 +3593,9 @@ const ACTIONS = {
   resetDataYes(){
     PLAYER.stopAll(); PLAYER.mode=null; PLAYER.fileId=null; PLAYER.custom=null; S.music.playing=false; S.music.progress=0;
     IDB.clear(); Object.keys(MEDIA_URLS).forEach(k=>{ try{URL.revokeObjectURL(MEDIA_URLS[k]);}catch(e){} delete MEDIA_URLS[k]; });
-    ['armi_tasks','armi_notes','armi_events','armi_sections','armi_topics','armi_lectures','armi_myvideos','armi_weights','armi_chat','armi_chats','armi_chat_current','armi_media'].forEach(k=>store.removeItem(k));
+    ['armi_tasks','armi_notes','armi_events','armi_sections','armi_topics','armi_lectures','armi_myvideos','armi_weights','armi_chat','armi_chats','armi_chat_current','armi_media','armi_playlists','armi_books','armi_web_saved'].forEach(k=>store.removeItem(k));
     Object.keys(store).forEach(k=>{ if(k.startsWith('m_')||k.startsWith('tr_')||k.startsWith('mm_')) store.removeItem(k); });
-    DB.tasks=SEED_TASKS.map(t=>({...t})); DB.notes=SEED_NOTES.map(n=>({...n})); DB.events=SEED_EVENTS.map(e=>({...e})); DB.sections=SEED_SECTIONS.map(s=>({...s})); DB.topics=SEED_TOPICS.map(t=>({...t})); DB.lectures=SEED_LECTURES.map(l=>({...l})); DB.myvideos=SEED_MYVIDEOS.map(v=>({...v})); DB.weights=[]; DB.media=[];
+    DB.tasks=SEED_TASKS.map(t=>({...t})); DB.notes=SEED_NOTES.map(n=>({...n})); DB.events=SEED_EVENTS.map(e=>({...e})); DB.sections=SEED_SECTIONS.map(s=>({...s})); DB.topics=SEED_TOPICS.map(t=>({...t})); DB.lectures=SEED_LECTURES.map(l=>({...l})); DB.myvideos=SEED_MYVIDEOS.map(v=>({...v})); DB.weights=[]; DB.media=[]; DB.playlists=[]; DB.books=[];
     CHATS=[{id:uid('ch'), name:'Новый чат', updated:Date.now(), msgs:[{id:uid('c'), role:'ai', content:'Привет! Я Арми — работаю на твоём устройстве, без интернета. Вижу план тренировок, задачи, заметки и расписание. Спроси что угодно — отвечу локально.', time:'09:00', local:true}]}];
     CHAT_ID=CHATS[0].id; store.setItem('armi_chat_current', CHAT_ID); CHAT=CHATS[0].msgs;
     closeModal(); render(); toast('Прототип сброшен');
@@ -3528,11 +3631,16 @@ document.addEventListener('click', e=>{
 });
 document.addEventListener('keydown', e=>{
   if(e.key==='Escape'){
+    const ae=document.activeElement;
+    if(ae && (ae.tagName==='INPUT'||ae.tagName==='TEXTAREA')){ ae.blur(); return; }
     if(document.querySelector('.modal')) closeModal();
     else if(S.secretActive) Secret.panic();
   }
 });
-window.addEventListener('resize', ()=>{ if(S.view==='auto') render(); });
+(function(){
+  let __lastView=resolveView();
+  window.addEventListener('resize', ()=>{ if(S.view!=='auto') return; const v=resolveView(); if(v!==__lastView){ __lastView=v; render(); } });
+})();
 /* ══════════ СЕКРЕТНЫЙ РЕЖИМ ══════════
    Закрытые разделы живут в том же интерфейсе, что и открытый Арми: после входа
    в меню рядом с обычными появляются «Чаты», «Заметки», «Фото», «Музыка»,
@@ -3712,10 +3820,12 @@ async function enterDecoy(){
   closeModal(); armLock(); render(); toast('Закрытая зона открыта — разделы появились в меню');
 }
 function panic(){
+  if(PLAYER.mode==='custom'){ PLAYER.stopAll(); PLAYER.mode=null; PLAYER.custom=null; S.music.playing=false; S.music.progress=0; }
+  closeModal();
   S.secretActive=false; S.secretMode='real'; MODE='real'; MK=null; DATA=null;
   S.secretScreen=null; S.secretThread=null; S.secretNoteOpen=null; S.moreOpen=false;
   clearTimeout(LOCK_T);
-  document.title='Арми — v6.5';
+  document.title='Арми — v6.6';
   render(); toast('Закрытая зона закрыта');
 }
 function counts(){
