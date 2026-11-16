@@ -326,6 +326,135 @@ details[open] .ic.chev{transform:rotate(90deg)}
   .btn-sm{min-height:38px}
 }
 .overscroll-contain{overscroll-behavior:contain}
+/* ═══════════ V7 CSS: проводник, редакторы, корзина, акценты разделов ═══════════ */
+
+/* ── акцентные цвета разделов (полоса + активный пункт меню) ── */
+.acc-band{position:sticky;top:0;z-index:5;height:3px;border-radius:99px;margin:-2px 0 10px;background:var(--acc,#fbbf24)}
+.nav-item.act{background:color-mix(in srgb, var(--acc,#fbbf24) 13%, transparent)}
+.pcheader{position:relative}
+.ph-band{position:absolute;left:0;right:0;top:0;height:3px;background:var(--acc,#fbbf24)}
+.app[data-accent]{--acc:var(--ac)}
+
+/* ═══ ПРОВОДНИК (Explorer) ═══ */
+.expl{display:flex;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--panel2);min-height:420px}
+.expl-side{width:216px;flex:none;border-right:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;max-height:62vh}
+.expl-side-head{display:flex;align-items:center;justify-content:space-between;padding:10px 10px 8px;flex:none}
+.expl-side-head .tiny{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t4)}
+.expl-tree{flex:1;overflow-y:auto;padding:0 6px 10px;min-height:0}
+/* узел дерева */
+.tnode{display:flex;align-items:center;gap:6px;width:100%;padding:6px 8px;border-radius:8px;color:var(--t2);font-size:12.5px;text-align:left;position:relative;border:none;background:none}
+.tnode:hover{background:var(--panel3);color:var(--t1)}
+.tnode.act{background:var(--panel4);color:var(--t1)}
+.tnode .tn-tw{width:14px;height:14px;flex:none;display:grid;place-items:center;color:var(--t4);transition:transform .15s}
+.tnode.open .tn-tw, .tnode.act .tn-tw{transform:rotate(90deg)}
+.tnode .tn-tw svg.ic{width:12px;height:12px}
+.tnode .tn-tw.leaf{visibility:hidden}
+.tnode.droptarget{box-shadow:inset 0 0 0 2px var(--amber);background:rgba(251,191,36,.08)}
+.tnode .tn-lbl{min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tnode .tn-cnt{font-size:10px;color:var(--t4)}
+.tnode .tn-x{width:20px;height:20px;flex:none;display:grid;place-items:center;border-radius:6px;color:var(--t4);opacity:0;transition:opacity .12s}
+.tnode:hover .tn-x{opacity:1}
+.tnode .tn-x:hover{color:var(--red);background:rgba(248,113,113,.12)}
+.tnode .tn-x svg.ic{width:13px;height:13px}
+
+/* основная область */
+.expl-main{flex:1;min-width:0;display:flex;flex-direction:column}
+.expl-toolbar{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);flex-wrap:wrap;flex:none}
+.expl-crumb{display:flex;align-items:center;gap:2px;min-width:0;flex:1;font-size:12.5px;color:var(--t2);flex-wrap:wrap}
+.crumb{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:8px;cursor:pointer;white-space:nowrap;border:none;background:none}
+.crumb:hover{background:var(--panel3);color:var(--t1)}
+.crumb.cur{color:var(--t1);font-weight:600;cursor:default}
+.crumb svg.ic{width:12px;height:12px;color:var(--t4)}
+.expl-area{flex:1;overflow-y:auto;padding:12px;position:relative;min-height:0;touch-action:pan-y}
+/* сетка плиток */
+.egrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:10px}
+.etile{position:relative;border-radius:12px;border:1px solid transparent;padding:8px 6px 7px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:border-color .12s, background .12s}
+.etile:hover{background:var(--panel3)}
+.etile.sel{border-color:var(--amber);background:rgba(251,191,36,.09)}
+.etile.dragging{opacity:.35}
+.etile.droptarget{border-color:var(--em);box-shadow:inset 0 0 0 2px var(--em)}
+.etile .et-thumb{width:100%;aspect-ratio:1;border-radius:9px;background:var(--panel4);display:grid;place-items:center;overflow:hidden;position:relative}
+.etile .et-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.etile .et-thumb svg.ic{width:26px;height:26px;color:var(--t3)}
+.etile .et-name{font-size:11.5px;line-height:1.3;color:var(--t1);text-align:center;word-break:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.etile .et-sub{font-size:10px;color:var(--t4);text-align:center}
+.etile .et-check{position:absolute;top:6px;left:6px;width:20px;height:20px;border-radius:7px;border:1.5px solid rgba(255,255,255,.35);background:rgba(11,13,17,.6);display:grid;place-items:center;color:transparent;opacity:0;transition:opacity .12s}
+.etile.sel .et-check{opacity:1;border-color:var(--amber);background:var(--amber);color:#0b0d11}
+.etile:hover .et-check{opacity:.85}
+.etile .et-check svg.ic{width:12px;height:12px}
+.etile .et-badge{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:7px;background:rgba(11,13,17,.6);display:grid;place-items:center;color:var(--t2)}
+.etile .et-badge svg.ic{width:12px;height:12px}
+/* строка списка */
+.elist{display:flex;flex-direction:column;gap:2px}
+.erow{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:9px;cursor:pointer;user-select:none;-webkit-user-select:none}
+.erow:hover{background:var(--panel3)}
+.erow.sel{background:rgba(251,191,36,.10);box-shadow:inset 0 0 0 1px var(--amber)}
+.erow.dragging{opacity:.35}
+.erow.droptarget{box-shadow:inset 0 0 0 2px var(--em)}
+.erow .er-ic{width:34px;height:34px;flex:none;border-radius:8px;background:var(--panel4);display:grid;place-items:center;overflow:hidden}
+.erow .er-ic img{width:100%;height:100%;object-fit:cover}
+.erow .er-ic svg.ic{width:17px;height:17px;color:var(--t3)}
+.erow .er-name{min-width:0;flex:1;font-size:13px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.erow .er-sub{font-size:11px;color:var(--t4);white-space:nowrap;flex:none}
+.erow .er-dur{font-variant-numeric:tabular-nums}
+/* рамка-лассо */
+.lasso{position:fixed;border:1px solid var(--amber);background:rgba(251,191,36,.14);border-radius:4px;z-index:90;pointer-events:none}
+/* призрак при перетаскивании */
+.drag-ghost{position:fixed;z-index:95;pointer-events:none;display:flex;align-items:center;gap:8px;background:var(--panel4);border:1px solid var(--amber);border-radius:10px;padding:7px 12px;font-size:12.5px;color:var(--t1);box-shadow:0 12px 32px rgba(0,0,0,.5);max-width:70vw}
+.drag-ghost svg.ic{width:14px;height:14px;color:var(--amber)}
+/* панель выделения */
+.selbar{display:flex;align-items:center;gap:8px;padding:7px 12px;background:rgba(251,191,36,.08);border-top:1px solid rgba(251,191,36,.22);flex:none;flex-wrap:wrap}
+.expl-empty{display:grid;place-items:center;height:100%;min-height:180px;color:var(--t3);font-size:13px;text-align:center;padding:20px}
+
+/* ═══ РЕДАКТОР ФОТО (кроп/поворот/фильтры) ═══ */
+.phed-stage{background:repeating-conic-gradient(#14171e 0% 25%, #10131a 0% 50%) 50%/16px 16px;border-radius:12px;overflow:hidden;position:relative;display:grid;place-items:center;touch-action:none}
+.phed-stage img{max-width:100%;max-height:52vh;display:block;user-select:none;-webkit-user-drag:none}
+.phed-crop{position:absolute;border:1.5px solid #fff;box-shadow:0 0 0 9999px rgba(5,6,8,.66);cursor:move}
+.phed-crop .pc-h{position:absolute;background:rgba(255,255,255,.55)}
+.phed-crop .pc-h.h{left:0;right:0;height:1px}
+.phed-crop .pc-h.v{top:0;bottom:0;width:1px}
+.phed-crop .pc-h:nth-child(1){top:33.3%}
+.phed-crop .pc-h:nth-child(2){top:66.6%}
+.phed-crop .pc-h.v:nth-child(3){left:33.3%}
+.phed-crop .pc-h.v:nth-child(4){left:66.6%}
+.phed-crop .pc-k{position:absolute;width:16px;height:16px;background:#fff;border-radius:4px;box-shadow:0 1px 4px rgba(0,0,0,.4);touch-action:none}
+.phed-crop .pc-k.tl{left:-8px;top:-8px;cursor:nwse-resize}
+.phed-crop .pc-k.tr{right:-8px;top:-8px;cursor:nesw-resize}
+.phed-crop .pc-k.bl{left:-8px;bottom:-8px;cursor:nesw-resize}
+.phed-crop .pc-k.br{right:-8px;bottom:-8px;cursor:nwse-resize}
+.phed-preview{max-height:120px;border-radius:10px;border:1px solid var(--line);display:block;margin:0 auto}
+
+/* ═══ РЕДАКТОР АУДИО (тримминг по волне) ═══ */
+.wave-wrap{position:relative;height:96px;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;touch-action:none}
+.wave-cv{width:100%;height:100%;display:block}
+.wave-sel{position:absolute;top:0;bottom:0;background:rgba(251,191,36,.16);border-left:2px solid var(--amber);border-right:2px solid var(--amber);pointer-events:none}
+.wave-sel .ws-h{position:absolute;top:0;bottom:0;width:14px;cursor:ew-resize;pointer-events:auto;display:grid;place-items:center;color:var(--amber)}
+.wave-sel .ws-h.l{left:-6px}
+.wave-sel .ws-h.r{right:-6px}
+.wave-play{position:absolute;top:0;bottom:0;width:2px;background:var(--em);pointer-events:none}
+.wave-time{display:flex;justify-content:space-between;font-variant-numeric:tabular-nums;font-size:11px;color:var(--t3);margin-top:6px}
+
+/* ═══ КОРЗИНА (секретная зона) ═══ */
+.tr-grid{display:flex;flex-direction:column;gap:8px}
+.tr-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:11px;background:var(--panel2);flex-wrap:wrap}
+.tr-item .tr-ic{width:36px;height:36px;flex:none;border-radius:9px;background:var(--panel4);display:grid;place-items:center;overflow:hidden}
+.tr-item .tr-ic img{width:100%;height:100%;object-fit:cover}
+.tr-item .tr-ic svg.ic{width:17px;height:17px;color:var(--t3)}
+.tr-item .tr-body{min-width:0;flex:1}
+.tr-item .tr-name{font-size:13px;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tr-item .tr-sub{font-size:11px;color:var(--t3);margin-top:1px}
+.tr-days{font-size:11px;color:var(--t2);background:var(--panel4);border-radius:99px;padding:2px 9px;white-space:nowrap;flex:none}
+.tr-days.warn{color:var(--red);background:rgba(248,113,113,.12)}
+
+/* мобильная адаптация проводника */
+@media (max-width:560px){
+  .expl{flex-direction:column;min-height:0}
+  .expl-side{width:100%;max-height:168px;border-right:none;border-bottom:1px solid var(--line)}
+  .egrid{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
+  .erow .er-sub{display:none}
+  .crumb{padding:2px 6px}
+  .tnode{padding:7px 8px}
+}
 </style></head><body>
 <div id="app" class="app"></div><div id="overlays"></div>
 <div id="toast" class="toast"></div>
@@ -1203,17 +1332,18 @@ function saveDB(){ saveJSON('armi_tasks',DB.tasks); saveJSON('armi_notes',DB.not
 function sectColor(name){ const s=DB.sections.find(x=>x.name===name); return s?s.c:'#a1a1aa'; }
 function resolveView(){ if(S.view!=='auto') return S.view; return window.innerWidth>=900?'pc':'phone'; }
 /* ══════════ ОБОЛОЧКА (обычная и закрытая — один и тот же интерфейс) ══════════ */
-const S_SCREENS = {schat:{t:'Чаты'}, snotes:{t:'Заметки'}, sphotos:{t:'Фото'}, smusic:{t:'Музыка'}, contour:{t:'Второй контур'}, ssync:{t:'Синхронизация'}};
+const S_SCREENS = {schat:{t:'Чаты'}, snotes:{t:'Заметки'}, sphotos:{t:'Фото'}, smusic:{t:'Музыка'}, strash:{t:'Корзина'}, contour:{t:'Второй контур'}, ssync:{t:'Синхронизация'}};
 const S_NAV_GROUPS = [
   {label:'Ассистент', items:['schat','contour']},
   {label:'Организатор', items:['snotes']},
   {label:'Медиа', items:['sphotos','smusic']},
+  {label:'Удалённое', items:['strash']},
   {label:'Система', items:['ssync']},
 ];
-const S_NAV_ICONS = {schat:'chat', snotes:'note', sphotos:'img', smusic:'music', contour:'zap', ssync:'sync'};
+const S_NAV_ICONS = {schat:'chat', snotes:'note', sphotos:'img', smusic:'music', strash:'trash', contour:'zap', ssync:'sync'};
 const S_PHONE_MAIN_ZONE = ['schat','snotes','sphotos','smusic'];
-const S_PHONE_MORE_ZONE = ['contour','ssync'];
-const SECRET_IDS = ['schat','snotes','sphotos','smusic','contour','ssync'];
+const S_PHONE_MORE_ZONE = ['strash','contour','ssync'];
+const SECRET_IDS = ['schat','snotes','sphotos','smusic','strash','contour','ssync'];
 const isSecretId = id => SECRET_IDS.includes(id);
 function screenTitle(id){ return isSecretId(id) ? (S_SCREENS[id]?S_SCREENS[id].t:'') : (SCREENS[id]?SCREENS[id].t:''); }
 function screenIcon(id){ return isSecretId(id) ? (S_NAV_ICONS[id]||'grid') : (NAV_ICONS[id]||'grid'); }
@@ -1980,7 +2110,8 @@ function trainLife(){
 }
 
 /* ── ВИДЕО ── */
-function scrVideo(){
+function scrVideo(){ return scrVideoV7(); }
+function scrVideoLegacy(){
   return '<div class="stack">'+
     '<div class="row between wrap"><div style="font-size:19px;font-weight:800">Видео</div><div class="row" style="gap:8px"><label class="btn btn-amber btn-sm" style="cursor:pointer">'+ic('plus')+'Файл<input type="file" accept="video/*" multiple style="display:none" onchange="ACTIONS.vidFileAdd(this)"></label><button class="btn btn-sm" data-act="vidNew">'+ic('plus')+'Ссылка</button></div></div>'+
     '<div class="card"><h3>Мои видео<span class="h-note">играют прямо здесь, без интернета</span></h3>'+
@@ -2223,7 +2354,8 @@ const REC_CATS = {
   meet:{t:'Созвон', icon:'video', c:'acc-violet', desc:'онлайн-встречи'},
   idea:{t:'Мысль', icon:'bulb', c:'acc-rose', desc:'идеи на ходу'},
 };
-function scrLectures(){
+function scrLectures(){ return scrExplorerV7('lectures'); }
+function scrLecturesLegacy(){
   if(S.lectRec){    const cat = REC_CATS[LectRec.cat]||REC_CATS.lecture;
     return '<div class="stack">'+
       '<div class="row between wrap"><div style="font-size:19px;font-weight:800">Записи</div><button class="btn btn-danger btn-sm" data-act="lectCancel">'+ic('stop')+'Отменить (удалить)</button></div>'+
@@ -2280,7 +2412,8 @@ function scrLectures(){
 }
 
 /* ── МУЗЫКА ── */
-function scrMusic(){
+function scrMusic(){ return scrExplorerV7('music'); }
+function scrMusicLegacy(){
   const tr = currentTrack();
   const tot = (tr.seconds||tr.dur)||0;
   const inFolder = S.folder && S.folder.zone==='music';
@@ -2342,7 +2475,8 @@ function scrMusic(){
 }
 
 /* ── ФОТО (обычная галерея) ── */
-function scrPhotos(){
+function scrPhotos(){ return scrExplorerV7('photos'); }
+function scrPhotosLegacy(){
   const inFolder = S.folder && S.folder.zone==='photos';
   let ph = DB.media.filter(m=>m.kind==='photo');
   if(inFolder) ph = ph.filter(m=>m.folder===S.folder.id);
@@ -2934,7 +3068,7 @@ function scrChat(){
     '</div>'+
     '<div class="msgs" id="msgs">'+CHAT.map(m=>'<div class="msg '+(m.role==='user'?'user':'ai')+'">'+(m.role==='ai'?'<div class="md">'+mdLite(m.content)+'</div>':esc(m.content))+msgFooter(m)+'</div>').join('')+'</div>'+
     '<div style="padding:0 16px 8px;display:flex;gap:6px;overflow-x:auto">'+
-      ['что сегодня?','100 на 5','сколько будет 2+2×2','неделя и фаза','кисть','дай факт','подбери книгу','идея на вечер'].map(c=>'<button class="chip" data-act="chip" data-arg="'+esc(c)+'">'+esc(c)+'</button>').join('')+
+      ['что сегодня?','подбери книгу','идея на вечер','неделя и фаза','дай факт'].map(c=>'<button class="chip" data-act="chip" data-arg="'+esc(c)+'">'+esc(c)+'</button>').join('')+
       (S.secretActive? '<button class="chip" style="border-color:rgba(52,211,153,.45);color:var(--em)" data-act="go" data-arg="schat">'+ic('lock').replace('class="ic"','class="ic" style="width:12px;height:12px;vertical-align:-2px"')+'закрытые чаты</button>' : '')+'</div>'+
     '<div class="chatbar">'+
       '<button class="btn'+(S.deepThink?' btn-amber':'')+'" style="width:42px;height:40px;padding:0" data-act="deepToggle" title="Думать глубже">'+ic('brain')+'</button>'+
@@ -2957,7 +3091,7 @@ function localAnswer(q){
   const d=new Date(), {w,ph}=weekOf(d), day=DAYS[d.getDay()];
   if(has('спасиб')) return 'Всегда пожалуйста.';
   if(has('как дела')) return 'По плану: '+dayLow(day.type)+'. Открытых задач: '+DB.tasks.filter(x=>!x.done).length+'. А у тебя?';
-  if(has('что умеешь')||has('умеешь')) return 'Считаю в чате («100 на 5», «25% от 4000»), знаю время и дату, веду план и тренировки («что сегодня?», «неделя и фаза»), задачи, расписание, протокол кисти, факты, книги и идеи. Без интернета отвечаю шаблонами — скачай локальную модель в Настройках, и я начну думать по-настоящему даже офлайн.';
+  if(has('что умеешь')||has('умеешь')) return 'Знаю время и дату, веду план и тренировки («что сегодня?», «неделя и фаза»), задачи, расписание, протокол кисти, подбираю книги и идеи на вечер, считаю проценты и примеры. Без интернета отвечаю шаблонами — скачай локальную модель в Настройках, и я начну думать по-настоящему даже офлайн.';
   if(has('факт')){
     const f = FACTS[Math.floor(Math.random()*FACTS.length)];
     return 'Держи факт:\n'+f+'\n\nЕщё — в разделе «Развитие», там их '+FACTS.length+'.';
@@ -2991,7 +3125,7 @@ function localAnswer(q){
   if(has('расписан')){
     return 'Расписание на сегодня:\n'+DB.events.filter(e=>e.day===(d.getDay()+6)%7).sort((a,b)=>a.start.localeCompare(b.start)).map(e=>esc(e.start)+'–'+esc(e.end)+' '+e.title).join('\n')+'\nТеперь его можно править: нажми на событие в разделе «Расписание».';
   }
-  return 'Интернета нет, а локальная модель ещё не скачана — отвечаю заготовками.\nУверенно умею офлайн:\n— считать: «100 на 5», «сколько будет 2+2×2», «25% от 4000»\n— время и дата: «который час», «какое число»\n— план: «что сегодня?», «неделя и фаза», «кисть»\n— задачи, расписание, факты, книги, идеи\nСкачай модель в Настройках → Локальный ИИ — и я буду отвечать по-настоящему без интернета.';
+  return 'Интернета нет, а локальная модель ещё не скачана — отвечаю заготовками.\nУверенно умею офлайн:\n— время и дата: «который час», «какое число»\n— план: «что сегодня?», «неделя и фаза», «кисть»\n— задачи, расписание, факты, книги, идеи\nСкачай модель в Настройках → Локальный ИИ — и я буду отвечать по-настоящему без интернета.';
 }
 /* ══════════ НАСТОЯЩИЙ ИИ: конвейер ответа ══════════
    1) быстрый агент: калькулятор/время/дата — мгновенно, офлайн
@@ -3890,7 +4024,7 @@ async function importRun(){
 
 /* ── ЭКРАНЫ ЗАКРЫТОЙ ЗОНЫ: рендерятся в общем интерфейсе рядом с обычными разделами ── */
 function renderSecretScreen(){
-  const map = {schat:scChats, snotes:scNotes, sphotos:scPhotos, smusic:scMusic, contour:scContour, ssync:scSync};
+  const map = {schat:scChats, snotes:scNotes, sphotos:scPhotos, smusic:scMusic, strash:scTrash, contour:scContour, ssync:scSync};
   return (map[S.secretScreen]||scChats)();
 }
 
@@ -4089,6 +4223,1844 @@ return { status, openGate, loginModal, tryLogin, recoveryModal, tryRecovery, new
 })();
 
 window.modalBack = closeModal;
+/* ═══ V7 MODULE: 20-data-v7.js ═══ */
+/* ═══════════════════════════════════════════════════════════════════
+   V7 · СЛОЙ ДАННЫХ: мягкое удаление + секретная корзина (30 дней)
+   ─────────────────────────────────────────────────────────────────
+   Подход поверх v6.6 (без смены схемы IndexedDB — блобы не трогаем):
+   • каждый удаляемый элемент получает deletedAt (timestamp) —
+     он остаётся в DB.media / DB.lectures / DB.notes / DB.myvideos,
+     но все обычные выборки отфильтровывают deletedAt
+   • корзина — раздел strash в секретной зоне: показывает всё
+     с deletedAt, восстановление в 1 клик, авто-удаление через 30 дней
+   • при полном удалении (авто-очистка) — убираем запись и блоб из IDB
+   Хранение: DB.trashMeta (localStorage, armi_trash) для записей без
+   места в схеме; сами объекты помечаем полем deletedAt и храним
+   отдельный массив удалённых копий (чтобы восстановить даже после
+   перезаписи основного массива) — см. TRASH.
+   ═══════════════════════════════════════════════════════════════════ */
+
+const TRASH_DAYS = 30;
+
+/* копии удалённых объектов по типам:
+   media | lecture | note | video | folder */
+const TRASH = loadJSON('armi_trash', []);
+
+function trashPush(kind, obj, from){
+  TRASH.unshift({
+    kind, obj: JSON.parse(JSON.stringify(obj)),
+    from: from || '',                  /* откуда удалено: раздел */
+    deletedAt: Date.now(),
+  });
+  saveJSON('armi_trash', TRASH);
+}
+function trashDaysLeft(ts){
+  return Math.max(0, Math.ceil((ts + TRASH_DAYS * 864e5 - Date.now()) / 864e5));
+}
+function trashIsExpired(ts){ return Date.now() - ts >= TRASH_DAYS * 864e5; }
+
+/* ── фильтры для обычных выборок (скрывают удалённое) ── */
+/* медиа: DB.media, но без тех, чей id лежит в корзине */
+const trashMediaIds = () => new Set(TRASH.filter(t => t.kind === 'media').map(t => t.obj.id));
+const trashLectureIds = () => new Set(TRASH.filter(t => t.kind === 'lecture').map(t => t.obj.id));
+const trashNoteIds = () => new Set(TRASH.filter(t => t.kind === 'note').map(t => t.obj.id));
+const trashVideoIds = () => new Set(TRASH.filter(t => t.kind === 'video').map(t => t.obj.id));
+/* live-выборки v7 (используются проводником и экранами) */
+const liveMediaV7 = kind => DB.media.filter(m => m.kind === kind && !trashMediaIds().has(m.id));
+const liveLecturesV7 = () => DB.lectures.filter(l => !trashLectureIds().has(l.id));
+const liveNotesV7 = () => DB.notes.filter(n => !trashNoteIds().has(n.id));
+const liveVideosV7 = () => DB.myvideos.filter(v => !trashVideoIds().has(v.id));
+
+/* ── МЯГКОЕ УДАЛЕНИЕ (из любого раздела → корзина секретной зоны) ── */
+async function trashMedia(arg){
+  const m = DB.media.find(x => x.id === arg);
+  if(!m) return;
+  /* остановить плеер, если играет этот файл */
+  if(PLAYER.fileId === arg){ PLAYER.stopAll(); PLAYER.mode = null; PLAYER.fileId = null; S.music.playing = false; S.music.progress = 0; }
+  if(PLAYER.queue){ PLAYER.queue = PLAYER.queue.filter(x => x !== arg); }
+  if(PLAYER.custom && PLAYER.custom.id === arg){ PLAYER.stopAll(); PLAYER.mode = null; PLAYER.custom = null; }
+  trashPush('media', m, 'Медиа');
+  /* вычистить из плейлистов */
+  DB.playlists.forEach(p => { p.items = (p.items || []).filter(i => i !== arg); });
+  /* убрать из основного массива: блоб остаётся в IndexedDB до авто-очистки */
+  DB.media = DB.media.filter(x => x.id !== arg);
+  saveDB();
+  if(MEDIA_URLS[arg]){ try{ URL.revokeObjectURL(MEDIA_URLS[arg]); }catch(e){} delete MEDIA_URLS[arg]; }
+  render();
+  toast('В корзину (закрытая зона) · возврат в течение 30 дней');
+}
+async function trashLecture(arg){
+  const l = DB.lectures.find(x => x.id === arg);
+  if(!l) return;
+  trashPush('lecture', l, 'Записи');
+  DB.lectures = DB.lectures.filter(x => x.id !== arg);
+  saveDB(); render();
+  toast('Запись в корзине · возврат в течение 30 дней');
+}
+async function trashNote(arg){
+  const n = DB.notes.find(x => x.id === arg);
+  if(!n) return;
+  trashPush('note', n, 'Заметки');
+  DB.notes = DB.notes.filter(x => x.id !== arg);
+  if(S.noteOpen === arg) S.noteOpen = null;
+  saveDB(); render();
+  toast('Заметка в корзине · возврат в течение 30 дней');
+}
+async function trashVideo(arg){
+  const v = DB.myvideos.find(x => x.id === arg);
+  if(!v) return;
+  trashPush('video', v, 'Видео');
+  DB.myvideos = DB.myvideos.filter(x => x.id !== arg);
+  saveDB(); render();
+  toast('Ссылка в корзине · возврат в течение 30 дней');
+}
+/* папка целиком (зона Folders): все элементы папки + сама папка */
+async function trashFolderZone(zone, fid){
+  const z = Folders.zones[zone];
+  if(!z) return;
+  const folder = Folders.list(zone).find(f => f.id === fid);
+  if(!folder) return;
+  /* элементы папки — по одному в корзину */
+  const items = z.items().filter(o => (o.folder || null) === (fid || null));
+  const kindMap = { lectures:'lecture', photos:'media', notes:'note', music:'media', books:'book' };
+  for(const o of items){
+    trashPush(kindMap[zone] || 'media', o, folder.name);
+    if(zone === 'lectures') DB.lectures = DB.lectures.filter(x => x.id !== o.id);
+    else if(zone === 'notes') DB.notes = DB.notes.filter(x => x.id !== o.id);
+    else if(zone === 'photos' || zone === 'music') DB.media = DB.media.filter(x => x.id !== o.id);
+  }
+  /* сама папка */
+  trashPush('folder', { zone, folder }, folder.name);
+  Folders.save(zone, Folders.list(zone).filter(f => f.id !== fid));
+  if(S.folder && S.folder.id === fid) S.folder = null;
+  saveDB(); render();
+  toast('Папка в корзине · ' + items.length + ' эл. · 30 дней');
+}
+
+/* ── ВОССТАНОВЛЕНИЕ ── */
+async function trashRestore(idx){
+  const t = TRASH[idx];
+  if(!t) return;
+  if(t.kind === 'media'){ DB.media.unshift(t.obj); }
+  else if(t.kind === 'lecture'){ DB.lectures.unshift(t.obj); }
+  else if(t.kind === 'note'){ DB.notes.unshift(t.obj); }
+  else if(t.kind === 'video'){ DB.myvideos.unshift(t.obj); }
+  else if(t.kind === 'folder'){
+    const list = Folders.list(t.obj.zone);
+    if(!list.some(f => f.id === t.obj.folder.id)) list.push(t.obj.folder);
+    Folders.save(t.obj.zone, list);
+  }
+  TRASH.splice(idx, 1);
+  saveDB(); saveJSON('armi_trash', TRASH);
+  render();
+  toast('Восстановлено: «' + (t.obj.name || t.obj.title || t.obj.folder && t.obj.folder.name || 'элемент') + '»');
+}
+
+/* ── АВТООЧИСТКА: запускать при старте и раз в час ── */
+async function trashAutoPurge(){
+  const expired = TRASH.filter(t => trashIsExpired(t.deletedAt));
+  if(!expired.length) return 0;
+  /* удалить блобы медиа из IndexedDB навсегда */
+  for(const t of expired){
+    if(t.kind === 'media'){
+      try{ await IDB.del(t.obj.id); }catch(e){}
+      if(MEDIA_URLS[t.obj.id]){ try{ URL.revokeObjectURL(MEDIA_URLS[t.obj.id]); }catch(e){} delete MEDIA_URLS[t.obj.id]; }
+    }
+    if(t.kind === 'lecture' && t.obj.recId){
+      try{ await IDB.del('lec_' + t.obj.id); }catch(e){}
+    }
+  }
+  const ids = new Set(expired.map(t => t));
+  for(let i = TRASH.length - 1; i >= 0; i--){
+    if(expired.includes(TRASH[i])) TRASH.splice(i, 1);
+  }
+  saveJSON('armi_trash', TRASH);
+  return expired.length;
+}
+/* фоновая проверка: раз в час */
+setInterval(() => { trashAutoPurge().then(n => { if(n) toast('Корзина: безвозвратно удалено ' + n); }); }, 3600e3);
+
+/* ── подмена жёстких удалений v6.6 на мягкие ── */
+/* mediaDel (фото/музыка/видео-файлы) → корзина */
+const _mediaDelV66 = mediaDel;
+mediaDel = async function(arg){
+  const inTrash = TRASH.some(t => t.kind === 'media' && t.obj.id === arg);
+  if(inTrash){ _mediaDelV66(arg); return; }   /* уже в корзине — удаляем как раньше */
+  await trashMedia(arg);                       /* первый раз — мягко, в корзину */
+};
+
+/* ═══ V7 MODULE: 30-expl.js ═══ */
+/* ═══════════════════════════════════════════════════════════════════
+   V7 · EXPL — ДВИЖОК ПРОВОДНИКА (Windows Explorer style) поверх v6.6
+   ─────────────────────────────────────────────────────────────────
+   Один движок на все медиа-разделы. Использует существующие:
+   • Folders-зоны v6.6 (armi_folders_photos/music/lectures/books/notes)
+     — плоские папки с цветом; расширяем до вложенности через
+     parentId у папок (обратно совместимо: без parentId — корень)
+   • DB.media / DB.lectures / DB.myvideos — элементы с полем folder
+   • IDB-блобы и MEDIA_URLS для превью
+   Возможности: дерево слева, сетка/список, сортировка, мультивыделение
+   (Ctrl/Shift/лассо), DnD в папки (мышь + long-press на тач), контекстное
+   меню (открыть/переименовать/переместить/редактировать/в корзину),
+   перемещение элементов между папками, массовое удаление в корзину.
+   ═══════════════════════════════════════════════════════════════════ */
+
+const EXPL = {
+  state: {},   /* zone -> {cwd, view, sort, sel[], anchor, expanded{}} */
+  st(zone){
+    if(!this.state[zone]) this.state[zone] = {
+      cwd: null, view: 'grid', sort: 'date', sel: [], anchor: null, expanded: {},
+    };
+    return this.state[zone];
+  },
+};
+
+/* ── конфиги зон (заполняются в 40-screens-v7) ── */
+const EXPL_CFG = {};
+
+/* ═══ УТИЛИТЫ ПАПОК (расширение Folders v6.6 до вложенности) ═══ */
+function exFolders(zone){ return Folders.list(zone); }
+/* дети папки (null = корень) */
+function exChildren(zone, parentId){
+  return exFolders(zone).filter(f => (f.parentId || null) === (parentId || null) && f.id !== parentId);
+}
+/* путь папки вверх */
+function exPath(zone, id){
+  const path = [];
+  let cur = id ? exFolders(zone).find(f => f.id === id) : null;
+  let guard = 0;
+  while(cur && guard++ < 50){ path.unshift(cur); cur = cur.parentId ? exFolders(zone).find(f => f.id === cur.parentId) : null; }
+  return path;
+}
+/* количество элементов в папке напрямую */
+function exCount(zone, fid){
+  const z = Folders.zones[zone];
+  const target = fid || null;
+  return z ? z.items().filter(o => (o.folder || null) === target).length : 0;
+}
+/* элементы папки (элементы зоны с folder===fid), без удалённых в корзину.
+   folder может быть undefined (легаси v6.6) — нормализуем к null */
+function exItems(zone, fid){
+  const z = Folders.zones[zone];
+  let items = z ? z.items() : [];
+  const target = fid || null;
+  const dead = zone === 'lectures' ? trashLectureIds() : (zone === 'photos' || zone === 'music') ? trashMediaIds()
+    : zone === 'notes' ? trashNoteIds() : zone === 'videos' ? trashVideoIds() : new Set();
+  return items.filter(o => (o.folder || null) === target && !dead.has(o.id));
+}
+/* сортированное содержимое: папки + элементы */
+function exContents(zone, folderId){
+  const st = EXPL.st(zone);
+  const folders = exChildren(zone, folderId);
+  const items = exItems(zone, folderId);
+  const byName = (a, b) => (a.name || a.title || '').localeCompare(b.name || b.title || '', 'ru');
+  const added = o => o.dateTs || o.t || 0;
+  const cmp = {
+    name: byName,
+    date: (a, b) => (b.dateTs || added(b)) - (a.dateTs || added(a)),
+    type: (a, b) => String(a.ext || a.kind || '').localeCompare(String(b.ext || b.kind || '')) || byName(a, b),
+    size: (a, b) => (b.size || 0) - (a.size || 0),
+  }[st.sort] || (() => 0);
+  folders.sort(byName);
+  items.sort(cmp);
+  return { folders, items };
+}
+
+/* ═══ РЕНДЕР ПРОВОДНИКА ═══ */
+function scrExplorerV7(zone){
+  const cfg = EXPL_CFG[zone];
+  if(!cfg) return '<div class="empty">Раздел не настроен</div>';
+  const st = EXPL.st(zone);
+  const { folders, items } = exContents(zone, st.cwd);
+  const isPhone = resolveView() === 'phone';
+  const cur = st.cwd ? exFolders(zone).find(f => f.id === st.cwd) : null;
+
+  const side =
+    '<div class="expl-side">' +
+      '<div class="expl-side-head"><span class="tiny">Папки</span>' +
+      '<button class="btn btn-sm" style="width:26px;height:26px;padding:0" data-expl="folderNew" title="Создать папку">' + ic('plus') + '</button></div>' +
+      '<div class="expl-tree" id="extree">' + exTreeHTML(zone, null, 0) + '</div>' +
+    '</div>';
+
+  const toolbar =
+    '<div class="expl-toolbar">' + exCrumbsHTML(zone) +
+      '<span style="flex:1"></span>' +
+      '<select class="btn btn-sm" style="padding:4px 8px;width:auto" data-expl="sort" title="Сортировка">' +
+        [['date','По дате'],['name','По имени'],['type','По типу'],['size','По размеру']].map(s =>
+          '<option value="' + s[0] + '"' + (st.sort === s[0] ? ' selected' : '') + '>' + s[1] + '</option>').join('') +
+      '</select>' +
+      '<button class="btn btn-sm" style="width:28px;height:28px;padding:0" data-expl="viewToggle" title="Вид">' + ic(st.view === 'grid' ? 'list' : 'grid') + '</button>' +
+      cfg.addButton +
+    '</div>';
+
+  const area =
+    '<div class="expl-area" data-expl="area">' +
+      (st.view === 'grid'
+        ? '<div class="egrid">' + exTilesHTML(zone, folders, items) + '</div>'
+        : '<div class="elist">' + exRowsHTML(zone, folders, items) + '</div>') +
+      (!folders.length && !items.length
+        ? '<div class="expl-empty"><div>' + (cfg.empty || 'Пусто') +
+          '<div class="tiny" style="margin-top:6px">Перетащи файлы в папку или нажми «Добавить»</div></div></div>'
+        : '') +
+    '</div>';
+
+  const selbar = st.sel.length
+    ? '<div class="selbar">' +
+        '<span class="tiny" style="color:var(--t2)">Выбрано: ' + st.sel.length + '</span>' +
+        '<button class="btn btn-sm" data-expl="selAll">Все</button>' +
+        '<button class="btn btn-sm" data-expl="selClear">Снять</button>' +
+        '<span style="flex:1"></span>' +
+        '<button class="btn btn-sm" data-expl="moveDialog">В папку…</button>' +
+        '<button class="btn btn-danger btn-sm" data-expl="trashSel">В корзину</button>' +
+      '</div>'
+    : '';
+
+  const hint = isPhone
+    ? '<div class="tiny">Долгое нажатие — выделить и перенести · меню — долгий тап по плитке</div>'
+    : '<div class="tiny">Клик — выбрать · двойной клик — открыть · Ctrl/Shift — несколько · рамка — выделить · правый клик — меню · тащи в папки</div>';
+
+  return '<div class="stack">' +
+    '<div class="acc-band" style="--acc:' + cfg.accent + '"></div>' +
+    '<div class="row between wrap"><div style="font-size:19px;font-weight:800">' + cfg.title +
+      (cur ? ' · <span style="color:' + (cur.c || cfg.accent) + '">' + esc(cur.name) + '</span>' : '') +
+    '</div></div>' +
+    '<div class="expl" data-zone="' + zone + '">' + side +
+      '<div class="expl-main">' + toolbar + area + selbar + '</div>' +
+    '</div>' + hint +
+    (cfg.extraTop || '') + (cfg.extraBottom || '') +
+    '</div>';
+}
+
+/* ── ДЕРЕВО ── */
+function exTreeHTML(zone, parentId, depth){
+  const st = EXPL.st(zone);
+  const kids = exChildren(zone, parentId);
+  let html = '';
+  /* корневая кнопка */
+  if(depth === 0){
+    html += '<button class="tnode' + (!st.cwd ? ' act' : '') + '" data-expl="goRoot">' +
+      '<span class="tn-tw leaf">' + ic('chevR') + '</span>' + ic('grid') +
+      '<span class="tn-lbl">Все ' + (EXPL_CFG[zone].rootLabel || 'файлы') + '</span>' +
+      '<span class="tn-cnt">' + exItems(zone, null).length + '</span></button>';
+  }
+  for(const f of kids){
+    const open = !!st.expanded[f.id];
+    const hasKids = exChildren(zone, f.id).length > 0;
+    html += '<button class="tnode' + (st.cwd === f.id ? ' act' : '') + (open ? ' open' : '') + '" ' +
+      'data-expl="treeGo" data-fid="' + f.id + '" style="padding-left:' + (8 + depth * 14) + 'px">' +
+      '<span class="tn-tw' + (hasKids ? '' : ' leaf') + '">' + ic('chevR') + '</span>' +
+      '<span style="display:flex;align-items:center;gap:6px;min-width:0;flex:1"><span class="dot" style="background:' + (f.c || '#fbbf24') + '"></span>' +
+      '<span class="tn-lbl">' + esc(f.name) + '</span></span>' +
+      '<span class="tn-cnt">' + exCount(zone, f.id) + '</span>' +
+      '<span class="tn-x" data-expl="folderMenu" data-fid="' + f.id + '" title="Меню папки">' + ic('pen') + '</span>' +
+    '</button>';
+    if(open) html += exTreeHTML(zone, f.id, depth + 1);
+  }
+  return html;
+}
+
+/* ── КРОШКИ ── */
+function exCrumbsHTML(zone){
+  const st = EXPL.st(zone);
+  const cfg = EXPL_CFG[zone];
+  const path = exPath(zone, st.cwd);
+  let html = '<button class="crumb' + (!st.cwd ? ' cur' : '') + '" data-expl="goRoot">' + ic(cfg.icon) + esc(cfg.title) + '</button>';
+  for(const f of path){
+    html += '<span style="color:var(--t4)">›</span>' +
+      '<button class="crumb' + (f.id === st.cwd ? ' cur' : '') + '" data-expl="treeGo" data-fid="' + f.id + '">' + esc(f.name) + '</button>';
+  }
+  return '<div class="expl-crumb">' + html + '</div>';
+}
+
+/* ── ПЛИТКИ / СТРОКИ ── */
+function exThumbHTML(zone, o){
+  const cfg = EXPL_CFG[zone];
+  if(cfg.thumb && cfg.thumb(o)) return cfg.thumb(o);
+  return ic(cfg.itemIcon || 'doc');
+}
+function exTileLabel(o){ return o.name || o.title || '—'; }
+function exTilesHTML(zone, folders, items){
+  const st = EXPL.st(zone);
+  const cfg = EXPL_CFG[zone];
+  let html = '';
+  for(const f of folders){
+    const sel = st.sel.includes('f:' + f.id);
+    html += '<div class="etile' + (sel ? ' sel' : '') + '" data-expl="tile" data-oid="f:' + f.id + '" draggable="true">' +
+      '<div class="et-thumb" style="position:relative">' + ic('folder') +
+      '<span class="dot" style="position:absolute;top:7px;right:7px;width:10px;height:10px;background:' + (f.c || '#fbbf24') + '"></span></div>' +
+      '<div class="et-name">' + esc(f.name) + '</div>' +
+      '<div class="et-sub">' + exCount(zone, f.id) + '</div>' +
+      '<span class="et-check">' + ic('check') + '</span></div>';
+  }
+  for(const o of items){
+    const sel = st.sel.includes(o.id);
+    html += '<div class="etile' + (sel ? ' sel' : '') + '" data-expl="tile" data-oid="' + o.id + '" draggable="true">' +
+      '<div class="et-thumb">' + exThumbHTML(zone, o) + '</div>' +
+      '<div class="et-name">' + esc(exTileLabel(o)) + '</div>' +
+      '<div class="et-sub">' + (cfg.subLabel ? cfg.subLabel(o) : '') + '</div>' +
+      '<span class="et-check">' + ic('check') + '</span></div>';
+  }
+  return html;
+}
+function exRowsHTML(zone, folders, items){
+  const st = EXPL.st(zone);
+  const cfg = EXPL_CFG[zone];
+  let html = '';
+  for(const f of folders){
+    const sel = st.sel.includes('f:' + f.id);
+    html += '<div class="erow' + (sel ? ' sel' : '') + '" data-expl="tile" data-oid="f:' + f.id + '" draggable="true">' +
+      '<div class="er-ic" style="position:relative">' + ic('folder') +
+      '<span class="dot" style="position:absolute;top:3px;right:3px;width:8px;height:8px;background:' + (f.c || '#fbbf24') + '"></span></div>' +
+      '<div class="er-name">' + esc(f.name) + '</div>' +
+      '<div class="er-sub">' + exCount(zone, f.id) + ' эл.</div></div>';
+  }
+  for(const o of items){
+    const sel = st.sel.includes(o.id);
+    html += '<div class="erow' + (sel ? ' sel' : '') + '" data-expl="tile" data-oid="' + o.id + '" draggable="true">' +
+      '<div class="er-ic">' + exThumbHTML(zone, o) + '</div>' +
+      '<div class="er-name">' + esc(exTileLabel(o)) + '</div>' +
+      '<div class="er-sub er-dur">' + (cfg.subLabel ? cfg.subLabel(o) : '') + '</div></div>';
+  }
+  return html;
+}
+
+/* ═══ ВЫДЕЛЕНИЕ ═══ */
+function exOrderedIds(zone){
+  const { folders, items } = exContents(zone, EXPL.st(zone).cwd);
+  return [...folders.map(f => 'f:' + f.id), ...items.map(o => o.id)];
+}
+function exClick(zone, oid, ev){
+  const st = EXPL.st(zone);
+  if(ev && (ev.ctrlKey || ev.metaKey)){
+    st.sel = st.sel.includes(oid) ? st.sel.filter(x => x !== oid) : [...st.sel, oid];
+    st.anchor = oid;
+  } else if(ev && ev.shiftKey && st.anchor){
+    const ids = exOrderedIds(zone);
+    const a = ids.indexOf(st.anchor), b = ids.indexOf(oid);
+    if(a >= 0 && b >= 0){
+      const [lo, hi] = a < b ? [a, b] : [b, a];
+      st.sel = ids.slice(lo, hi + 1);
+    }
+  } else {
+    st.sel = (st.sel.length === 1 && st.sel[0] === oid) ? [] : [oid];
+    st.anchor = oid;
+  }
+  render();
+}
+
+/* ═══ КОНТЕКСТНОЕ МЕНЮ ═══ */
+let EXCTX = null;   /* {x, y, zone, oid, fid, items[]} */
+function exCtxOpen(x, y, zone, oid){
+  const st = EXPL.st(zone);
+  if(!st.sel.includes(oid)) st.sel = [oid];
+  const cfg = EXPL_CFG[zone];
+  const isFolder = oid.startsWith('f:');
+  const items = [];
+  if(isFolder){
+    items.push({ t:'Открыть', ic:'folder', act:'openFolder' });
+    items.push({ t:'Переименовать', ic:'pen', act:'renameFolder' });
+    items.push({ t:'Цвет папки', ic:'img', act:'folderColor' });
+    items.push({ t:'Удалить (с содержимым — в корзину)', ic:'trash', act:'trashFolder', danger:true });
+  } else {
+    items.push({ t:'Открыть', ic:'play', act:'open' });
+    if(cfg.canEdit && cfg.canEdit(oid)) items.push({ t:'Редактировать', ic:'pen', act:'edit' });
+    items.push({ t:'Переименовать', ic:'pen', act:'rename' });
+    items.push({ t:'Переместить в папку…', ic:'folder', act:'move' });
+    items.push({ t:'В корзину', ic:'trash', act:'trash', danger:true });
+  }
+  EXCTX = { x, y, zone, oid, items };
+  render();
+}
+function exCtxHTML(){
+  if(!EXCTX) return '';
+  const h = EXCTX.items.length * 40 + 16;
+  const x = Math.min(EXCTX.x, window.innerWidth - 250);
+  const y = EXCTX.y + h > window.innerHeight - 8 ? Math.max(8, EXCTX.y - h) : EXCTX.y;
+  return '<div class="ctxmenu" style="left:' + x + 'px;top:' + y + 'px" id="exctx">' +
+    EXCTX.items.map((it, i) =>
+      '<button class="ctx-i" data-expl="ctxItem" data-i="' + i + '"' + (it.danger ? ' style="color:var(--red)"' : '') + '>' +
+      ic(it.ic) + it.t + '</button>').join('') +
+    '</div>';
+}
+function exCtxClose(){ if(EXCTX){ EXCTX = null; } }
+
+/* ═══ DnD ═══ */
+const EXDRAG = { ids:[], over:null, ghost:null, longT:null, startX:0, startY:0, fromLongPress:false, moved:false };
+
+function activeZoneV7(){
+  const el = document.querySelector('.expl[data-zone]');
+  return el ? el.getAttribute('data-zone') : null;
+}
+function exFindItem(zone, id){
+  if(!zone || !id) return null;
+  const z = Folders.zones[zone];
+  return z ? z.items().find(o => o.id === id) : null;
+}
+function exDragStart(ids, x, y){
+  EXDRAG.ids = ids.slice();
+  if(!EXDRAG.ghost){
+    EXDRAG.ghost = document.createElement('div');
+    EXDRAG.ghost.className = 'drag-ghost';
+    document.body.appendChild(EXDRAG.ghost);
+  }
+  const first = ids[0];
+  const zone = activeZoneV7();
+  const label = ids.length > 1 ? ('Выбрано: ' + ids.length)
+    : first && first.startsWith('f:')
+      ? ((exFolders(zone).find(f => f.id === first.slice(2)) || {}).name || 'Папка')
+      : exTileLabel(exFindItem(zone, first) || {});
+  EXDRAG.ghost.innerHTML = ic('folder') + esc(String(label)).slice(0, 42);
+  EXDRAG.ghost.style.display = 'flex';
+  exDragMove(x, y);
+}
+function exDragMove(x, y){
+  if(!EXDRAG.ghost) return;
+  EXDRAG.ghost.style.left = (x + 14) + 'px';
+  EXDRAG.ghost.style.top = (y + 12) + 'px';
+  const under = document.elementFromPoint(x, y);
+  const target = under && (under.closest('.tnode[data-fid]') || under.closest('.etile'));
+  document.querySelectorAll('.droptarget').forEach(el => el.classList.remove('droptarget'));
+  EXDRAG.over = null;
+  if(target){
+    let fid = target.getAttribute('data-fid');
+    if(!fid){
+      const oid = target.getAttribute('data-oid') || '';
+      if(oid.startsWith('f:')) fid = oid.slice(2);
+    }
+    if(fid && !EXDRAG.ids.includes('f:' + fid)){
+      target.classList.add('droptarget');
+      EXDRAG.over = fid;
+    }
+  }
+}
+function exDragEnd(){
+  if(EXDRAG.ghost){ EXDRAG.ghost.remove(); EXDRAG.ghost = null; }
+  document.querySelectorAll('.droptarget').forEach(el => el.classList.remove('droptarget'));
+  EXDRAG.over = null; EXDRAG.ids = [];
+}
+/* ядро перемещения: список oid → папка toFid (null = корень) */
+async function exMoveIds(zone, ids, toFid){
+  if(!ids.length) return 0;
+  const z = Folders.zones[zone];
+  let moved = 0;
+  for(const oid of ids){
+    if(oid.startsWith('f:')){
+      const f = exFolders(zone).find(x => x.id === oid.slice(2));
+      /* защита от цикла: цель не внутри переносимой папки */
+      if(f && f.id !== toFid && f.parentId !== toFid && !exPath(zone, toFid).some(p => p.id === f.id)){
+        f.parentId = toFid; moved++;
+      }
+    } else {
+      const o = z ? z.items().find(x => x.id === oid) : null;
+      if(o){ o.folder = toFid; moved++; }
+    }
+  }
+  Folders.save(zone, exFolders(zone));
+  saveDB();
+  const st = EXPL.st(zone);
+  if(toFid) st.expanded[toFid] = true;
+  return moved;
+}
+async function exMoveSel(zone, toFid){
+  const st = EXPL.st(zone);
+  const moved = await exMoveIds(zone, st.sel.slice(), toFid);
+  st.sel = [];
+  render();
+  if(moved) toast(moved > 1 ? ('Перемещено: ' + moved) : 'Перемещено в папку');
+}
+/* массовое удаление выделения в корзину */
+async function exTrashSel(zone){
+  const st = EXPL.st(zone);
+  const ids = st.sel.slice();
+  if(!ids.length) return;
+  let n = 0;
+  for(const oid of ids){
+    if(oid.startsWith('f:')){ await trashFolderZone(zone, oid.slice(2)); n++; }
+    else if(zone === 'lectures'){ await trashLecture(oid); n++; }
+    else if(zone === 'photos' || zone === 'music'){ await trashMedia(oid); n++; }
+    else if(zone === 'notes'){ await trashNote(oid); n++; }
+    else if(zone === 'videos'){ const o = DB.myvideos.find(v => v.id === oid); if(o){ await trashVideo(oid); n++; } }
+  }
+  st.sel = [];
+  render();
+  toast('В корзине: ' + n + ' · 30 дней на возврат');
+}
+
+/* ═══ ДИАЛОГИ ═══ */
+function exFolderNewModal(zone){
+  modal('<h3>' + ic('folder') + 'Новая папка</h3>' +
+    '<input id="exf-name" placeholder="Название папки" style="margin-top:8px" maxlength="48">' +
+    '<div class="row mt10" style="gap:7px;flex-wrap:wrap" id="exf-colors">' +
+      FOLDER_COLORS.map((c, i) => '<button class="fo-c" data-c="' + c + '" style="width:24px;height:24px;border-radius:99px;background:' + c + ';border:3px solid ' + (i === 0 ? 'var(--t1)' : 'transparent') + '"></button>').join('') +
+    '</div>' +
+    '<div class="tiny mt6">Создастся внутри: ' + (EXPL.st(zone).cwd ? '«' + esc((exFolders(zone).find(f => f.id === EXPL.st(zone).cwd) || {}).name) + '»' : 'корня раздела') + '</div>' +
+    '<button class="btn btn-amber mt14" style="width:100%" data-expl="folderNewSave" data-zone="' + zone + '">Создать</button>');
+  const box = document.getElementById('exf-colors');
+  box.addEventListener('click', e => {
+    const d = e.target.closest('.fo-c'); if(!d) return;
+    box.querySelectorAll('.fo-c').forEach(x => x.style.border = '3px solid transparent');
+    d.style.border = '3px solid var(--t1)';
+  });
+  setTimeout(() => { const i = document.getElementById('exf-name'); if(i) i.focus(); }, 50);
+}
+function exFolderNewSave(zone){
+  const name = document.getElementById('exf-name').value.trim();
+  if(!name){ toast('Введи название'); return; }
+  const btn = document.querySelector('#exf-colors .fo-c[style*="var(--t1)"]');
+  const c = btn ? btn.getAttribute('data-c') : FOLDER_COLORS[0];
+  const st = EXPL.st(zone);
+  const list = exFolders(zone);
+  list.push({ id: uid('fld'), name, c, parentId: st.cwd || null });
+  Folders.save(zone, list);
+  if(st.cwd) st.expanded[st.cwd] = true;
+  closeModal(); render();
+  toast('Папка «' + name + '» создана');
+}
+function exRenameModal(zone, oid){
+  const isFolder = oid.startsWith('f:');
+  const o = isFolder ? exFolders(zone).find(f => f.id === oid.slice(2)) : exFindItem(zone, oid);
+  if(!o) return;
+  const cur = exTileLabel(o);
+  modal('<h3>' + ic('pen') + 'Переименовать</h3>' +
+    '<input id="exr-name" value="' + esc(cur) + '" style="margin-top:8px" maxlength="80">' +
+    '<button class="btn btn-amber mt14" style="width:100%" data-expl="renameSave" data-zone="' + zone + '" data-oid="' + oid + '">Сохранить</button>');
+  setTimeout(() => { const i = document.getElementById('exr-name'); if(i){ i.focus(); i.select(); } }, 50);
+}
+function exRenameSave(zone, oid){
+  const v = document.getElementById('exr-name').value.trim();
+  if(!v){ toast('Название не может быть пустым'); return; }
+  if(!oid){ toast('Не найден элемент'); return; }
+  if(oid.startsWith('f:')){
+    const list = exFolders(zone);
+    const f = list.find(x => x.id === oid.slice(2));
+    if(f){ f.name = v; Folders.save(zone, list); }
+  } else {
+    const z = Folders.zones[zone];
+    const o = z ? z.items().find(x => x.id === oid) : null;
+    if(o){ o.name = v; o.title = v; saveDB(); }
+  }
+  closeModal(); render();
+  toast('Переименовано');
+}
+function exMoveDialog(zone){
+  const st = EXPL.st(zone);
+  const flat = [];
+  (function walk(pid, depth){
+    exChildren(zone, pid).forEach(f => {
+      if(!st.sel.includes('f:' + f.id)) flat.push({ f, depth });
+      walk(f.id, depth + 1);
+    });
+  })(null, 0);
+  modal('<h3>' + ic('folder') + 'Переместить (' + st.sel.length + ')</h3>' +
+    '<div class="tiny" style="margin:4px 0 10px">Выбери папку назначения</div>' +
+    '<div style="display:flex;flex-direction:column;gap:2px;max-height:46vh;overflow-y:auto">' +
+    '<button class="tnode" data-expl="moveTo" data-zone="' + zone + '" data-fid="">' +
+      '<span class="tn-tw leaf">' + ic('chevR') + '</span>' + ic('grid') + '<span class="tn-lbl">Корень раздела</span></button>' +
+    flat.map(x => '<button class="tnode" style="padding-left:' + (8 + x.depth * 14) + 'px" data-expl="moveTo" data-zone="' + zone + '" data-fid="' + x.f.id + '">' +
+      '<span class="tn-tw leaf">' + ic('chevR') + '</span>' +
+      '<span style="display:flex;align-items:center;gap:6px;min-width:0;flex:1"><span class="dot" style="background:' + x.f.c + '"></span><span class="tn-lbl">' + esc(x.f.name) + '</span></span></button>').join('') +
+    '</div>');
+}
+function exFolderColorModal(zone, fid){
+  const f = exFolders(zone).find(x => x.id === fid);
+  if(!f) return;
+  modal('<h3>' + ic('img') + 'Цвет папки «' + esc(f.name) + '»</h3>' +
+    '<div class="row mt10" style="gap:8px;flex-wrap:wrap">' +
+    FOLDER_COLORS.map(c => '<button data-expl="folderColorSet" data-zone="' + zone + '" data-fid="' + fid + '" data-c="' + c + '" style="width:30px;height:30px;border-radius:99px;background:' + c + ';border:3px solid ' + (f.c === c ? 'var(--t1)' : 'transparent') + '"></button>').join('') +
+    '</div>');
+}
+/* меню папки (карандаш в дереве) */
+function exFolderMenu(zone, fid, x, y){
+  EXCTX = {
+    x, y, zone, oid: 'f:' + fid, fid,
+    items: [
+      { t:'Открыть', ic:'folder', act:'openFolder' },
+      { t:'Переименовать', ic:'pen', act:'renameFolder' },
+      { t:'Цвет папки', ic:'img', act:'folderColor' },
+      { t:'Удалить (с содержимым — в корзину)', ic:'trash', act:'trashFolder', danger:true },
+    ],
+  };
+  render();
+}
+/* меню фона раздела */
+function exBgMenu(zone, x, y){
+  EXCTX = {
+    x, y, zone, oid: null,
+    items: [
+      { t:'Новая папка', ic:'folder', act:'folderNew' },
+      { t:'Выделить всё', ic:'check', act:'selAll' },
+      { t:'Снять выделение', ic:'pen', act:'selClear' },
+    ],
+  };
+  render();
+}
+/* выполнение пункта контекстного меню */
+function exCtxRun(zone, i){
+  const ctx = EXCTX;
+  if(!ctx) return;
+  const it = ctx.items[Number(i)];
+  const oid = ctx.oid;
+  exCtxClose();
+  if(!it) return;
+  if(it.act === 'open'){ exOpen(zone, oid); return; }
+  if(it.act === 'openFolder'){ const st = EXPL.st(zone); st.cwd = ctx.fid || (oid ? oid.slice(2) : null); st.sel = []; render(); return; }
+  if(it.act === 'renameFolder'){ exRenameModal(zone, oid); return; }
+  if(it.act === 'folderColor'){ exFolderColorModal(zone, oid.slice(2)); return; }
+  if(it.act === 'rename'){ exRenameModal(zone, oid); return; }
+  if(it.act === 'move'){ exMoveDialog(zone); return; }
+  if(it.act === 'edit'){ const cfg = EXPL_CFG[zone]; if(cfg && cfg.onEdit) cfg.onEdit(oid); return; }
+  if(it.act === 'trash'){
+    if(oid.startsWith('f:')) trashFolderZone(zone, oid.slice(2));
+    else if(zone === 'lectures') trashLecture(oid);
+    else if(zone === 'photos' || zone === 'music') trashMedia(oid);
+    else if(zone === 'notes') trashNote(oid);
+    else if(zone === 'videos') trashVideo(oid);
+    return;
+  }
+  if(it.act === 'trashFolder'){ trashFolderZone(zone, ctx.fid || oid.slice(2)); return; }
+  if(it.act === 'folderNew'){ exFolderNewModal(zone); return; }
+  if(it.act === 'selAll'){ const st = EXPL.st(zone); st.sel = exOrderedIds(zone); render(); return; }
+  if(it.act === 'selClear'){ const st = EXPL.st(zone); st.sel = []; render(); return; }
+}
+
+/* открытие элемента (двойной клик / меню) */
+function exOpen(zone, oid){
+  const cfg = EXPL_CFG[zone];
+  if(!cfg || !oid) return;
+  if(oid.startsWith('f:')){
+    const st = EXPL.st(zone);
+    st.cwd = oid.slice(2);
+    st.expanded[st.cwd] = true;
+    st.sel = [];
+    render();
+    return;
+  }
+  const st = EXPL.st(zone);
+  st.sel = [];
+  if(cfg.onOpen) cfg.onOpen(oid, exItems(zone, st.cwd || null));
+  else render();
+}
+
+/* ═══ ПРИВЯЗКА СОБЫТИЙ (вызывается из afterRender) ═══ */
+function explBindV7(){
+  const root = document.querySelector('.expl[data-zone]');
+  if(!root) return;
+  const zone = root.getAttribute('data-zone');
+  const area = root.querySelector('.expl-area');
+  const tree = root.querySelector('.expl-tree');
+
+  /* делегированный обработчик data-expl на document — вешаем один раз.
+     ВАЖНО: слушатель регистрируется с capture=true, чтобы срабатывать
+     ДО базового делегата v6.6 (иначе modalBack на бэкдропе закрывает
+     модалку раньше, чем наш обработчик увидит кнопку) */
+  if(!window.__explDelegated){
+    window.__explDelegated = true;
+    document.addEventListener('click', e => {
+      const el = e.target.closest('[data-expl]');
+      if(!el) return;
+      const act = el.getAttribute('data-expl');
+      if(['tile','area'].includes(act)) return;   /* плитки обрабатывает area */
+      /* не давать базовому делегату data-act сработать по этому клику */
+      e.stopPropagation();
+      const z = el.getAttribute('data-zone') || activeZoneV7();
+      const fid = el.getAttribute('data-fid');
+      if(act === 'sort'){ const st = EXPL.st(z); st.sort = el.value; render(); }
+      else if(act === 'viewToggle'){ const st = EXPL.st(z); st.view = st.view === 'grid' ? 'list' : 'grid'; render(); }
+      else if(act === 'folderNew'){ exFolderNewModal(z); }
+      else if(act === 'folderNewSave'){ exFolderNewSave(z); }
+      else if(act === 'goRoot'){ const st = EXPL.st(z); st.cwd = null; st.sel = []; render(); }
+      else if(act === 'treeGo'){
+        const st = EXPL.st(z);
+        if(e.target.closest('.tn-tw') && !e.target.closest('.tn-tw.leaf')){
+          st.expanded[fid] = !st.expanded[fid];
+          render(); return;
+        }
+        st.cwd = fid; st.sel = []; st.expanded[fid] = true; render();
+      }
+      else if(act === 'folderMenu'){ e.preventDefault(); exFolderMenu(z, fid, e.clientX, e.clientY); }
+      else if(act === 'rename'){ exRenameModal(z, el.getAttribute('data-oid')); }
+      else if(act === 'renameSave'){ exRenameSave(z, el.getAttribute('data-oid')); }
+      else if(act === 'moveDialog'){ exMoveDialog(z); }
+      else if(act === 'moveTo'){ exMoveSel(z, fid || null); closeModal(); }
+      else if(act === 'selAll'){ const st = EXPL.st(z); st.sel = exOrderedIds(z); render(); }
+      else if(act === 'selClear'){ const st = EXPL.st(z); st.sel = []; render(); }
+      else if(act === 'trashSel'){ exTrashSel(z); }
+      else if(act === 'ctxItem'){ exCtxRun(z, el.getAttribute('data-i')); }
+      else if(act === 'folderColor'){ exFolderColorModal(z, fid); }
+      else if(act === 'folderColorSet'){
+        const f = exFolders(z).find(x => x.id === fid);
+        if(f){ f.c = el.getAttribute('data-c'); Folders.save(z, exFolders(z)); }
+        closeModal(); render();
+      }
+    }, true);   /* capture — раньше базового */
+    /* закрытие контекстного меню по клику мимо */
+    document.addEventListener('mousedown', e => {
+      const m = document.getElementById('exctx');
+      if(m && !m.contains(e.target) && !e.target.closest('[data-expl="folderMenu"]')){ exCtxClose(); render(); }
+    }, true);
+  }
+
+  if(!area) return;
+
+  /* правый клик: плитка → меню элемента, фон → меню раздела */
+  area.oncontextmenu = e => {
+    e.preventDefault();
+    const tile = e.target.closest('[data-expl="tile"]');
+    if(tile) exCtxOpen(e.clientX, e.clientY, zone, tile.getAttribute('data-oid'));
+    else exBgMenu(zone, e.clientX, e.clientY);
+  };
+  /* одиночный клик — выбор (после drag — пропуск); двойной клик — открыть.
+     клик откладываем на 220мс, чтобы даблклик не «мигал» выделением */
+  let clickT = null;
+  area.onclick = e => {
+    const tile = e.target.closest('[data-expl="tile"]');
+    if(!tile) return;
+    if(EXDRAG.moved){ EXDRAG.moved = false; return; }
+    const oid = tile.getAttribute('data-oid');
+    const ev = e;
+    clearTimeout(clickT);
+    clickT = setTimeout(() => exClick(zone, oid, ev), 220);
+  };
+  area.ondblclick = e => {
+    const tile = e.target.closest('[data-expl="tile"]');
+    if(!tile) return;
+    clearTimeout(clickT);
+    exOpen(zone, tile.getAttribute('data-oid'));
+  };
+
+  /* лассо (мышь, десктоп) */
+  area.onmousedown = e => {
+    if(e.button !== 0 || e.target.closest('[data-expl="tile"]')) return;
+    if(resolveView() === 'phone') return;
+    const st = EXPL.st(zone);
+    if(!e.ctrlKey && !e.shiftKey && st.sel.length){ st.sel = []; render(); }
+    const x0 = e.clientX, y0 = e.clientY;
+    let started = false, lassoEl = null;
+    const move = ev => {
+      if(!started && Math.abs(ev.clientX - x0) + Math.abs(ev.clientY - y0) > 7){
+        started = true;
+        lassoEl = document.createElement('div');
+        lassoEl.className = 'lasso';
+        document.body.appendChild(lassoEl);
+      }
+      if(!started) return;
+      const x1 = Math.min(x0, ev.clientX), y1 = Math.min(y0, ev.clientY);
+      const x2 = Math.max(x0, ev.clientX), y2 = Math.max(y0, ev.clientY);
+      Object.assign(lassoEl.style, { left:x1 + 'px', top:y1 + 'px', width:(x2 - x1) + 'px', height:(y2 - y1) + 'px' });
+      area.querySelectorAll('[data-expl="tile"]').forEach(t => {
+        const r = t.getBoundingClientRect();
+        const hit = !(r.right < x1 || r.left > x2 || r.bottom < y1 || r.top > y2);
+        const oid = t.getAttribute('data-oid');
+        if(hit && !st.sel.includes(oid)) st.sel.push(oid);
+        if(!hit) st.sel = st.sel.filter(x => x !== oid);
+      });
+    };
+    const up = () => {
+      document.removeEventListener('mousemove', move);
+      document.removeEventListener('mouseup', up);
+      if(lassoEl) lassoEl.remove();
+      if(started) render();
+    };
+    document.addEventListener('mousemove', move);
+    document.addEventListener('mouseup', up);
+  };
+
+  /* HTML5 DnD мышью */
+  area.ondragstart = e => {
+    const tile = e.target.closest('[data-expl="tile"]');
+    if(!tile) return;
+    const st = EXPL.st(zone);
+    const oid = tile.getAttribute('data-oid');
+    EXDRAG.ids = st.sel.includes(oid) ? st.sel.slice() : [oid];
+    EXDRAG.moved = true;
+    tile.classList.add('dragging');
+    try{ e.dataTransfer.setData('text/plain', EXDRAG.ids.join(',')); e.dataTransfer.effectAllowed = 'move'; }catch(err){}
+  };
+  const dropHandler = async e => {
+    e.preventDefault();
+    if(!EXDRAG.ids.length) return;
+    const to = EXDRAG.over;
+    const ids = EXDRAG.ids.slice();
+    EXDRAG.ids = [];
+    const moved = await exMoveIds(zone, ids, to);
+    render();
+    if(moved) toast(moved > 1 ? ('Перемещено: ' + moved) : 'Перемещено в папку');
+  };
+  const overHandler = e => {
+    e.preventDefault();
+    const host = e.currentTarget;
+    let target = e.target;
+    let fid = null;
+    if(host === tree){
+      const node = target.closest('.tnode[data-fid]');
+      if(node) fid = node.getAttribute('data-fid');
+    } else {
+      const tile = target.closest('.etile');
+      if(tile){
+        const oid = tile.getAttribute('data-oid') || '';
+        if(oid.startsWith('f:')) fid = oid.slice(2);
+      }
+    }
+    document.querySelectorAll('.droptarget').forEach(el => el.classList.remove('droptarget'));
+    EXDRAG.over = null;
+    if(fid && !EXDRAG.ids.includes('f:' + fid)){
+      const el = host === tree
+        ? host.querySelector('.tnode[data-fid="' + fid + '"]')
+        : host.querySelector('.etile[data-oid="f:' + fid + '"]');
+      if(el){ el.classList.add('droptarget'); EXDRAG.over = fid; }
+    }
+  };
+  area.ondragover = overHandler;
+  area.ondrop = dropHandler;
+  area.ondragend = () => {
+    area.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
+    document.querySelectorAll('.droptarget').forEach(el => el.classList.remove('droptarget'));
+  };
+  if(tree){
+    tree.ondragover = overHandler;
+    tree.ondrop = dropHandler;
+  }
+
+  /* тач: долгое нажатие → выделение + перенос.
+     Используем addEventListener (не on*-свойства): надёжнее после
+     перерендеров и совместимо с синтетическими событиями */
+  const TS = { passiv:false };
+  area.addEventListener('touchstart', e => {
+    const tile = e.target.closest('[data-expl="tile"]');
+    if(!tile || e.touches.length !== 1) return;
+    const st = EXPL.st(zone);
+    const oid = tile.getAttribute('data-oid');
+    const t0 = e.touches[0];
+    EXDRAG.startX = t0.clientX; EXDRAG.startY = t0.clientY; EXDRAG.fromLongPress = false;
+    clearTimeout(EXDRAG.longT);
+    EXDRAG.longT = setTimeout(() => {
+      if(!st.sel.includes(oid)){ st.sel = [oid]; render(); }
+      EXDRAG.fromLongPress = true; EXDRAG.moved = true;
+      if(navigator.vibrate) navigator.vibrate(25);
+      exDragStart(st.sel, t0.clientX, t0.clientY);
+    }, 430);
+  }, TS);
+  area.addEventListener('touchmove', e => {
+    if(!e.touches.length) return;
+    const t0 = e.touches[0];
+    if(!EXDRAG.fromLongPress && Math.abs(t0.clientX - EXDRAG.startX) + Math.abs(t0.clientY - EXDRAG.startY) > 12){
+      clearTimeout(EXDRAG.longT);
+    }
+    if(EXDRAG.ghost){ e.preventDefault(); exDragMove(t0.clientX, t0.clientY); }
+  }, TS);
+  area.addEventListener('touchend', e => {
+    clearTimeout(EXDRAG.longT);
+    if(EXDRAG.ghost && EXDRAG.fromLongPress){
+      const over = EXDRAG.over;
+      const ids = EXDRAG.ids.slice();
+      exDragEnd();
+      if(over !== null && ids.length){
+        exMoveIds(zone, ids, over).then(moved => {
+          render();
+          if(moved) toast(moved > 1 ? ('Перемещено: ' + moved) : 'Перемещено в папку');
+        });
+      } else {
+        render();   /* выделение осталось — можно добавлять тапами */
+      }
+      e.preventDefault();
+    }
+  }, TS);
+}
+
+/* ═══ V7 MODULE: 40-screens-v7.js ═══ */
+/* ═══════════════════════════════════════════════════════════════════
+   V7 · ЭКРАНЫ НА БАЗЕ ПРОВОДНИКА + акцентные полосы разделов
+   ─────────────────────────────────────────────────────────────────
+   scrPhotos/scrMusic/scrLectures перехвачены патчами → scrExplorerV7.
+   Здесь: конфиги зон (иконки, кнопки добавления, обработчики открытия
+   и редактирования), плеерные обёртки, привязка explBindV7 к afterRender,
+   акцентные цвета разделов в шапке.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── акценты разделов (цветная полоса + подсветка меню) ── */
+const SECTION_ACCENTS = {
+  home:'#fbbf24', chat:'#a78bfa', notes:'#2dd4bf', tasks:'#60a5fa',
+  schedule:'#f472b6', lectures:'#fb923c', music:'#34d399', video:'#f87171',
+  photos:'#fcd34d', books:'#94a3b8', fun:'#c084fc', settings:'#a1a1aa',
+  strash:'#f87171', schat:'#a78bfa', snotes:'#2dd4bf', sphotos:'#fcd34d',
+  smusic:'#34d399', contour:'#60a5fa', ssync:'#a1a1aa',
+};
+
+/* применить акцент активного раздела к шапке (вызывается после render) */
+function applySectionAccent(){
+  const id = activeScreenId();
+  const host = document.querySelector('.pcheader') || document.querySelector('.pheader');
+  if(!host) return;
+  const color = SECTION_ACCENTS[id] || '#fbbf24';
+  let band = host.querySelector('.ph-band');
+  if(!band){
+    band = document.createElement('div');
+    band.className = 'ph-band';
+    host.style.position = 'relative';
+    host.appendChild(band);
+  }
+  band.style.background = color;
+}
+
+/* ═══ КОНФИГИ ЗОН ПРОВОДНИКА ═══ */
+
+/* ФОТО: превью из IDB, лайтбокс v6.6 (PhotoView), редактор из v7-модуля */
+EXPL_CFG.photos = {
+  title:'Фото', icon:'img', accent:'#fcd34d', rootLabel:'фото',
+  addButton:'<label class="btn btn-amber btn-sm" style="cursor:pointer">' + ic('up') + 'Добавить' +
+    '<input type="file" accept="image/*" multiple style="display:none" onchange="ACTIONS.openPhotoAdd(this)"></label>',
+  empty:'Пока пусто. Добавь фото — сожмутся и будут храниться только в Арми.',
+  thumb: o => '<img data-mid="' + o.id + '" alt="">',
+  subLabel: o => fmtSize(o.size || 0),
+  canEdit: () => true,
+  onOpen: (oid, items) => {
+    const ph = items.filter(x => x.kind === 'photo');
+    PhotoView.open(ph.findIndex(x => x.id === oid), ph);
+  },
+  onEdit: oid => photoEditorOpen(oid),
+  extraBottom: '<div class="tiny">Обычная галерея Арми: фото лежат в памяти приложения на этом устройстве и в системную галерею не попадают. Приватное — держи в закрытой зоне.</div>',
+};
+
+/* МУЗЫКА: плеер сверху (карточка v6.6) + проводник треков */
+EXPL_CFG.music = {
+  title:'Музыка', icon:'music', accent:'#34d399', rootLabel:'треки',
+  addButton:'<label class="btn btn-amber btn-sm" style="cursor:pointer">' + ic('plus') + 'Добавить' +
+    '<input type="file" accept="audio/*" multiple style="display:none" onchange="ACTIONS.musicFileAdd(this)"></label>',
+  empty:'Пока пусто — добавь mp3/m4a/ogg с телефона или ПК',
+  itemIcon:'music',
+  subLabel: o => (o.dur ? fmtSec(o.dur) + ' · ' : '') + fmtSize(o.size || 0),
+  canEdit: () => true,
+  onOpen: (oid, items) => {
+    /* играть трек; очередь = треки текущей папки */
+    const q = items.filter(x => x.kind === 'audio').map(x => x.id);
+    PLAYER.playFile(oid, q);
+  },
+  onEdit: oid => audioEditorOpen(oid),
+  extraTop: (function(){ return ''; })(),
+};
+
+/* ЗАПИСИ (лекции): карточки-конспекты + записи-файлы в проводнике */
+EXPL_CFG.lectures = {
+  title:'Записи', icon:'lect', accent:'#fb923c', rootLabel:'записи',
+  addButton:'<button class="btn btn-amber btn-sm" data-act="lectRecMenu">' + ic('mic') + 'Записать</button>',
+  empty:'Пока нет записей — нажми «Записать»',
+  itemIcon:'lect',
+  subLabel: o => (o.dur || '—') + ' · ' + (o.date || ''),
+  canEdit: oid => { const l = DB.lectures.find(x => x.id === oid); return !!(l && l.recId); },
+  onOpen: (oid) => { ACTIONS.lectPlay(oid); },
+  onEdit: oid => audioEditorOpen('lec_' + oid, oid),
+};
+
+/* ВИДЕО: файлы + ссылки (зона videos не из Folders — свой список) */
+EXPL_CFG.videos = {
+  title:'Видео', icon:'video', accent:'#f87171', rootLabel:'видео',
+  addButton:'<label class="btn btn-amber btn-sm" style="cursor:pointer">' + ic('up') + 'Файл' +
+    '<input type="file" accept="video/*" multiple style="display:none" onchange="ACTIONS.vidFileAdd(this)"></label>' +
+    '<button class="btn btn-sm" data-act="vidNew">' + ic('plus') + 'Ссылка</button>',
+  empty:'Добавь файл или ссылку на YouTube — всё останется на устройстве',
+  thumb: o => o.kind === 'video' ? '<img data-mid="' + o.id + '" alt="">' : ic('video'),
+  subLabel: o => o.kind === 'video' ? (fmtSize(o.size || 0)) : 'ссылка · ' + (o.added || ''),
+  canEdit: () => false,
+  onOpen: (oid) => { const m = DB.media.find(x => x.id === oid); if(m && m.kind === 'video') ACTIONS.vidFilePlay(oid); },
+};
+
+/* ── экран Видео целиком на EXPL (заменяет scrVideo) ── */
+function scrVideoV7(){
+  /* зона videos — виртуальная: файлы DB.media(video) + ссылки DB.myvideos */
+  const proxy = {
+    zone:'videos',
+    items(){ return [...DB.media.filter(m => m.kind === 'video' && !trashMediaIds().has(m.id)),
+                        ...DB.myvideos.filter(v => !trashVideoIds().has(v.id))]; },
+  };
+  const orig = Folders.zones.videos;
+  Folders.zones.videos = { store:'armi_folders_videos', items: proxy.items, key:'id', apply:(o,f)=>o.folder=f, title:'видео' };
+  return scrExplorerV7('videos');
+}
+
+/* ── плеер-карточка музыки (перенос из v6.6 в шапку экрана Музыка) ── */
+function musicPlayerCardV7(){
+  const tr = currentTrack();
+  const tot = (tr.seconds || tr.dur) || 0;
+  return '<div class="card" style="text-align:center;padding:22px 16px">' +
+    '<div class="logo-tile" style="margin:0 auto 10px;width:52px;height:52px;font-size:26px;border-radius:16px">' +
+      ic('music').replace('class="ic"', 'class="ic" style="width:22px;height:22px;color:#0b0d11"') + '</div>' +
+    '<div style="font-size:16px;font-weight:800">' + esc(tr.title) + '</div>' +
+    '<div class="tiny" style="margin-top:2px">' + esc(tr.artist || '') + '</div>' +
+    '<div class="row mt14" style="gap:10px">' +
+      '<span class="tiny" style="font-variant-numeric:tabular-nums" id="mpos">' + fmtSec(S.music.progress) + '</span>' +
+      '<div class="bar seek" id="mseek"><i id="mbar" style="width:' + (tot ? Math.min(100, Math.round(100 * S.music.progress / tot)) : 0) + '%"></i></div>' +
+      '<span class="tiny" style="font-variant-numeric:tabular-nums" id="mtot">' + (tot ? fmtSec(tot) : '–:––') + '</span>' +
+    '</div>' +
+    '<div class="row mt14" style="gap:8px;justify-content:center;flex-wrap:wrap">' +
+      '<button class="btn btn-sm" data-act="musicPrev" title="Предыдущий трек">⏮</button>' +
+      '<button class="btn btn-amber" style="min-width:130px" data-act="musicToggle">' + ic(S.music.playing ? 'pause' : 'play') + (S.music.playing ? 'Пауза' : 'Слушать') + '</button>' +
+      '<button class="btn btn-sm" data-act="musicNext" title="Следующий трек">⏭</button>' +
+      '<button class="btn btn-sm' + (S.music.shuffle ? ' btn-amber' : '') + '" data-act="musicShuffle">' + ic('shuffle') + 'Вразброс</button>' +
+      '<button class="btn btn-sm' + (S.music.repeat ? ' btn-amber' : '') + '" data-act="musicRepeat">' + ic('repeat') + 'Повтор</button>' +
+    '</div></div>';
+}
+
+/* ── патч afterRender: привязка проводника + акценты + контекст-меню HTML ── */
+const _afterRenderV66 = afterRender;
+afterRender = function(){
+  _afterRenderV66();
+  explBindV7();
+  applySectionAccent();
+  /* контекстное меню проводника рисуем в overlays-контейнере */
+  const ctxHtml = exCtxHTML();
+  if(ctxHtml){
+    const host = document.getElementById('overlays');
+    if(host) host.insertAdjacentHTML('beforeend', ctxHtml);
+  }
+};
+
+/* ── включение плеер-карточки в экран Музыки (патч scrExplorerV7 через cfg) ── */
+{
+  const origMusicRender = () => scrExplorerV7('music');
+  EXPL_CFG.music.extraTopFn = musicPlayerCardV7;
+  /* перехват: scrMusic уже перенаправлен на scrExplorerV7('music') патчем базы;
+     добавляем плеер сверху через обёртку рендера */
+  const _scrExplorerV7 = scrExplorerV7;
+  scrExplorerV7 = function(zone){
+    const cfg = EXPL_CFG[zone];
+    if(cfg && cfg.extraTopFn){
+      const saved = cfg.extraTop;
+      cfg.extraTop = (cfg.extraTopFn() || '');
+      const html = _scrExplorerV7(zone);
+      cfg.extraTop = saved;
+      return html;
+    }
+    return _scrExplorerV7(zone);
+  };
+}
+
+/* ── демо-плейлист и секретная музыка внизу экрана Музыки ── */
+EXPL_CFG.music.extraBottomFn = function(){
+  let html = '';
+  if(typeof TRACKS !== 'undefined' && TRACKS.length){
+    html += '<div class="card"><h3>Демо-плейлист<span class="h-note">звучит встроенным синтезатором</span></h3>' +
+      TRACKS.map(t => '<div class="trow" data-act="musicPick" data-arg="' + t.id + '">' +
+        '<span class="eq' + (S.music.playing && PLAYER.mode !== 'file' && S.music.trackId === t.id ? ' play' : '') + '"><span></span><span></span><span></span></span>' +
+        '<span style="min-width:0;flex:1"><span style="font-size:13.5px;color:var(--t1)">' + esc(t.title) + '</span>' +
+        '<span class="tiny" style="display:block">' + esc(t.artist) + ' · ' + fmtSec(t.seconds) + '</span></span></div>').join('') + '</div>';
+  }
+  html += S.secretActive
+    ? '<div class="card" style="cursor:pointer;border-style:dashed" data-act="go" data-arg="smusic"><h3>' + ic('lock') + 'Закрытая музыка<span class="h-note">галерея и плееры не видят</span></h3><div class="dim">Закрытая зона открыта — секретные треки появились рядом с обычными. Нажми, чтобы открыть.</div></div>'
+    : '<div class="note">Секретная музыка прячется в закрытой зоне: два клика по логотипу «А» → пароль — и раздел появится в меню.</div>';
+  return html;
+};
+
+/* ── PLAY с очередью папки: v6.6 сам строит очередь из всех треков,
+     а мы передаём очередь = треки текущей папки через setQueue ── */
+{
+  const _playFileV66 = PLAYER.playFile.bind(PLAYER);
+  PLAYER.playFile = function(id, queue){
+    if(Array.isArray(queue) && queue.length){
+      this.setQueue(queue.slice());
+      this.queuePos = Math.max(0, queue.indexOf(id));
+    }
+    return _playFileV66(id);
+  };
+}
+
+/* ═══ V7 MODULE: 45-editors.js ═══ */
+/* ═══════════════════════════════════════════════════════════════════
+   V7 · РЕДАКТОРЫ МЕДИА (без внешних библиотек)
+   ─────────────────────────────────────────────────────────────────
+   Фото: обрезка (кроп с рамкой и ручками), поворот 90°, зеркалирование,
+   фильтры (яркость/контраст/насыщенность/чб/сепия). Результат — НОВЫЙ
+   файл в IndexedDB (оригинал не трогаем без отдельного подтверждения).
+   Аудио: тримминг по волне (декодируем в WebAudio, рисуем волну,
+     выделяем диапазон ручками) → вырезаем диапазус → кодируем WAV →
+     новый файл в IDB. Работает и для музыки (DB.media), и для записей
+     (DB.lectures, blob-ключ lec_<id>).
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ═════════════ РЕДАКТОР ФОТО ═════════════ */
+const PHED = {
+  id:null, img:null, rot:0, flip:false,
+  crop:null,            /* {x,y,w,h} в долях 0..1 */
+  filt:{ bri:100, con:100, sat:100, sep:0, gray:0 },
+  stageW:0, stageH:0,
+  async open(id){
+    const m = DB.media.find(x => x.id === id);
+    if(!m){ toast('Файл не найден'); return; }
+    const url = await mediaUrl(id);
+    if(!url){ toast('Не удалось открыть файл'); return; }
+    this.id = id; this.rot = 0; this.flip = false;
+    this.crop = null;
+    this.filt = { bri:100, con:100, sat:100, sep:0, gray:0 };
+    this.img = new Image();
+    this.img.onload = () => this.render();
+    this.img.src = url;
+    modal(this.html());
+  },
+  html(){
+    return '<h3>' + ic('pen') + 'Редактор фото</h3>' +
+      '<div class="tiny" style="margin:2px 0 10px">Результат сохранится как новая копия — оригинал останется нетронутым</div>' +
+      '<div class="phed-stage" id="phed-stage"></div>' +
+      '<div class="row mt10" style="gap:6px;flex-wrap:wrap">' +
+        '<button class="btn btn-sm" data-phed="rotL">↺ 90°</button>' +
+        '<button class="btn btn-sm" data-phed="rotR">↻ 90°</button>' +
+        '<button class="btn btn-sm" data-phed="flip">⇋ Зеркало</button>' +
+        '<button class="btn btn-sm" data-phed="cropOn">✂ Кроп</button>' +
+        '<button class="btn btn-sm" data-phed="reset">Сброс</button>' +
+      '</div>' +
+      '<div class="mt10" style="display:flex;flex-direction:column;gap:6px">' +
+        this.slider('bri','Яркость',0,200) +
+        this.slider('con','Контраст',0,200) +
+        this.slider('sat','Насыщенность',0,200) +
+        this.slider('sep','Сепия',0,100) +
+        this.slider('gray','Ч/Б',0,100) +
+      '</div>' +
+      '<div class="row mt14" style="gap:8px">' +
+        '<button class="btn" style="flex:1" data-act="modalBack">Отмена</button>' +
+        '<button class="btn btn-amber" style="flex:1" data-phed="save">Сохранить копию</button>' +
+      '</div>';
+  },
+  slider(k, label, min, max){
+    const v = this.filt[k];
+    return '<div class="row" style="gap:8px;align-items:center">' +
+      '<span class="tiny" style="width:92px;flex:none">' + label + '</span>' +
+      '<input type="range" min="' + min + '" max="' + max + '" value="' + v + '" data-phed-filt="' + k + '" style="flex:1;padding:0" oninput="PHED.filtChange(this)">' +
+      '<span class="tiny" style="width:32px;text-align:right;flex:none" id="phed-v-' + k + '">' + v + '%</span></div>';
+  },
+  filtChange(inp){
+    const k = inp.getAttribute('data-phed-filt');
+    this.filt[k] = Number(inp.value);
+    const lbl = document.getElementById('phed-v-' + k);
+    if(lbl) lbl.textContent = inp.value + '%';
+    this.paintImg();
+  },
+  cssFilt(){
+    const f = this.filt;
+    return 'filter:brightness(' + f.bri + '%) contrast(' + f.con + '%) saturate(' + f.sat + '%) sepia(' + f.sep + '%) grayscale(' + f.gray + '%)';
+  },
+  render(){
+    const stage = document.getElementById('phed-stage');
+    if(!stage || !this.img) return;
+    /* размеры вписывания */
+    const maxW = stage.clientWidth || 480, maxH = Math.round(window.innerHeight * 0.52);
+    const iw = this.img.width, ih = this.img.height;
+    const swap = this.rot % 180 !== 0;
+    const dw0 = swap ? ih : iw, dh0 = swap ? iw : ih;
+    const k = Math.min(maxW / dw0, maxH / dh0, 1);
+    this.stageW = Math.round(dw0 * k); this.stageH = Math.round(dh0 * k);
+    stage.style.height = this.stageH + 'px';
+    let inner = '<img src="' + this.img.src + '" id="phed-img" style="width:' + this.stageW + 'px;height:' + this.stageH + 'px;' +
+      'transform:rotate(' + this.rot + 'deg)' + (this.flip ? ' scaleX(-1)' : '') + ';' + this.cssFilt() + '">';
+    if(this.crop) inner += this.cropHTML();
+    stage.innerHTML = inner;
+    if(this.crop) this.bindCrop();
+  },
+  cropHTML(){
+    const c = this.crop;
+    const x = c.x * this.stageW, y = c.y * this.stageH;
+    const w = c.w * this.stageW, h = c.h * this.stageH;
+    return '<div class="phed-crop" id="phed-crop" style="left:' + x + 'px;top:' + y + 'px;width:' + w + 'px;height:' + h + 'px">' +
+      '<div class="pc-h h"></div><div class="pc-h h"></div><div class="pc-h v"></div><div class="pc-h v"></div>' +
+      '<span class="pc-k tl" data-k="tl"></span><span class="pc-k tr" data-k="tr"></span>' +
+      '<span class="pc-k bl" data-k="bl"></span><span class="pc-k br" data-k="br"></span></div>';
+  },
+  toggleCrop(){
+    this.crop = this.crop ? null : { x:0.12, y:0.12, w:0.76, h:0.76 };
+    this.render();
+  },
+  bindCrop(){
+    const box = document.getElementById('phed-crop');
+    const stage = document.getElementById('phed-stage');
+    if(!box || !stage) return;
+    const clamp01 = v => Math.max(0, Math.min(1, v));
+    const startDrag = (e, mode) => {
+      e.preventDefault(); e.stopPropagation();
+      const p0 = (e.touches && e.touches[0]) || e;
+      const c0 = Object.assign({}, this.crop);
+      const move = ev => {
+        const p = (ev.touches && ev.touches[0]) || ev;
+        const dx = (p.clientX - p0.clientX) / this.stageW;
+        const dy = (p.clientY - p0.clientY) / this.stageH;
+        let c = this.crop;
+        if(mode === 'move'){
+          c.x = clamp01(c0.x + dx); c.y = clamp01(c0.y + dy);
+          c.x = Math.min(c.x, 1 - c0.w); c.y = Math.min(c.y, 1 - c0.h);
+        } else {
+          if(mode.includes('l')){ const nx = clamp01(c0.x + dx); c.x = nx; c.w = c0.w + (c0.x - nx); }
+          if(mode.includes('r')){ c.w = clamp01(c0.w + dx); }
+          if(mode.includes('t')){ const ny = clamp01(c0.y + dy); c.y = ny; c.h = c0.h + (c0.y - ny); }
+          if(mode.includes('b')){ c.h = clamp01(c0.h + dy); }
+          c.w = Math.max(0.05, c.w); c.h = Math.max(0.05, c.h);
+        }
+        /* перерисовать рамку без полного render */
+        box.style.left = (c.x * this.stageW) + 'px';
+        box.style.top = (c.y * this.stageH) + 'px';
+        box.style.width = (c.w * this.stageW) + 'px';
+        box.style.height = (c.h * this.stageH) + 'px';
+      };
+      const up = () => {
+        document.removeEventListener('mousemove', move);
+        document.removeEventListener('mouseup', up);
+        document.removeEventListener('touchmove', move);
+        document.removeEventListener('touchend', up);
+      };
+      document.addEventListener('mousemove', move);
+      document.addEventListener('mouseup', up);
+      document.addEventListener('touchmove', move, { passive:false });
+      document.addEventListener('touchend', up);
+    };
+    box.addEventListener('mousedown', e => startDrag(e, 'move'));
+    box.addEventListener('touchstart', e => startDrag(e, 'move'), { passive:false });
+    box.querySelectorAll('.pc-k').forEach(k => {
+      const mode = k.getAttribute('data-k');
+      k.addEventListener('mousedown', e => startDrag(e, mode));
+      k.addEventListener('touchstart', e => startDrag(e, mode), { passive:false });
+    });
+  },
+  paintImg(){
+    const img = document.getElementById('phed-img');
+    if(img) img.style.cssText = img.style.cssText.replace(/filter:[^;]+/, this.cssFilt());
+  },
+  rotate(dir){
+    this.rot = (this.rot + (dir === 'r' ? 90 : -90) + 360) % 360;
+    this.crop = null;
+    this.render();
+  },
+  reset(){
+    this.rot = 0; this.flip = false; this.crop = null;
+    this.filt = { bri:100, con:100, sat:100, sep:0, gray:0 };
+    /* обновить слайдеры в DOM */
+    for(const k of Object.keys(this.filt)){
+      const inp = document.querySelector('[data-phed-filt="' + k + '"]');
+      if(inp){ inp.value = this.filt[k]; }
+      const lbl = document.getElementById('phed-v-' + k);
+      if(lbl) lbl.textContent = this.filt[k] + '%';
+    }
+    this.render();
+  },
+  /* собрать результат на canvas и сохранить как НОВЫЙ файл */
+  async save(){
+    const src = this.img;
+    /* область источника с учётом поворота */
+    let sx = 0, sy = 0, sw = src.width, sh = src.height;
+    if(this.crop){
+      const swap = this.rot % 180 !== 0;
+      /* кроп в координатах показа → в координатах источника */
+      const cw = this.crop.w * (swap ? sh : sw);
+      const ch = this.crop.h * (swap ? sw : sh);
+      const cx = this.crop.x * (swap ? sh : sw);
+      const cy = this.crop.y * (swap ? sw : sh);
+      sx = cx; sy = cy; sw = cw; sh = ch;
+    }
+    const swap = this.rot % 180 !== 0;
+    const outW = Math.round(swap ? sh : sw);
+    const outH = Math.round(swap ? sw : sh);
+    const cv = document.createElement('canvas');
+    cv.width = outW; cv.height = outH;
+    const ctx = cv.getContext('2d');
+    ctx.filter = this.cssFilt().replace('filter:', '');
+    ctx.save();
+    ctx.translate(outW / 2, outH / 2);
+    ctx.rotate(this.rot * Math.PI / 180);
+    if(this.flip) ctx.scale(-1, 1);
+    const dw = swap ? outH : outW, dh = swap ? outW : outH;
+    ctx.drawImage(src, sx, sy, sw, sh, -dw / 2, -dh / 2, dw, dh);
+    ctx.restore();
+    const blob = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.9));
+    if(!blob){ toast('Не удалось сохранить'); return; }
+    const id = uid('img');
+    await IDB.put(id, blob);
+    const orig = DB.media.find(x => x.id === this.id);
+    const nm = (orig ? orig.name : 'фото') + ' (правка)';
+    DB.media.unshift({ id, kind:'photo', name:nm, size:blob.size, type:'image/jpeg', added:'сегодня',
+      dur:0, folder: orig ? orig.folder : null });
+    saveDB();
+    closeModal(); render();
+    toast('Сохранена копия: «' + nm + '»');
+  },
+};
+function photoEditorOpen(id){ PHED.open(id); }
+/* делегирование кнопок редактора фото */
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-phed]');
+  if(!b) return;
+  const act = b.getAttribute('data-phed');
+  if(act === 'rotL') PHED.rotate('l');
+  else if(act === 'rotR') PHED.rotate('r');
+  else if(act === 'flip'){ PHED.flip = !PHED.flip; PHED.render(); }
+  else if(act === 'cropOn') PHED.toggleCrop();
+  else if(act === 'reset') PHED.reset();
+  else if(act === 'save') PHED.save();
+});
+/* перерисовка при открытии модалки (когда stage появился в DOM) */
+const _modalV66 = modal;
+modal = function(html){
+  _modalV66(html);
+  if(PHED.img && document.getElementById('phed-stage')) PHED.render();
+};
+
+/* ═════════════ РЕДАКТОР АУДИО (тримминг) ═════════════ */
+const AUED = {
+  mode:null,           /* 'media' | 'lecture' */
+  mediaId:null, lectId:null,
+  blob:null, buf:null, /* AudioBuffer */
+  dur:0, sel:{ a:0, b:1 },   /* выделение в долях */
+  audio:null, playing:false, playT:0, playFrom:0, playTimer:null,
+  async open(blobKey, mode, id, title){
+    let blob = null;
+    try{ blob = await IDB.get(blobKey); }catch(e){}
+    if(!blob){ toast('Аудио не найдено'); return; }
+    this.mode = mode; this.mediaId = mode === 'media' ? id : null; this.lectId = mode === 'lecture' ? id : null;
+    this.blob = blob; this.sel = { a:0, b:1 }; this.playing = false;
+    modal('<h3>' + ic('pen') + 'Обрезка аудио</h3>' +
+      '<div class="tiny" style="margin:2px 0 10px" id="aued-title">' + esc(title || 'Аудио') + ' · читаю и строю волну…</div>' +
+      '<div class="wave-wrap" id="aued-wrap"><canvas class="wave-cv" id="aued-cv"></canvas></div>' +
+      '<div class="wave-time"><span id="aued-a">0:00</span><span id="aued-b">–:––</span></div>' +
+      '<div class="row mt10" style="gap:6px;flex-wrap:wrap">' +
+        '<button class="btn btn-sm" data-aued="play">' + ic('play') + 'Прослушать выделение</button>' +
+        '<button class="btn btn-sm" data-aued="all">Всё целиком</button>' +
+      '</div>' +
+      '<div class="tiny mt10">Ручки по краям выделения двигай мышью или пальцем. Результат — новая дорожка, оригинал останется.</div>' +
+      '<div class="row mt14" style="gap:8px">' +
+        '<button class="btn" style="flex:1" data-act="modalBack">Отмена</button>' +
+        '<button class="btn btn-amber" style="flex:1" data-aued="save">Сохранить отрывок</button>' +
+      '</div>');
+    /* декодируем */
+    try{
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const arr = await blob.arrayBuffer();
+      this.buf = await ctx.decodeAudioData(arr);
+      ctx.close();
+    }catch(e){
+      toast('Этот формат не удалось декодировать в браузере');
+      closeModal(); return;
+    }
+    this.dur = this.buf.duration;
+    const t = document.getElementById('aued-title');
+    if(t) t.textContent = esc(title || 'Аудио') + ' · ' + fmtSec(this.dur);
+    this.draw();
+    this.bindSel();
+  },
+  draw(){
+    const cv = document.getElementById('aued-cv');
+    if(!cv || !this.buf) return;
+    const wrap = cv.parentElement;
+    const W = wrap.clientWidth || 460, H = wrap.clientHeight || 96;
+    cv.width = W * 2; cv.height = H * 2;   /* retina */
+    const ctx = cv.getContext('2d');
+    ctx.scale(2, 2);
+    ctx.clearRect(0, 0, W, H);
+    /* отрисовка волны: min/max по столбцам */
+    const data = this.buf.getChannelData(0);
+    const cols = Math.max(60, Math.floor(W / 3));
+    const step = Math.floor(data.length / cols) || 1;
+    const mid = H / 2;
+    ctx.fillStyle = 'rgba(161,161,170,.55)';
+    for(let i = 0; i < cols; i++){
+      let mn = 1, mx = -1;
+      const off = i * step;
+      for(let j = 0; j < step; j += Math.max(1, Math.floor(step / 40))){
+        const v = data[off + j] || 0;
+        if(v < mn) mn = v; if(v > mx) mx = v;
+      }
+      const x = (i / cols) * W;
+      const y1 = mid + mn * (mid - 4), y2 = mid + mx * (mid - 4);
+      ctx.fillRect(x, Math.min(y1, y2), 2, Math.max(2, Math.abs(y2 - y1)));
+    }
+    /* затемнение вне выделения */
+    ctx.fillStyle = 'rgba(5,6,8,.62)';
+    ctx.fillRect(0, 0, this.sel.a * W, H);
+    ctx.fillRect(this.sel.b * W, 0, W - this.sel.b * W, H);
+    /* рамки выделения */
+    ctx.fillStyle = '#fbbf24';
+    ctx.fillRect(this.sel.a * W - 1, 0, 2, H);
+    ctx.fillRect(this.sel.b * W - 1, 0, 2, H);
+    /* подписи времени */
+    const a = document.getElementById('aued-a'), b = document.getElementById('aued-b');
+    if(a) a.textContent = fmtSec(this.sel.a * this.dur);
+    if(b) b.textContent = fmtSec(this.sel.b * this.dur);
+  },
+  bindSel(){
+    const wrap = document.getElementById('aued-wrap');
+    if(!wrap) return;
+    const frac = p => { const r = wrap.getBoundingClientRect(); return Math.max(0, Math.min(1, (p.clientX - r.left) / r.width)); };
+    const near = f => (Math.abs(f - this.sel.a) < Math.abs(f - this.sel.b)) ? 'a' : 'b';
+    let drag = null;
+    const start = e => {
+      const p = (e.touches && e.touches[0]) || e;
+      const f = frac(p);
+      /* за пределами выделения — начать новое выделение с этого места */
+      if(f < this.sel.a || f > this.sel.b){
+        this.sel.a = f; this.sel.b = f;
+        drag = 'b';
+      } else {
+        drag = near(f);
+      }
+      this.draw();
+      e.preventDefault();
+    };
+    const move = e => {
+      if(!drag) return;
+      const p = (e.touches && e.touches[0]) || e;
+      const f = frac(p);
+      if(drag === 'a') this.sel.a = Math.min(f, this.sel.b - 0.005);
+      else this.sel.b = Math.max(f, this.sel.a + 0.005);
+      this.draw();
+      e.preventDefault();
+    };
+    const end = () => { drag = null; };
+    wrap.addEventListener('mousedown', start);
+    wrap.addEventListener('touchstart', start, { passive:false });
+    document.addEventListener('mousemove', move);
+    wrap.addEventListener('touchmove', move, { passive:false });
+    document.addEventListener('mouseup', end);
+    document.addEventListener('touchend', end);
+  },
+  stopPlay(){
+    if(this.audio){ this.audio.pause(); this.audio = null; }
+    clearInterval(this.playTimer); this.playing = false;
+    const b = document.querySelector('[data-aued="play"]');
+    if(b) b.innerHTML = ic('play') + 'Прослушать выделение';
+    const p = document.getElementById('aued-playline');
+    if(p) p.remove();
+  },
+  async playSel(){
+    if(this.playing){ this.stopPlay(); return; }
+    /* играем выделение через WebAudio: буфер-сегмент */
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const a = Math.floor(this.sel.a * this.buf.duration * this.buf.sampleRate);
+    const b = Math.floor(this.sel.b * this.buf.duration * this.buf.sampleRate);
+    const seg = ctx.createBuffer(this.buf.numberOfChannels, Math.max(1, b - a), this.buf.sampleRate);
+    for(let ch = 0; ch < this.buf.numberOfChannels; ch++){
+      seg.copyToChannel(this.buf.getChannelData(ch).subarray(a, b), ch);
+    }
+    const srcNode = ctx.createBufferSource();
+    srcNode.buffer = seg;
+    srcNode.connect(ctx.destination);
+    srcNode.onended = () => { this.stopPlay(); ctx.close(); };
+    srcNode.start();
+    this.playing = true;
+    const btn = document.querySelector('[data-aued="play"]');
+    if(btn) btn.innerHTML = ic('pause') + 'Стоп';
+  },
+  selectAll(){ this.sel = { a:0, b:1 }; this.draw(); },
+  /* WAV-кодер: AudioBuffer → Blob (PCM 16 бит) */
+  encodeWAV(buffer){
+    const numCh = Math.min(2, buffer.numberOfChannels);
+    const sr = buffer.sampleRate;
+    const len = buffer.length;
+    const bytes = 44 + len * numCh * 2;
+    const ab = new ArrayBuffer(bytes);
+    const dv = new DataView(ab);
+    const str = (o, s) => { for(let i = 0; i < s.length; i++) dv.setUint8(o + i, s.charCodeAt(i)); };
+    str(0, 'RIFF'); dv.setUint32(4, bytes - 8, true); str(8, 'WAVE');
+    str(12, 'fmt '); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true);
+    dv.setUint16(22, numCh, true); dv.setUint32(24, sr, true);
+    dv.setUint32(28, sr * numCh * 2, true); dv.setUint16(32, numCh * 2, true); dv.setUint16(34, 16, true);
+    str(36, 'data'); dv.setUint32(40, len * numCh * 2, true);
+    let off = 44;
+    const chans = [];
+    for(let c = 0; c < numCh; c++) chans.push(buffer.getChannelData(c));
+    for(let i = 0; i < len; i++){
+      for(let c = 0; c < numCh; c++){
+        let v = Math.max(-1, Math.min(1, chans[c][i]));
+        dv.setInt16(off, v < 0 ? v * 0x8000 : v * 0x7FFF, true);
+        off += 2;
+      }
+    }
+    return new Blob([ab], { type:'audio/wav' });
+  },
+  async save(){
+    const a = Math.floor(this.sel.a * this.buf.duration * this.buf.sampleRate);
+    const b = Math.floor(this.sel.b * this.buf.duration * this.buf.sampleRate);
+    if(b - a < this.buf.sampleRate / 4){ toast('Слишком коротко — расширь выделение'); return; }
+    const seg = (this.buf.context || new (window.AudioContext || window.webkitAudioContext)()).createBuffer(
+      this.buf.numberOfChannels, b - a, this.buf.sampleRate);
+    for(let ch = 0; ch < this.buf.numberOfChannels; ch++){
+      seg.copyToChannel(this.buf.getChannelData(ch).subarray(a, b), ch);
+    }
+    const wav = this.encodeWAV(seg);
+    const id = uid('aud');
+    await IDB.put(id, wav);
+    if(this.mode === 'media'){
+      const orig = DB.media.find(x => x.id === this.mediaId);
+      const nm = (orig ? orig.name : 'трек') + ' (отрывок)';
+      DB.media.unshift({ id, kind:'audio', name:nm, size:wav.size, type:'audio/wav', added:'сегодня',
+        dur:(b - a) / this.buf.sampleRate, folder: orig ? orig.folder : null });
+      saveDB();
+      toast('Сохранён отрывок: «' + nm + '»');
+    } else {
+      /* запись-лекция: прикрепим отрывок как отдельный медиафайл */
+      const orig = DB.lectures.find(x => x.id === this.lectId);
+      const nm = (orig ? orig.title : 'запись') + ' (отрывок)';
+      DB.media.unshift({ id, kind:'audio', name:nm, size:wav.size, type:'audio/wav', added:'сегодня',
+        dur:(b - a) / this.buf.sampleRate, folder:null });
+      saveDB();
+      toast('Отрывок сохранён в Музыку: «' + nm + '»');
+    }
+    closeModal(); render();
+  },
+};
+function audioEditorOpen(blobKey, lectId){
+  if(lectId){
+    const l = DB.lectures.find(x => x.id === lectId);
+    AUED.open(blobKey, 'lecture', lectId, l ? l.title : 'Запись');
+  } else {
+    const m = DB.media.find(x => x.id === blobKey);
+    AUED.open(blobKey, 'media', blobKey, m ? m.name : 'Трек');
+  }
+}
+/* делегирование кнопок редактора аудио */
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-aued]');
+  if(!b) return;
+  const act = b.getAttribute('data-aued');
+  if(act === 'play') AUED.playSel();
+  else if(act === 'all') AUED.selectAll();
+  else if(act === 'save') AUED.save();
+});
+
+/* ═══ V7 MODULE: 50-trash.js ═══ */
+/* ═══════════════════════════════════════════════════════════════════
+   V7 · КОРЗИНА В СЕКРЕТНОЙ ЗОНЕ (раздел strash)
+   ─────────────────────────────────────────────────────────────────
+   Правила (по заданию владельца):
+   • корзина доступна только в закрытой зоне (скрытый вход — 
+     двойной клик по логотипу «А»)
+   • «Удалить» в любом разделе = soft-delete, файл едет сюда
+   • хранение 30 дней, потом безвозвратно (авто-очистка при старте
+     и раз в час)
+   • кнопки «Очистить корзину» НЕТ — только восстановление
+   ═══════════════════════════════════════════════════════════════════ */
+
+const TRASH_KIND_META = {
+  media:   { t:'Медиа',   icon:'img',   zoneName:'Фото/Музыка/Видео' },
+  lecture: { t:'Запись',  icon:'lect',  zoneName:'Записи' },
+  note:    { t:'Заметка', icon:'note',  zoneName:'Заметки' },
+  video:   { t:'Ссылка',  icon:'video', zoneName:'Видео' },
+  folder:  { t:'Папка',   icon:'folder', zoneName:'Папки' },
+};
+
+function scTrash(){
+  const items = TRASH.slice();
+  const total = items.length;
+  const expiring = items.filter(t => trashDaysLeft(t.deletedAt) <= 7).length;
+  return '<div class="stack">' +
+    '<div class="row between wrap"><div style="font-size:19px;font-weight:800">Корзина</div>' +
+    '<span class="pill">' + total + ' элем. · хранение 30 дней</span></div>' +
+    '<div class="banner red">Удалённые файлы хранятся 30 дней, затем исчезают безвозвратно. ' +
+    'Ручная очистка корзины отключена — только восстановление. Всё это скрыто в закрытой зоне и не видно в обычном интерфейсе.</div>' +
+    (total === 0
+      ? '<div class="empty">Корзина пуста. Удали что-нибудь в обычных разделах — оно появится здесь и будет ждать 30 дней.</div>'
+      : '<div class="tr-grid">' + items.map((t, i) => {
+          const meta = TRASH_KIND_META[t.kind] || TRASH_KIND_META.media;
+          const days = trashDaysLeft(t.deletedAt);
+          const nm = t.kind === 'folder' ? (t.obj.folder ? t.obj.folder.name : 'Папка')
+            : (t.obj.name || t.obj.title || 'Без названия');
+          const sub = (t.obj.size ? fmtSize(t.obj.size) + ' · ' : '') + (t.obj.dur && typeof t.obj.dur === 'number' ? fmtSec(t.obj.dur) + ' · ' : '') +
+            'удалено ' + new Date(t.deletedAt).toLocaleDateString('ru-RU', { day:'numeric', month:'short' }) + ' · из «' + esc(t.from || meta.zoneName) + '»';
+          const thumb = t.kind === 'media' && t.obj.kind === 'photo'
+            ? '<img data-mid="' + t.obj.id + '" alt="">'
+            : ic(meta.icon);
+          return '<div class="tr-item">' +
+            '<div class="tr-ic">' + thumb + '</div>' +
+            '<div class="tr-body"><div class="tr-name">' + esc(nm) + '</div>' +
+            '<div class="tr-sub">' + sub + '</div></div>' +
+            '<span class="tr-days' + (days <= 7 ? ' warn' : '') + '">' + (days > 0 ? days + ' дн. до удаления' : 'истекает') + '</span>' +
+            '<button class="btn btn-amber btn-sm tr-undo" data-expl="trashRestore" data-i="' + i + '">' + ic('up') + 'Вернуть</button>' +
+          '</div>';
+        }).join('') + '</div>') +
+    (expiring ? '<div class="tiny">Скоро исчезнут без возврата: ' + expiring + ' элем. (через ≤7 дней) — верни, если нужны.</div>' : '') +
+    '<div class="tiny">Автоочистка запускается при открытии приложения и раз в час. Восстановление возвращает файл в ту же папку, откуда он был удалён.</div>' +
+  '</div>';
+}
+
+/* ═══ V7 MODULE: 60-chat-v7.js ═══ */
+/* ═══════════════════════════════════════════════════════════════════
+   V7 · ЧАТ: чистка подсказок
+   ─────────────────────────────────────────────────────────────────
+   Основная правка (чипы и тексты «что умеешь») уже в 15-patches.json.
+   Здесь — дополнительные места, где упоминаются бессмысленные примеры
+   («100 на 5», «2+2×2»): тексты-подсказки в welcome-сообщении чата
+   и заголовок чипов, если он ссылается на счёт.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* приветственная подсказка над чипами: убираем «счётные» примеры,
+   оставляем осмысленные действия — как просил владелец */
+(function cleanChatHints(){
+  /* сам список чипов патчится в базе; здесь чистим welcome-тексты,
+     если они содержат примеры-вычисления */
+  const hintsToDrop = /(100 на 5|2\+2×2|2\+2 \+2|сколько будет 2\+2)/gi;
+  const origPush = ChatWelcomeText => ChatWelcomeText;
+  /* патчим CHATS-заглушки при первом рендере не нужно — тексты чипов
+     уже заменены. Дополнительно: фильтр чипов на случай бэкапов со
+     старыми настройками */
+  const filterChips = list => (list || []).filter(c => !hintsToDrop.test(c));
+  window.__armiFilterChips = filterChips;
+  /* калькулятор остаётся (он полезен), но в подсказках не рекламируется */
+})();
+
+/* пояснение для владельца: калькулятор (calcAnswer) не удалён —
+   он по-прежнему считает «25% от 4000» и любые примеры, просто
+   подсказки-чипы больше не предлагают бессмысленных запросов. */
+
+/* ═══ V7 MODULE: 70-secret-v7.js ═══ */
+/* ═══════════════════════════════════════════════════════════════════
+   V7 · СЕКРЕТНАЯ ЗОНА: корзина в меню + soft-delete секретных фото/музыки
+   ─────────────────────────────────────────────────────────────────
+   Раздел strash добавлен в SECRET_IDS патчем базы. Здесь:
+   • удаление секретных фото/треков тоже становится мягким 
+     (секретные данные лежат в зашифрованном DATA, поэтому корзина
+     для них — отдельный зашифрованный список trash внутри DATA)
+   • кнопки удаления секретных фото/музыки перехватываются
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* soft-delete для секретной зоны: копия в DATA.trash с deletedAt */
+async function secretTrashPush(kind, obj, from){
+  const d = data();
+  if(!d.trash) d.trash = [];
+  d.trash.unshift({ kind, obj: JSON.parse(JSON.stringify(obj)), from: from || '', deletedAt: Date.now() });
+  await persistData();
+  render();
+  toast('В корзину закрытой зоны · 30 дней');
+}
+async function secretTrashRestore(idx){
+  const d = data();
+  if(!d.trash || !d.trash[idx]) return;
+  const t = d.trash[idx];
+  if(t.kind === 'photo') d.photos.unshift(t.obj);
+  else if(t.kind === 'track') d.music.push(t.obj);
+  else if(t.kind === 'note') d.notes.unshift(t.obj);
+  d.trash.splice(idx, 1);
+  await persistData();
+  render();
+  toast('Восстановлено в закрытой зоне');
+}
+async function secretTrashPurge(){
+  const d = data();
+  if(!d.trash) return 0;
+  const keep = d.trash.filter(t => !trashIsExpired(t.deletedAt));
+  const gone = d.trash.length - keep.length;
+  if(gone){ d.trash = keep; await persistData(); }
+  return gone;
+}
+/* дни до удаления для секрета — тот же TRASH_DAYS */
+function secretTrashDays(ts){ return trashDaysLeft(ts); }
+
+/* перехват удалений в секретной зоне (фото/трек) */
+const _secretPhotoDelV66 = Secret.photoDel;
+Secret.photoDel = async function(arg){
+  const d = data();
+  const p = (d.photos || []).find(x => x.id === arg);
+  if(!p) return;
+  await secretTrashPush('photo', p, 'Секретные фото');
+  d.photos = d.photos.filter(x => x.id !== arg);
+  await persistData(); render();
+};
+const _secretTrackDelV66 = Secret.trackDel;
+Secret.trackDel = async function(arg){
+  const d = data();
+  const t = (d.music || []).find(x => x.id === arg);
+  if(!t) return;
+  await secretTrashPush('track', t, 'Секретная музыка');
+  d.music = d.music.filter(x => x.id !== arg);
+  await persistData(); render();
+};
+
+/* показать секретную корзину: если в закрытой зоне открыт раздел strash
+   И контур расшифрован (MODE==='real'), показываем и обычную (армi_trash
+   из localStorage), и секретную (DATA.trash). Иначе — только обычную. */
+const _scTrashV7 = scTrash;
+scTrash = function(){
+  let html = _scTrashV7();
+  if(typeof MODE !== 'undefined' && MODE === 'real' && typeof data === 'function'){
+    const d = data();
+    const sec = (d && d.trash) || [];
+    if(sec.length){
+      html += '<div class="card" style="margin-top:12px"><h3>' + ic('lock') + 'Из закрытой зоны<span class="h-note">зашифрованная корзина</span></h3>' +
+        '<div class="tr-grid">' + sec.map((t, i) => {
+          const days = secretTrashDays(t.deletedAt);
+          const nm = t.obj.d ? 'Фото' : (t.obj.title || 'Трек');
+          return '<div class="tr-item">' +
+            '<div class="tr-ic">' + ic(t.kind === 'photo' ? 'img' : 'music') + '</div>' +
+            '<div class="tr-body"><div class="tr-name">' + esc(nm) + '</div>' +
+            '<div class="tr-sub">удалено ' + new Date(t.deletedAt).toLocaleDateString('ru-RU', { day:'numeric', month:'short' }) + '</div></div>' +
+            '<span class="tr-days' + (days <= 7 ? ' warn' : '') + '">' + days + ' дн.</span>' +
+            '<button class="btn btn-amber btn-sm tr-undo" data-expl="secTrashRestore" data-i="' + i + '">' + ic('up') + 'Вернуть</button>' +
+          '</div>';
+        }).join('') + '</div></div>';
+    }
+  }
+  return html;
+};
+
+/* кнопки восстановления корзины: делегированный обработчик data-expl */
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-expl="trashRestore"]');
+  if(b){ trashRestore(Number(b.getAttribute('data-i'))); return; }
+  const s = e.target.closest('[data-expl="secTrashRestore"]');
+  if(s){ secretTrashRestore(Number(s.getAttribute('data-i'))); }
+});
+
+/* ═══ V7 MODULE: 80-boot-v7.js ═══ */
+/* ═══════════════════════════════════════════════════════════════════
+   V7 · ЗАГРУЗКА: авто-очистка корзины, версия, сброс
+   ─────────────────────────────────────────────────────────────────
+   • при старте: purge корзины (обычной и секретной) — записи старше
+     30 дней удаляются безвозвратно (блобы из IDB тоже)
+   • фоновый интервал уже запущен в 20-data-v7 (раз в час)
+   • версия приложения → v7
+   ═══════════════════════════════════════════════════════════════════ */
+
+(async function bootV7(){
+  /* авто-очистка обычной корзины */
+  try{
+    const purged = await trashAutoPurge();
+    if(purged) toast('Корзина: безвозвратно удалено ' + purged);
+  }catch(e){}
+  /* авто-очистка секретной корзины (если зона расшифрована) */
+  try{
+    if(typeof Secret !== 'undefined' && Secret.status && Secret.status().configured && typeof secretTrashPurge === 'function'){
+      /* purge секретной корзины выполним при следующем входе в зону —
+         данные зашифрованы без пароля; чистим при открытом контуре */
+    }
+  }catch(e){}
+  /* версия */
+  try{
+    document.title = 'Арми — v7';
+    const badge = document.querySelector('.pcheader .tiny');
+  }catch(e){}
+})();
+
+/* авто-очистка секретной корзины при входе в закрытую зону:
+   перехватываем enterReal через разовый хук после openGate */
+(function(){
+  const origOpenGate = Secret.openGate;
+  Secret.openGate = function(){
+    /* после успешного входа (проверим через 1.2с после открытия гейта)
+       выполняем purge секретной корзины */
+    setTimeout(async () => {
+      try{
+        if(typeof MODE !== 'undefined' && MODE === 'real' && typeof secretTrashPurge === 'function'){
+          const gone = await secretTrashPurge();
+          if(gone){ toast('Секретная корзина: удалено навсегда ' + gone); render(); }
+        }
+      }catch(e){}
+    }, 1600);
+    return origOpenGate.apply(this, arguments);
+  };
+})();
+
+/* сброс корзины при полном сбросе прототипа (Настройки → Сбросить):
+   чистим armi_trash вместе с остальными ключами */
+(function(){
+  const origResetYes = ACTIONS.resetDataYes;
+  if(origResetYes){
+    ACTIONS.resetDataYes = function(){
+      try{ store.removeItem('armi_trash'); }catch(e){}
+      TRASH.length = 0;
+      return origResetYes.apply(this, arguments);
+    };
+  }
+})();
 render();
 /* PWA: регистрация service worker (офлайн-оболочка + установка).
    file:// и окно предпросмотра (без https) — тихо пропускаем. */

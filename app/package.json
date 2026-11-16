@@ -1,8 +1,8 @@
 {
   "name": "armi",
   "productName": "Armi",
-  "version": "1.0.0",
-  "description": "Арми — локальный ассистент",
+  "version": "7.0.0",
+  "description": "Арми — локальный ассистент (v7: проводник, редакторы, корзина)",
   "main": "main.js",
   "author": "Armi",
   "license": "MIT",
