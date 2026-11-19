@@ -1,0 +1,9 @@
+{
+  "name": "armi",
+  "productName": "Armi Qwen 3.8 Flash Next",
+  "version": "7.1.117",
+  "description": "Арми Qwen 3.8 Flash Next — сборка SC117 (база v7.1)",
+  "main": "main.js",
+  "author": "Armi",
+  "license": "MIT"
+}
