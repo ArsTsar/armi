@@ -1,0 +1,9 @@
+{
+  "name": "armi",
+  "productName": "Арми 8",
+  "version": "8.0.0",
+  "description": "Арми 8 — ассистент и органайзер",
+  "main": "main.js",
+  "author": "Armi",
+  "license": "MIT"
+}

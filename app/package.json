@@ -1,8 +1,8 @@
 {
   "name": "armi",
-  "productName": "Armi",
-  "version": "7.1.0",
-  "description": "Арми — локальный ассистент (v7: проводник, редакторы, корзина)",
+  "productName": "Арми 8",
+  "version": "8.0.0",
+  "description": "Арми 8 — локальный ассистент: чат с ИИ, задачи, заметки, лекции, медиа; темы «Классика» и «Aurora»",
   "main": "main.js",
   "author": "Armi",
   "license": "MIT",

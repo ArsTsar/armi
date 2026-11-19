@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b0d11">
-<meta name="description" content="Арми — ИИ-ассистент и органайзер: чат, задачи, заметки, запись лекций с расшифровкой, музыка, видео. Данные — на устройстве.">
+<meta name="description" content="Арми 8 — ИИ-ассистент и органайзер: чат, задачи, заметки, запись лекций с расшифровкой, музыка, видео. Данные — на устройстве.">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -9,7 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Арми">
-<title>Арми — v6.6</title>
+<title>Арми 8</title>
 <style>
 :root{
   color-scheme:dark;
@@ -455,6 +455,57 @@ details[open] .ic.chev{transform:rotate(90deg)}
   .crumb{padding:2px 6px}
   .tnode{padding:7px 8px}
 }
+
+/* ═══ AURORA THEME (редизайн Клода) — только оформление, логика не тронута ═══ */
+html.aurora{
+  --bg:#0a0e1f; --panel:#0d1226; --panel2:#121833; --panel3:#182042; --panel4:#212a54;
+  --line:rgba(180,200,255,.08); --line2:rgba(180,200,255,.16);
+  --amber:#7dd3fc; --amber2:#38bdf8; --amber3:#bae6fd;
+  --t1:#eef1ff; --t2:#b4bbdc; --t3:#7f88b0; --t4:#586088;
+  --r:18px;
+  --grad:linear-gradient(135deg,#7dd3fc 0%,#a78bfa 100%);
+}
+html.aurora body{
+  font:14.5px/1.6 "Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+  background:
+    radial-gradient(900px 500px at 12% -10%,rgba(167,139,250,.18),transparent 60%),
+    radial-gradient(800px 480px at 100% 0%,rgba(125,211,252,.12),transparent 55%),
+    var(--bg);
+  background-attachment:fixed;
+}
+html.aurora .logo-tile,html.aurora .brief-ic,html.aurora .btn-amber{background:var(--grad)!important;border-color:transparent!important;color:#0a0e1f!important}
+html.aurora .btn-amber{font-weight:700;box-shadow:0 6px 18px -6px rgba(125,211,252,.55)}
+html.aurora .btn-amber:hover{filter:brightness(1.07)}
+html.aurora .card{
+  background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.01)),var(--panel2);
+  border:1px solid var(--line2);
+  box-shadow:0 10px 30px -18px rgba(0,0,0,.7);
+}
+html.aurora .card.dash-brief{
+  background:linear-gradient(135deg,rgba(167,139,250,.28),rgba(125,211,252,.12) 50%,var(--panel2) 90%);
+  border-color:rgba(167,139,250,.5);
+}
+html.aurora .nav-item{border-radius:12px;transition:background .15s,color .15s}
+html.aurora .nav-item.act{background:linear-gradient(90deg,rgba(125,211,252,.18),rgba(167,139,250,.10));color:#fff;box-shadow:inset 3px 0 0 #7dd3fc}
+html.aurora .tab.on{background:rgba(125,211,252,.16);color:var(--amber3)}
+html.aurora .pill.on{background:rgba(125,211,252,.14);border-color:rgba(125,211,252,.45);color:var(--amber3)}
+html.aurora .chip.on{background:rgba(125,211,252,.13);border-color:rgba(125,211,252,.4);color:var(--amber3)}
+html.aurora input:focus,html.aurora textarea:focus,html.aurora select:focus{border-color:rgba(125,211,252,.65);box-shadow:0 0 0 3px rgba(125,211,252,.14)}
+html.aurora input,html.aurora textarea,html.aurora select{border-radius:12px}
+html.aurora .msg.user{background:rgba(125,211,252,.14);border:1px solid rgba(125,211,252,.25)}
+html.aurora .fdrop{outline-color:rgba(125,211,252,.55)}
+html.aurora .selbar{background:rgba(125,211,252,.08);border-top-color:rgba(125,211,252,.22)}
+html.aurora .etile.sel{background:rgba(125,211,252,.09)}
+html.aurora .erow.sel{background:rgba(125,211,252,.10)}
+html.aurora .tnode.droptarget{background:rgba(125,211,252,.08)}
+html.aurora .lasso{background:rgba(125,211,252,.14)}
+html.aurora .wave-sel{background:rgba(125,211,252,.16)}
+html.aurora .banner{background:rgba(125,211,252,.07);border-color:rgba(125,211,252,.22)}
+html.aurora .tr-days.warn{color:#fb923c}
+html.aurora a{color:var(--amber3)}
+html.aurora ::-webkit-scrollbar{width:10px;height:10px}
+html.aurora ::-webkit-scrollbar-thumb{background:rgba(180,200,255,.18);border-radius:10px;border:2px solid transparent;background-clip:content-box}
+html.aurora ::-webkit-scrollbar-thumb:hover{background:rgba(180,200,255,.32);background-clip:content-box;border:2px solid transparent}
 </style></head><body>
 <div id="app" class="app"></div><div id="overlays"></div>
 <div id="toast" class="toast"></div>
@@ -754,6 +805,7 @@ const MODEL_LABEL = {
   auto:{pc1660:'авто: облако при сети · иначе локальная модель', phone:'авто: облако при сети · иначе локальная модель', old:'авто: облако при сети · иначе офлайн-функции'},
   offline:{pc1660:()=>'локально · '+(LocalAI.modelName()||'модель не скачана'), phone:()=>'локально · '+(LocalAI.modelName()||'модель не скачана'), old:'офлайн-функции'},
   online:{pc1660:'облако · умная модель', phone:'облако · умная модель', old:'облако · основная'},
+  build:'Арми 8 · темы оформления',
 };
 function modelLabelNow(){
   const v = MODEL_LABEL[S.aiMode] && MODEL_LABEL[S.aiMode][S.deviceProfile];
@@ -1363,7 +1415,7 @@ function logoTap(){ /* скрытый вход: 2 клика по логотип
   if(S.secretActive) return;
   const now = Date.now();
   if(now - (logoTap.t||0) < 1200){ logoTap.t=0; Secret.openGate(); }
-  else { logoTap.t=now; toast('Арми · v6'); }
+  else { logoTap.t=now; toast('Арми 8'); }
 }
 function pcShell(){
   const online = S.aiMode==='online' || (S.aiMode==='auto' && navigator.onLine);
@@ -1371,7 +1423,7 @@ function pcShell(){
   const fullChat = (S.secretActive && S.secretScreen) ? (S.secretScreen==='schat'&&!!S.secretThread) : (S.screen==='chat');
   const secLbl = ic('lock').replace('class="ic"','class="ic" style="width:11px;height:11px"');
   return '<aside class="sidebar">'+
-    '<div class="sb-logo" data-act="logoTap"><div class="logo-tile">А</div><div><div style="font-weight:700;letter-spacing:-.01em">Арми</div><div class="tiny">локальный ассистент</div></div></div>'+
+    '<div class="sb-logo" data-act="logoTap"><div class="logo-tile">А</div><div><div style="font-weight:700;letter-spacing:-.01em">Арми 8</div><div class="tiny">темы: Классика · Aurora</div></div></div>'+
     '<nav class="sb-nav">'+
       (S.secretActive? '<div><div class="group-label sec">'+secLbl+'Закрытая зона</div><div style="display:flex;flex-direction:column;gap:2px">'+SECRET_IDS.map(id=>navItem(id, S.secretScreen===id)).join('')+'</div></div>' : '')+
       NAV_GROUPS.map(g=>'<div><div class="group-label">'+g.label+'</div><div style="display:flex;flex-direction:column;gap:2px">'+g.items.map(id=>navItem(id, S.screen===id&&!S.secretScreen)).join('')+'</div></div>').join('')+
@@ -2801,6 +2853,10 @@ function scrSettings(){
       Object.entries(PROFILES).map(([k,p])=>'<button class="btn'+(S.deviceProfile===k?' btn-amber':'')+' btn-sm" style="width:100%;justify-content:flex-start;margin-bottom:6px" data-act="profile" data-arg="'+k+'">'+
         '<span style="min-width:0;text-align:left"><span style="display:block;font-size:12.5px">'+p.t+'</span><span style="display:block;font-size:10.5px;opacity:.75;font-weight:500">'+p.m+'</span></span></button>').join('')+
       '<div class="tiny mt6">Локальная модель всегда бесплатна. Платно — только облако, и только когда своих мощностей не хватает.</div></div>'+
+    '<div class="card"><h3>'+ic('spark')+'Тема оформления<span class="h-note">по настроению</span></h3><div class="row wrap" style="gap:8px">'+
+      THEMES.map(t=>'<button class="btn'+(themeGet()===t.id?' btn-amber':'')+' btn-sm" data-act="themeSet" data-arg="'+t.id+'">'+
+        '<span style="min-width:0;text-align:left"><span style="display:block;font-size:12.5px">'+t.name+'</span><span style="display:block;font-size:10.5px;opacity:.75;font-weight:500">'+t.hint+'</span></span></button>').join('')+
+      '</div><div class="tiny mt6">Классика — янтарная Арми из v7.1, Aurora — светло-голубой редизайн от Клода. Данные и логика одинаковые, меняется только вид.</div></div>'+
     '<div class="card"><h3>'+ic('zap')+'ИИ-режим<span class="h-note">настоящий: облако + локальная модель</span></h3><div class="row wrap" style="gap:8px">'+
       [['auto','Авто'],['online','Облако'],['offline','Локально']].map(m=>'<button class="btn'+(S.aiMode===m[0]?' btn-amber':'')+' btn-sm" data-act="aiMode" data-arg="'+m[0]+'">'+m[1]+'</button>').join('')+'</div>'+
       '<div class="note mt10">'+(S.aiMode==='online'
@@ -2862,7 +2918,7 @@ function scrSettings(){
       '<button class="btn btn-sm" data-act="importData">'+ic('up')+'Загрузить бэкап</button>'+
       '<button class="btn btn-danger btn-sm" data-act="resetData">Сбросить прототип</button></div>'+
       '<div class="tiny mt10">Секретная зона синхронизируется отдельно — из закрытого режима, своим ключом. Здесь она не трогается.</div></div>'+
-    '<div class="card"><h3>'+ic('check')+'Версия и данные</h3><div class="sub">Эта копия: <b>Арми v6.6</b> (сборка 16 ноября · большой фикс-релиз: 60+ багов) — настоящий ИИ: облако + локальная модель, настоящая запись лекций. Если приложение и браузерная версия выглядят по-разному — версии одинаковые, просто данные разные: браузер помнит твои старые записи, а новое приложение начинает с демо-набора. Привести всё к демо-виду — кнопка «Сбросить прототип» ниже.</div></div>'+
+    '<div class="card"><h3>'+ic('check')+'Версия и данные</h3><div class="sub">Эта копия: <b>Арми 8</b> (19 ноября 2026 · идёт сразу после v7.1: v5 → v6.5 → v6.6 → v7 → v7.1 → Арми 8). Две темы оформления: «Классика» и «Aurora» — переключаются выше. — настоящий ИИ: облако + локальная модель, настоящая запись лекций. Если приложение и браузерная версия выглядят по-разному — версии одинаковые, просто данные разные: браузер помнит твои старые записи, а новое приложение начинает с демо-набора. Привести всё к демо-виду — кнопка «Сбросить прототип» ниже.</div></div>'+
     '<div class="card"><h3>'+ic('down')+'Приложение на ПК и телефон<span class="h-note">PWA · без магазинов</span></h3>'+
       '<div class="sub">Арми ставится как настоящее приложение: отдельное окно, иконка на рабочем столе, работает офлайн. Данные остаются на устройстве.</div>'+
       '<div class="row mt10"><button class="btn btn-amber" style="flex:1" id="pwa-install">'+ic('down')+'Установить Арми</button></div>'+
@@ -2879,7 +2935,7 @@ function scrSettings(){
       '<b>Расписание:</b> нажми на любое событие — правка или удаление; «+ Событие» добавляет своё.<br>'+
       '<b>Секретный режим:</b> два клика по жёлтой «А» → пароль → закрытые разделы появляются в меню рядом с обычными (плюс блоки в «Заметках», «Музыке» и чип в чате).<br>'+
       '<b>Паника:</b> кнопка «Быстрый выход», кнопка «Закрыто» в шапке или клавиша Esc.</div></div>'+
-    '<div class="tiny" style="text-align:center;padding:4px 0 10px">Арми · v6.6 · фикс-релиз: музыка, фото, модалки, телефон<br>Данные: '+DB.notes.length+' заметок · '+DB.topics.length+' тем · '+DB.tasks.length+' задач · '+DB.sections.length+' разделов · '+DB.media.length+' медиафайлов · план 39 недель</div>'+
+    '<div class="tiny" style="text-align:center;padding:4px 0 10px">Арми 8<br>Данные: '+DB.notes.length+' заметок · '+DB.topics.length+' тем · '+DB.tasks.length+' задач · '+DB.sections.length+' разделов · '+DB.media.length+' медиафайлов · план 39 недель</div>'+
   '</div>';
 }
 
@@ -2888,7 +2944,7 @@ const LocalAI = (() => {
   const MODELS = [
     {id:'Qwen2.5-0.5B-Instruct-q4f16_1-MLC', t:'Арми Мини (Qwen 0.5Б)', size:'0,9 ГБ', vram:900, desc:'для телефона и слабых ПК — быстрая', tag:'Qwen'},
     {id:'Qwen2.5-1.5B-Instruct-q4f16_1-MLC', t:'Арми Стандарт (Qwen 1.5Б)', size:'1,6 ГБ', vram:1600, desc:'баланс качества и скорости', tag:'Qwen'},
-    {id:'Qwen2.5-3B-Instruct-q4f16_1-MLC', t:'Арми Макс (Qwen 3Б)', size:'2,4 ГБ', vram:2400, desc:'самая умная локально, нужен GPU', tag:'Qwen'},
+    {id:'Qwen2.5-3B-Instruct-q4f16_1-MLC', t:'Арми Макс (Qwen 3Б) · по умолчанию', size:'2,4 ГБ', vram:2400, desc:'самая умная локально, нужен GPU', tag:'Qwen'},
     {id:'SmolLM2-360M-Instruct-q4f16_1-MLC', t:'SmolLM2 360М', size:'0,4 ГБ', vram:500, desc:'совсем крошка — самый быстрый старт', tag:'SmolLM'},
     {id:'SmolLM2-1.7B-Instruct-q4f16_1-MLC', t:'SmolLM2 1.7Б', size:'1,3 ГБ', vram:1500, desc:'шустрая английская, русский ограничен', tag:'SmolLM'},
     {id:'gemma-2-2b-it-q4f16_1-MLC', t:'Gemma 2 2Б', size:'1,8 ГБ', vram:2000, desc:'от Google, аккуратные ответы', tag:'Gemma'},
@@ -2897,7 +2953,7 @@ const LocalAI = (() => {
     {id:'Mistral-7B-Instruct-v0.3-q4f16_1-MLC', t:'Mistral 7Б', size:'4,4 ГБ', vram:5000, desc:'тяжёлая, для ПК с видеокартой', tag:'Mistral'},
     {id:'TinyLlama-1.1B-Chat-v1.0-q4f16_1-MLC', t:'TinyLlama 1.1Б', size:'0,8 ГБ', vram:900, desc:'проверенная классика, быстрый чат', tag:'TinyLlama'},
   ];
-  let engine=null, loading=null, current=store.getItem('armi_local_model')||null;
+  let engine=null, loading=null, current=store.getItem('armi_local_model')||'Qwen2.5-3B-Instruct-q4f16_1-MLC';
   function ready(){ return !!engine; }
   function modelName(){ return current ? (MODELS.find(m=>m.id===current)||{}).t : null; }
   function hasWebGPU(){
@@ -2982,7 +3038,7 @@ const LocalAI = (() => {
 
 /* ══════════ ЧАТ АРМИ (настоящий ИИ: облако + локальная модель) ══════════ */
 /* мульти-чаты: armi_chats = [{id, name, updated, msgs:[...]}]. Один раз мигрируем старый armi_chat */
-const CHAT_WELCOME = 'Привет! Я Арми. Отвечаю по-настоящему: в облаке — когда есть интернет, локально — когда его нет (модель скачивается в Настройках). Вижу твои задачи, заметки и расписание. Спроси что угодно.';
+const CHAT_WELCOME = 'Привет! Я Арми 8. Отвечаю по-настоящему: в облаке — когда есть интернет, локально — когда его нет (модель скачивается в Настройках). Вижу твои задачи, заметки и расписание. Спроси что угодно.';
 let CHATS = loadJSON('armi_chats', null);
 if(!CHATS){
   const old = loadJSON('armi_chat', null);
@@ -3201,6 +3257,7 @@ async function doChatSend(preset){
 }
 /* ══════════ ДЕЙСТВИЯ ══════════ */
 const ACTIONS = {
+  themeSet(arg){ if(THEMES.some(t=>t.id===arg)) themeSet(arg); },
   go(arg){ if(isSecretId(arg)){ S.secretScreen=arg; } else { S.screen=arg; S.secretScreen=null; } S.moreOpen=false; render(); },
   /* дашборд «Сегодня»: быстрый ввод и глубокая работа */
   quickAdd(){
@@ -3959,7 +4016,7 @@ function panic(){
   S.secretActive=false; S.secretMode='real'; MODE='real'; MK=null; DATA=null;
   S.secretScreen=null; S.secretThread=null; S.secretNoteOpen=null; S.moreOpen=false;
   clearTimeout(LOCK_T);
-  document.title='Арми — v6.6';
+  document.title='Арми 8';
   render(); toast('Закрытая зона закрыта');
 }
 function counts(){
@@ -5192,7 +5249,7 @@ function applySectionAccent(){
   const id = activeScreenId();
   const host = document.querySelector('.pcheader') || document.querySelector('.pheader');
   if(!host) return;
-  const color = SECTION_ACCENTS[id] || '#fbbf24';
+  const color = SECTION_ACCENTS[id] || (themeGet()==='aurora' ? '#7dd3fc' : '#fbbf24');
   let band = host.querySelector('.ph-band');
   if(!band){
     band = document.createElement('div');
@@ -5671,7 +5728,7 @@ const AUED = {
     ctx.fillRect(0, 0, this.sel.a * W, H);
     ctx.fillRect(this.sel.b * W, 0, W - this.sel.b * W, H);
     /* рамки выделения */
-    ctx.fillStyle = '#fbbf24';
+    ctx.fillStyle = themeGet()==='aurora' ? '#7dd3fc' : '#fbbf24';
     ctx.fillRect(this.sel.a * W - 1, 0, 2, H);
     ctx.fillRect(this.sel.b * W - 1, 0, 2, H);
     /* подписи времени */
@@ -6026,7 +6083,7 @@ document.addEventListener('click', e => {
   }catch(e){}
   /* версия */
   try{
-    document.title = 'Арми — v7';
+    document.title = 'Арми 8';
     const badge = document.querySelector('.pcheader .tiny');
   }catch(e){}
 })();
@@ -6567,8 +6624,28 @@ scrHome = function(){
   document.head.appendChild(css);
 })();
 
+
+/* ═══ ТЕМЫ ОФОРМЛЕНИЯ: «Классика» (янтарь, v7.1) и «Aurora» (голубой, редизайн Клода) ═══ */
+const THEMES = [
+  {id:'classic', name:'Классика', hint:'янтарь · тёмная · как в v7.1'},
+  {id:'aurora',  name:'Aurora',   hint:'голубой + фиолетовый · редизайн Клода'},
+];
+function themeGet(){ return store.getItem('armi_theme') || 'classic'; }
+function themeApply(t){
+  document.documentElement.classList.toggle('aurora', t === 'aurora');
+  const m = document.querySelector('meta[name="theme-color"]');
+  if(m) m.setAttribute('content', t === 'aurora' ? '#0a0e1f' : '#0b0d11');
+}
+function themeSet(t){
+  store.setItem('armi_theme', t);
+  themeApply(t);
+  render();
+  toast(t === 'aurora' ? 'Тема Aurora — редизайн Клода' : 'Тема «Классика» — янтарь');
+}
+themeApply(themeGet());
+
 /* ── 9. ВЕРСИЯ ── */
-document.title = 'Арми — v7.1';
+document.title = 'Арми 8';
 
 render();
 /* PWA: регистрация service worker (офлайн-оболочка + установка).
