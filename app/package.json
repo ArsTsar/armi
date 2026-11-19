@@ -1,7 +1,7 @@
 {
   "name": "armi",
   "productName": "Armi",
-  "version": "7.0.0",
+  "version": "7.1.0",
   "description": "Арми — локальный ассистент (v7: проводник, редакторы, корзина)",
   "main": "main.js",
   "author": "Armi",
