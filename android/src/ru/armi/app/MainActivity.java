@@ -49,7 +49,18 @@ public class MainActivity extends Activity implements LocalServer.Source {
 
     /** Тело index.html для локального сервера. */
     public byte[] indexHtml() throws Exception {
-        InputStream is = getAssets().open("index.html");
+        return readAsset("index.html");
+    }
+
+    /** Отдаём только vendor-webllm.js — остальные ассеты наружу не выходят. */
+    @Override
+    public byte[] asset(String name) throws Exception {
+        if (!"vendor-webllm.js".equals(name)) return null;
+        try { return readAsset(name); } catch (java.io.IOException e) { return null; }
+    }
+
+    private byte[] readAsset(String name) throws Exception {
+        InputStream is = getAssets().open(name);
         ByteArrayOutputStream bo = new ByteArrayOutputStream();
         byte[] buf = new byte[65536];
         int n;

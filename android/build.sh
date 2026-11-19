@@ -2,12 +2,14 @@
 # Сборка Арми-Android.apk: aapt2 + javac + d8 + zipalign + apksigner
 set -e
 cd "$(dirname "$0")"
+# приложение и локальный ИИ берём из ../app, чтобы в APK лежала актуальная версия
+mkdir -p assets && cp ../app/index.html ../app/vendor-webllm.js assets/
 export PATH=~/jdk/bin:$PATH
 
 BT=$(pwd)/android-14
 PLAT=$(pwd)/android-34/android.jar
 KEYSTORE=armi-release.keystore
-KEYPASS="armi-local-build"
+KEYPASS="${ARMI_KEYPASS:?задай пароль ключа: export ARMI_KEYPASS=...}"  # пароль не хранится в репозитории
 OUT_APK="/home/z/my-project/download/Арми-Android.apk"
 
 echo "==> 1/6 aapt2: компиляция ресурсов"

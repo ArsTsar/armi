@@ -20,6 +20,9 @@ public class LocalServer implements Runnable {
     /** Источник тела index.html. */
     public interface Source {
         byte[] indexHtml() throws Exception;
+
+        /** Ресурс рядом с index.html (сейчас только vendor-webllm.js); null — нет такого. */
+        default byte[] asset(String name) throws Exception { return null; }
     }
 
     public static final int PORT = 8377;
@@ -80,6 +83,11 @@ public class LocalServer implements Runnable {
                 String path = req.substring(4).split(" ")[0];
                 if (path.equals("/") || path.equals("/index.html") || path.startsWith("/?")) {
                     write(out, 200, source.indexHtml(), "text/html; charset=utf-8");
+                } else if (path.equals("/vendor-webllm.js")) {
+                    /* локальный движок ИИ лежит в APK: без него приложению пришлось бы грузить его с CDN */
+                    byte[] js = source.asset("vendor-webllm.js");
+                    if (js != null) write(out, 200, js, "text/javascript; charset=utf-8");
+                    else write(out, 404, bytes("Not Found"), "text/plain");
                 } else {
                     write(out, 404, bytes("Not Found"), "text/plain");
                 }
