@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, session } = require('electron');
+const { app, BrowserWindow, Menu, session, globalShortcut } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -107,9 +107,20 @@ if (!gotLock) {
     Menu.setApplicationMenu(null);
     startLocalServer();
     createWindow();
+    /* V9: глобальная горячая клавиша быстрого ввода — работает, даже когда Арми свёрнута */
+    const quick = () => {
+      const w = BrowserWindow.getAllWindows()[0]; if (!w) return;
+      if (w.isMinimized()) w.restore();
+      w.show(); w.focus();
+      w.webContents.executeJavaScript('window.armiQuickCapture && window.armiQuickCapture()').catch(() => {});
+    };
+    if (!globalShortcut.register('CommandOrControl+Shift+Space', quick)) {
+      console.warn('Арми: Ctrl+Shift+Space занято другой программой');
+    }
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) createWindow();
     });
   });
+  app.on('will-quit', () => globalShortcut.unregisterAll());
   app.on('window-all-closed', () => app.quit());
 }
