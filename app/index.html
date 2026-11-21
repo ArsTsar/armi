@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8">
+<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><meta http-equiv="Content-Security-Policy" content="object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b0d11">
 <meta name="description" content="Арми 9 — ИИ-ассистент и органайзер: чат, задачи, заметки, запись лекций с расшифровкой, музыка, видео. Данные — на устройстве.">
@@ -638,12 +638,6 @@ const TECH = [
   ['Дриллы A-skip / B-skip (на английском, но всё видно)','aSDyoraNOZc'],
  ]],
 ];
-const TECH_IMG = [
- ['Пункт 1 осанки: подбородок назад (chin tuck)','https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/7d035eda5b4b.jpg'],
- ['Пункт 2: растяжка сгибателя бедра','https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/3883dd831688.jpg'],
- ['Пункт 3: растяжка грудных в дверном проёме','https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/68ba34cd50e8.jpg'],
- ['Пункт 5: мёртвый жук','https://z-cdn.chatglm.cn/image-search-mcp/images-ppt/1aeb8b791962.jpg'],
-];
 /* ══════════ ИКОНКИ (инлайн SVG, офлайн) ══════════ */
 const IC = {
   home:'<path d="M3 11l9-8 9 8"/><path d="M5 9.8V21h14V9.8"/>',
@@ -719,12 +713,12 @@ const NAV_ICONS = {home:'home', chat:'chat', notes:'note', tasks:'task', schedul
 const WEEKDAYS = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const WEEKFULL = ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'];
 
-/* ══════════ СЕМЕЙНЫЕ ДАННЫЕ (импорт из GLM-чата, 8 ноября) ══════════ */
+/* ══════════ СТАРТОВЫЕ ДАННЫЕ (нейтральные; личные данные в репозиторий не кладём) ══════════ */
 const SEED_SECTIONS = [
   {id:'s_zdo', name:'Здоровье', c:'#60a5fa'},
   {id:'s_telo', name:'Тело', c:'#2dd4bf'},
   {id:'s_rab', name:'Работа', c:'#fbbf24'},
-  {id:'s_aik', name:'Айкидо', c:'#a78bfa'},
+  {id:'s_aik', name:'Спорт', c:'#a78bfa'},
   {id:'s_uch', name:'Учёба', c:'#34d399'},
   {id:'s_fin', name:'Финансы', c:'#f59e0b'},
   {id:'s_lich', name:'Личное', c:'#fb7185'},
@@ -738,46 +732,20 @@ const SEED_TOPICS = [
   {id:'tp5', name:'Проекты', c:'#a78bfa'},
 ];
 const SEED_TASKS = [
-  {id:'t1', title:'Травмпункт: рентген кисти по ОМС — бесплатно, без записи', done:false, priority:'high', project:'Здоровье', due:'до вс'},
-  {id:'t2', title:'Силовая по плану дня (отметить в трекере)', done:false, priority:'high', project:'Тело', due:'сегодня'},
-  {id:'t3', title:'Стажировка: дождаться первой зарплаты, уточнить дату', done:false, priority:'high', project:'Работа', due:'на неделе'},
-  {id:'t4', title:'Оплатить хакаму (2 кю получено)', done:false, priority:'normal', project:'Айкидо', due:'до 27.12'},
-  {id:'t5', title:'Академия: доучиться и забрать диплом', done:false, priority:'normal', project:'Учёба', due:'до марта'},
-  {id:'t6', title:'Вернуть долг 6к другу — с первой зарплаты', done:false, priority:'normal', project:'Финансы', due:'к дек'},
-  {id:'t7', title:'Замеры и фото — воскресенье, натощак', done:false, priority:'low', project:'Тело', due:'вс'},
-  {id:'t8', title:'Настроить llama.cpp на 1660 Super', done:true, priority:'high', project:'Работа', due:'сделано'},
+  {id:'t1', title:'Добавить первую задачу — кнопка «+» или быстрый ввод (Ctrl+Shift+Пробел)', done:false, priority:'high', project:'Личное', due:'сегодня'},
+  {id:'t2', title:'Сделать резервную копию: Настройки → Экспорт', done:false, priority:'normal', project:'Личное', due:'на неделе'},
+  {id:'t3', title:'Скачать локальную модель ИИ: Настройки → Локальный ИИ', done:false, priority:'normal', project:'Работа', due:'на неделе'},
+  {id:'t4', title:'Пример выполненной задачи', done:true, priority:'low', project:'Личное', due:'сделано'},
 ];
 const SEED_NOTES = [
-  {id:'n1', title:'Контракт до 30.11',
-   content:'Контракт до 30.11 — пробный формат, финал совпадает с концом Фазы 1 (29.11).\n\nПравила:\n— не «парень»: никаких подарков-инвестиций и логистики за неё\n— 1–2 встречи в неделю, не каждый день\n— ни разу не спрашивать «появились?»\n— спорт неприкосновенен: план не двигается из-за настроения\n— деньги: ничего сверх обычного\n— триггер выхода: 15–20 ноября самопроверка — если инициативы и тепла нет, завершаю сам\n\nПосле 30.11 — чистый разрыв и 2–4 недели тишины. Декабрь-протокол в трекере буквально для этого.', topic:'Личное', updatedAt:'сб, 7 ноя'},
-  {id:'n2', title:'Протокол кисти',
-   content:'Макивара — СТОП до снимка и вердикта врача.\nБесплатный путь: травмпункт при больнице скорой помощи — рентген по ОМС без записи. Или поликлиника → травматолог-ортопед.\nПосле вердикта: сила удара 20–30%, первые две костяшки, запястье прямое, 2–3 мин через день.\nХват-блок по сенсею: вис 2×60 с (всегда первый) → «парашютист» 3×20–60 с → разводка в наклоне 3×12–20.', topic:'Тело', updatedAt:'сб, 7 ноя'},
-  {id:'n3', title:'Финансы: долг и степуха',
-   content:'Долг 6к другу — гасить с первой зарплаты со стажировки.\nСтепуха ~27к ожидается 27.12. Малая степуха 2900 → зал.\nС марта (диплом + зарплата): 3–4 месяца копить → своя комната к 6.07.2027.\nПравило: траты записывать в тот же день, чтобы понимать, куда уходит.', topic:'Финансы', updatedAt:'вс, 8 ноя'},
-  {id:'n4', title:'Кожа — протокол за 400 ₽',
-   content:'1) умывание мягким гелем 2 раза в день + обязательно после тренировки\n2) на ночь бензоилпероксид 2,5% (Базирон/аналог) или адапален 0,1% — тонким слоем на всё лицо, через день\n3) наволочка свежая раз в 2–3 дня, полотенце для лица отдельное\n4) не давить. Эффект 8–12 недель\nЕсли через 2 месяца тяжело — терапевт → дерматолог (бесплатно).', topic:'Здоровье', updatedAt:'сб, 7 ноя'},
-  {id:'n5', title:'Цель: своя комната к 6.07.2027',
-   content:'«Хочу один жить» — это цель, а не побег.\nПуть: стажировка платит → долг 6к → степуха 27.12 → с марта зп + диплом → 3–4 месяца копить → комната к 6.07.2027.\nКаждая тренировка теперь работает и на это.\nЛюди: минимум там, где клинят (дома). Друзья с тренировок и айкидо — свои люди, там уважают.', topic:'Проекты', updatedAt:'вс, 8 ноя'},
-  {id:'n6', title:'Роадмап Арми',
-   content:'1) Локальный RAG по заметкам — векторный поиск без облака\n2) Брифинг на будильник: Арми зачитывает план дня\n3) Голосовые лекции → автоконспект + теги (whisper.cpp)\n4) Секретный режим: тот же интерфейс, скрытый вход двойным кликом по логотипу\n5) Мультиагенты по мотивам Сары — только локальные', topic:'Проекты', updatedAt:'пн, 9 ноя'},
+  {id:'n1', title:'Добро пожаловать в Арми',
+   content:'Арми работает на твоём устройстве: данные лежат в браузере/приложении, облако выключено.\n\nЧто попробовать:\n— быстрый ввод задачи или заметки: Ctrl+Shift+Пробел (на телефоне — кнопка «+»)\n— фокус-сессии и разбор дня\n— карточки для повторения (заметка → карточки)\n— секретная зона с шифрованием: меню → «Закрытая зона»\n\nВажно: сделай бэкап (Настройки → Экспорт). Если очистить данные браузера, без бэкапа всё пропадёт.', topic:'Проекты', updatedAt:new Date().toLocaleDateString('ru-RU',{weekday:'short',day:'numeric',month:'short'})},
 ];
 const KIND_STYLE = {'учёба':{c:'#34d399'},'спорт':{c:'#2dd4bf'},'работа':{c:'#fbbf24'},'личное':{c:'#fb7185'},'прочее':{c:'#a1a1aa'}};
 const SEED_EVENTS = [
-  {id:'e1', day:0, start:'15:00', end:'17:00', title:'Силовая A — окно 15:00–17:00', place:'зал у дома', kind:'спорт'},
-  {id:'e2', day:0, start:'18:30', end:'21:00', title:'Академия — вечер', place:'академия', kind:'учёба'},
-  {id:'e3', day:1, start:'07:15', end:'07:30', title:'Осанка — полный блок', place:'дома', kind:'спорт'},
-  {id:'e4', day:1, start:'13:00', end:'14:00', title:'Физра', place:'корпус', kind:'спорт'},
-  {id:'e5', day:1, start:'19:00', end:'21:00', title:'Айкидо', place:'додзё', kind:'спорт'},
-  {id:'e6', day:2, start:'15:00', end:'17:00', title:'Силовая B — окно 15:00–17:00', place:'зал у дома', kind:'спорт'},
-  {id:'e7', day:2, start:'18:30', end:'21:00', title:'Академия — вечер', place:'академия', kind:'учёба'},
-  {id:'e8', day:3, start:'07:15', end:'07:30', title:'Осанка — полный блок', place:'дома', kind:'спорт'},
-  {id:'e9', day:3, start:'19:00', end:'21:00', title:'Айкидо', place:'додзё', kind:'спорт'},
-  {id:'e10', day:4, start:'16:40', end:'18:00', title:'Силовая C после пар', place:'зал у дома', kind:'спорт'},
-  {id:'e11', day:4, start:'18:30', end:'21:00', title:'Академия — вечер', place:'академия', kind:'учёба'},
-  {id:'e12', day:5, start:'09:30', end:'10:30', title:'Бег-блок по фазе', place:'парк/стадион', kind:'спорт'},
-  {id:'e13', day:5, start:'19:00', end:'21:00', title:'Айкидо', place:'додзё', kind:'спорт'},
-  {id:'e14', day:6, start:'10:00', end:'10:20', title:'Замеры: вес, талия, фото', place:'дома', kind:'личное'},
-  {id:'e15', day:6, start:'16:00', end:'16:40', title:'Силовая D (руки/плечи)', place:'дома', kind:'спорт'},
+  {id:'e1', day:0, start:'09:00', end:'10:30', title:'Пример: учёба / работа', place:'', kind:'учёба'},
+  {id:'e2', day:2, start:'18:00', end:'19:30', title:'Пример: тренировка', place:'', kind:'спорт'},
+  {id:'e3', day:6, start:'11:00', end:'11:30', title:'Пример: обзор недели', place:'дома', kind:'личное'},
 ];
 const SEED_LECTURES = [
   {id:'l1', title:'Базы данных — Индексы и планы запросов', dur:'48 мин', date:'пн, 9 ноя', consp:true,
@@ -787,10 +755,7 @@ const SEED_LECTURES = [
    text:'Механизм внимания взвешивает важность токенов друг для друга: запрос-ключ-значение, масштабирование на корень из размерности, softmax по строкам.',
    excerpt:'…проблема RNN — затухание градиента на длинных последовательностях. Attention решает её прямым доступом к любому элементу: каждый токен «смотрит» на все остальные и выбирает, что важно…'},
 ];
-const SEED_MYVIDEOS = [
-  {id:'mv1', title:'План-трекер (исходник из чата)', url:'https://chat.z.ai/s/ea06a617', note:'39 недель, импортировано 8 ноя', added:'8 ноя'},
-  {id:'mv2', title:'GLM-чат: анализ диалогов и план', url:'https://chat.z.ai/s/ea06a617', note:'источник данных прототипа', added:'8 ноя'},
-];
+const SEED_MYVIDEOS = [];
 const TRACKS = [
   {id:'m1', title:'Утренний фокус', artist:'Арми · локальный плейлист', seconds:204},
   {id:'m2', title:'Глубокая работа', artist:'Арми · ambient', seconds:252},
@@ -810,7 +775,7 @@ const MODEL_LABEL = {
   build:'Арми 9 · стабилизация',
 };
 function modelLabelNow(){
-  const v = MODEL_LABEL[S.aiMode] && MODEL_LABEL[S.aiMode][S.deviceProfile];
+  const v = MODEL_LABEL[aiEffMode()] && MODEL_LABEL[aiEffMode()][S.deviceProfile];
   return typeof v === 'function' ? v() : (v || '');
 }
 /* ══════════ РАЗВЛЕЧЕНИЯ И САМОРАЗВИТИЕ ══════════ */
@@ -897,11 +862,29 @@ function pickBook(){
 
 /* ══════════ ХРАНИЛИЩЕ И УТИЛИТЫ ══════════ */
 const store = (function(){
-  try{ const t='__t'; localStorage.setItem(t,'1'); localStorage.removeItem(t); return localStorage; }
-  catch(e){ const m={}; return {getItem:k=>(k in m)?m[k]:null, setItem:(k,v)=>{m[k]=String(v);}, removeItem:k=>{delete m[k];}}; }
+  /* Хранилище с честной диагностикой. Раньше при недоступном localStorage данные молча уходили в память
+     и пропадали при закрытии. Теперь: флаг volatile, счётчик сбоев, overlay в памяти и баннер (см. Durable). */
+  let real=null;
+  try{ const t='__t'; localStorage.setItem(t,'1'); localStorage.removeItem(t); real=localStorage; }catch(e){}
+  const mem={};
+  const w = {
+    volatile: !real,
+    failed: 0,
+    onChange: null,
+    getItem:k=>(k in mem)?mem[k]:(real?real.getItem(k):null),
+    setItem:(k,v)=>{
+      v=String(v);
+      try{ if(!real) throw new Error('no-storage'); real.setItem(k,v); delete mem[k]; }
+      catch(e){ mem[k]=v; w.failed++; }
+      if(w.onChange) w.onChange(k);
+    },
+    removeItem:k=>{ delete mem[k]; try{ if(real) real.removeItem(k); }catch(e){} if(w.onChange) w.onChange(k); },
+    keys:()=>{ const o={}; try{ if(real) for(let i=0;i<real.length;i++) o[real.key(i)]=1; }catch(e){} Object.keys(mem).forEach(k=>o[k]=1); return Object.keys(o); },
+  };
+  return w;
 })();
 function loadJSON(k, d){ try{ const v = store.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
-function saveJSON(k, v){ try{ store.setItem(k, JSON.stringify(v)); }catch(e){ toast('Хранилище переполнено'); } }
+function saveJSON(k, v){ try{ store.setItem(k, JSON.stringify(v)); }catch(e){ toast('Не удалось сохранить данные'); } }
 const dkey = d => { const x=new Date(d.getTime()-d.getTimezoneOffset()*6e4); return x.toISOString().slice(0,10); };
 function chkGet(k){ return store.getItem(k)==='1'; }
 function chkSet(k,v){ v?store.setItem(k,'1'):store.removeItem(k); }
@@ -926,6 +909,66 @@ const IDB = {
   del(k){ return this._tx('readwrite',st=>st.delete(k)); },
   clear(){ return this._tx('readwrite',st=>st.clear()); },
 };
+
+/* ══════════ ДОЛГОВЕЧНОСТЬ ДАННЫХ (v9.1) ══════════
+   1) запрос «постоянного» хранилища у браузера (navigator.storage.persist)
+   2) зеркало всех ключей в IndexedDB (другая квота и другая «судьба», чем у localStorage)
+   3) автовосстановление из зеркала, если localStorage очистили
+   4) баннер, если данные не сохраняются или место заканчивается */
+const Durable = (function(){
+  const SNAP = '__snapshot', LIMIT = 5*1024*1024;
+  let timer = null, dismissed = false, restored = false;
+  function usage(){ let n=0; try{ store.keys().forEach(k=>{ const v=store.getItem(k); n += (k.length + (v?v.length:0))*2; }); }catch(e){} return n; }
+  async function snapshot(){
+    try{
+      const o={}; store.keys().forEach(k=>{ if(k!=='__t') o[k]=store.getItem(k); });
+      if(Object.keys(o).length) await IDB.put(SNAP, {ts:Date.now(), data:o});
+    }catch(e){}
+  }
+  function schedule(){ if(timer) clearTimeout(timer); timer=setTimeout(()=>{ timer=null; snapshot(); warn(); }, 900); }
+  async function restoreIfWiped(){
+    try{
+      const hasData = store.getItem('armi_tasks')!==null || store.getItem('armi_notes')!==null || store.getItem('armi_sec_data')!==null;
+      if(hasData || store.volatile) return false;
+      const snap = await IDB.get(SNAP);
+      if(!snap || !snap.data) return false;
+      if(!(snap.data.armi_tasks || snap.data.armi_notes)) return false;
+      try{ if(sessionStorage.getItem('armi_restored')) return false; sessionStorage.setItem('armi_restored','1'); }catch(e){}
+      Object.keys(snap.data).forEach(k=>store.setItem(k, snap.data[k]));
+      restored = true;
+      return true;
+    }catch(e){ return false; }
+  }
+  function problem(){
+    if(store.volatile) return 'Хранилище браузера недоступно — всё, что ты вводишь, пропадёт при закрытии. Открой Арми обычным окном (не приватным) и сделай бэкап: Настройки → Экспорт.';
+    if(store.failed>0) return 'Не удалось сохранить часть данных — место закончилось. Сделай бэкап (Настройки → Экспорт) и удали лишнее.';
+    if(usage() > LIMIT*0.8) return 'Хранилище заполнено на '+Math.round(usage()/LIMIT*100)+'%. Сделай бэкап (Настройки → Экспорт), пока ничего не потерялось.';
+    return '';
+  }
+  function warn(){
+    if(typeof document==='undefined' || !document.body) return;
+    let el = document.getElementById('storage-warn');
+    const msg = problem();
+    if(!msg || dismissed){ if(el) el.remove(); return; }
+    if(!el){
+      el = document.createElement('div'); el.id='storage-warn'; el.setAttribute('role','alert');
+      el.style.cssText='position:fixed;left:8px;right:8px;top:8px;z-index:99999;background:#7f1d1d;color:#fff;border:1px solid #fca5a5;border-radius:12px;padding:10px 12px;font:13px/1.4 system-ui,sans-serif;display:flex;gap:10px;align-items:flex-start;box-shadow:0 6px 24px rgba(0,0,0,.4)';
+      document.body.appendChild(el);
+    }
+    el.innerHTML = '<span style="flex:1"></span><button type="button" style="background:transparent;color:#fff;border:1px solid #fca5a5;border-radius:8px;padding:2px 8px;cursor:pointer">Понятно</button>';
+    el.firstChild.textContent = msg;
+    el.lastChild.onclick = ()=>{ dismissed=true; el.remove(); };
+  }
+  async function init(){
+    try{ if(navigator.storage && navigator.storage.persist) await navigator.storage.persist(); }catch(e){}
+    store.onChange = schedule;
+    const did = await restoreIfWiped();
+    if(did){ location.reload(); return; }
+    await snapshot(); warn();
+  }
+  return {init, usage, snapshot, warn, problem, get restored(){ return restored; }, LIMIT};
+})();
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', ()=>Durable.init()); else Durable.init();
 const MEDIA_URLS = {};
 async function mediaUrl(id){
   if(MEDIA_URLS[id]) return MEDIA_URLS[id];
@@ -1341,13 +1384,13 @@ function closeModal(){ document.getElementById('overlays').innerHTML=''; }
 const S = {
   screen:'home', view:'auto', trainTab:'today', taskFilter:'all', taskSect:null, recFilter:'all', modelFilter:'all', taskView:'cards',
   schedView:'week', schedDay:(new Date().getDay()+6)%7,
-  aiMode:'auto', deviceProfile:'pc1660', deepThink:false,
+  aiMode:'offline', cloudOn:false, cloudAsk:false, deviceProfile:'pc1660', deepThink:false,
   music:{trackId:'m1', playing:false, progress:0, shuffle:false, repeat:false},
   moreOpen:false, noteOpen:null, noteTopic:null, lectRec:false, readBook:null, chatMenu:false,
   funTab:'fact', funFact:Math.floor(Math.random()*FACTS.length), funIdea:Math.floor(Math.random()*IDEAS.length), funBook:null,
   secretActive:false, secretMode:'real', secretScreen:null, secretThread:null, secretNoteOpen:null,
 };
-const PERSIST_KEYS = ['view','aiMode','deviceProfile','deepThink','taskView'];
+const PERSIST_KEYS = ['view','aiMode','cloudOn','deviceProfile','deepThink','taskView'];
 const DB = {
   tasks:loadJSON('armi_tasks', SEED_TASKS),
   notes:loadJSON('armi_notes', SEED_NOTES),
@@ -1381,7 +1424,16 @@ function migrateDB(){
 /* миграция выполняется при загрузке и после импорта бэкапа */
 migrateDB();
 PERSIST_KEYS.forEach(k=>{ const v=store.getItem('armi_'+k); if(v!==null){ S[k] = v==='true' ? true : v==='false' ? false : v; } });
+/* Облако выключено по умолчанию. Старые настройки («авто»/«облако») без явного согласия сбрасываются на «локально». */
+if(store.getItem('armi_cloudOn')===null){ S.cloudOn=false; S.aiMode='offline'; }
 function persist(){ PERSIST_KEYS.forEach(k=>store.setItem('armi_'+k, S[k])); }
+/* Эффективный режим ИИ: пока облако не включено явно тумблером — всегда «offline» */
+function aiEffMode(){ return (S.cloudOn && !isStandalone()) ? S.aiMode : 'offline'; }
+function cloudGuard(what){
+  if(S.cloudOn && !isStandalone()) return true;
+  toast('Облако выключено — «'+what+'» отправляет данные на сервер. Включить можно в Настройках → Облако');
+  return false;
+}
 function saveDB(){ saveJSON('armi_tasks',DB.tasks); saveJSON('armi_notes',DB.notes); saveJSON('armi_events',DB.events); saveJSON('armi_sections',DB.sections); saveJSON('armi_topics',DB.topics); saveJSON('armi_lectures',DB.lectures); saveJSON('armi_myvideos',DB.myvideos); saveJSON('armi_weights',DB.weights); saveJSON('armi_media',DB.media); saveJSON('armi_playlists',DB.playlists); saveJSON('armi_books',DB.books); }
 function sectColor(name){ const s=DB.sections.find(x=>x.name===name); return s?s.c:'#a1a1aa'; }
 function resolveView(){ if(S.view!=='auto') return S.view; return window.innerWidth>=900?'pc':'phone'; }
@@ -1420,8 +1472,8 @@ function logoTap(){ /* скрытый вход: 2 клика по логотип
   else { logoTap.t=now; toast('Арми 9'); }
 }
 function pcShell(){
-  const online = S.aiMode==='online' || (S.aiMode==='auto' && navigator.onLine);
-  const modeName = S.aiMode==='auto'?'Авто':(S.aiMode==='online'?'Облако':'Локально');
+  const online = aiEffMode()==='online' || (aiEffMode()==='auto' && navigator.onLine);
+  const modeName = aiEffMode()==='auto'?'Авто':(aiEffMode()==='online'?'Облако':'Локально');
   const fullChat = (S.secretActive && S.secretScreen) ? (S.secretScreen==='schat'&&!!S.secretThread) : (S.screen==='chat');
   const secLbl = ic('lock').replace('class="ic"','class="ic" style="width:11px;height:11px"');
   return '<aside class="sidebar">'+
@@ -1435,7 +1487,7 @@ function pcShell(){
       '<div class="card" style="padding:12px;margin-top:10px">'+
         '<div class="row" style="gap:7px"><span class="dot" style="background:'+(online?'var(--em)':'var(--amber)')+'"></span><span class="sub" style="font-weight:600;color:var(--t1)">'+modeName+(online?' · онлайн':' · офлайн')+'</span></div>'+
         '<div class="tiny mt6">'+modelLabelNow()+'</div>'+
-        '<button class="btn btn-sm mt10" style="width:100%" data-act="aiToggle">Режим: '+modeName+' → сменить</button>'+
+        '<button class="btn btn-sm mt10" style="width:100%" data-act="aiToggle">'+(S.cloudOn?'Режим: '+modeName+' → сменить':'Облако выключено · настроить')+'</button>'+
       '</div>'+
       (S.secretActive? '<button class="btn btn-danger btn-sm" style="width:100%;margin-top:8px" onclick="Secret.panic()" title="Esc">'+ic('power')+'Быстрый выход</button>' : '')+
     '</div></aside>'+
@@ -1454,8 +1506,8 @@ function pcShell(){
   '</header><div class="content" style="'+(fullChat?'padding:0;':'')+'"><div class="'+(fullChat?'':'narrow ')+'fade-in" style="'+(fullChat?'height:100%;':'')+'">'+renderScreen()+'</div></div></main>';
 }
 function phoneShell(){
-  const online = S.aiMode==='online' || (S.aiMode==='auto' && navigator.onLine);
-  const modeName = S.aiMode==='auto'?'Авто':(S.aiMode==='online'?'Облако':'Локально');
+  const online = aiEffMode()==='online' || (aiEffMode()==='auto' && navigator.onLine);
+  const modeName = aiEffMode()==='auto'?'Авто':(aiEffMode()==='online'?'Облако':'Локально');
   const t = new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
   const fullChat = (S.secretActive && S.secretScreen) ? (S.secretScreen==='schat'&&!!S.secretThread) : (S.screen==='chat');
   return '<div class="pwrap">'+
@@ -1798,7 +1850,7 @@ function scrHome(){
   const lastLectures = DB.lectures.slice(0,2);
   const lecturesTotal = DB.lectures.length;
   const notesTotal = DB.notes.length;
-  const dl = isStandalone() ? 'локально · один файл' : (S.aiMode==='online' ? 'облако · по-настоящему' : (navigator.onLine ? 'авто · облако при сети' : 'локально · офлайн'));
+  const dl = isStandalone() ? 'локально · один файл' : (aiEffMode()==='online' ? 'облако · включено вручную' : (aiEffMode()==='auto' ? (navigator.onLine ? 'авто · облако при сети' : 'локально · офлайн') : 'локально · облако выключено'));
   return '<div class="dash">'+
     (S.secretActive? '<div class="banner dash-span" style="background:rgba(52,211,153,.07);border-color:rgba(52,211,153,.3);color:#a7f3d0"><b>Закрытая зона открыта.</b> Секретные чаты, заметки, фото и музыка появились в меню сверху. <button class="btn btn-sm btn-danger" style="padding:2px 8px;margin-left:4px" onclick="Secret.panic()">Быстрый выход</button></div>' : '')+
     /* приветствие + мини-статы */
@@ -2141,8 +2193,7 @@ function trainWrist(){
 }
 function trainOs(){
   return '<div class="card"><h3>Полный блок осанки · 12–15 мин (вт/чт/сб)</h3>'+tbl(HEAD_O, OS_FULL)+'<div class="note mt10">'+OS_NOTE+'</div></div>'+
-  '<div class="card"><h3>Хруст в спине</h3><div class="sub">'+OS_CRUNCH+'</div></div>'+
-  '<div class="card"><h3>Картинки-схемы</h3><div class="vgrid">'+TECH_IMG.map(i=>'<div><img src="'+i[1]+'" alt="'+esc(i[0])+'" loading="lazy" style="width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:10px;border:1px solid var(--line2)" onerror="this.style.display=\'none\'"><div class="vname">'+esc(i[0])+'</div></div>').join('')+'</div><div class="tiny mt6">Картинки грузятся из сети; офлайн они скрыты — таблица выше самодостаточна.</div></div>';
+  '<div class="card"><h3>Хруст в спине</h3><div class="sub">'+OS_CRUNCH+'</div></div>';
 }
 function trainRun(){
   const {ph}=weekOf(new Date()); const n = ph?ph.n:1;
@@ -2171,7 +2222,7 @@ function scrVideoLegacy(){
     '<div class="card"><h3>Мои видео<span class="h-note">играют прямо здесь, без интернета</span></h3>'+
       (DB.media.filter(m=>m.kind==='video').length? DB.media.filter(m=>m.kind==='video').map(v=>'<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer" data-act="vidFilePlay" data-arg="'+v.id+'">'+ic('video')+'<span style="min-width:0;flex:1"><span style="font-size:13.5px;color:var(--t1)">'+esc(v.name)+'</span><span class="tiny" style="display:block">'+fmtSize(v.size)+' · добавлено '+esc(v.added)+'</span></span><button class="btn btn-sm" style="width:28px;height:28px;padding:0" data-act="vidFileDel" data-arg="'+v.id+'">✕</button></div>').join('') : '<div class="dim">Пока пусто — добавь mp4/webm/mkv кнопкой «Файл»</div>')+'</div>'+
     '<div class="card"><h3>Мои ссылки<span class="h-note">сохранённые из чатов</span></h3>'+
-      (DB.myvideos.length?DB.myvideos.map(v=>'<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line)">'+ic('video')+'<span style="min-width:0;flex:1"><a href="'+esc(v.url)+'" target="_blank" rel="noopener" style="font-size:13.5px">'+esc(v.title)+'</a><span class="tiny" style="display:block">'+esc(v.note||'')+' · '+esc(v.added)+'</span></span><button class="btn btn-sm" style="width:28px;height:28px;padding:0" data-act="vidDel" data-arg="'+v.id+'">✕</button></div>').join(''):'<div class="dim">Пока пусто</div>')+'</div>'+
+      (DB.myvideos.length?DB.myvideos.map(v=>'<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line)">'+ic('video')+'<span style="min-width:0;flex:1"><a href="'+esc(/^https?:\/\//i.test(v.url)?v.url:'#')+'" target="_blank" rel="noopener" style="font-size:13.5px">'+esc(v.title)+'</a><span class="tiny" style="display:block">'+esc(v.note||'')+' · '+esc(v.added)+'</span></span><button class="btn btn-sm" style="width:28px;height:28px;padding:0" data-act="vidDel" data-arg="'+v.id+'">✕</button></div>').join(''):'<div class="dim">Пока пусто</div>')+'</div>'+
     TECH.map(c=>'<details><summary>'+esc(c[0])+' — '+c[1].length+' видео'+chev()+'</summary><div class="dbody">'+
       '<div class="vgrid">'+c[1].map(v=>'<div><button class="vthumb" data-act="vidEmbed" data-arg="'+v[1]+'"><img loading="lazy" alt="превью" src="https://i.ytimg.com/vi/'+v[1]+'/hqdefault.jpg" onerror="this.style.display=\'none\'"><span class="play">▶</span></button><div class="vname">'+esc(v[0])+'</div></div>').join('')+'</div></div></details>').join('')+
     '<div class="tiny">Превью грузятся из сети. Клик — видео открывается прямо здесь (youtube-nocookie, без куки). Офлайн превью скрыты.</div>'+
@@ -2859,13 +2910,16 @@ function scrSettings(){
       THEMES.map(t=>'<button class="btn'+(themeGet()===t.id?' btn-amber':'')+' btn-sm" data-act="themeSet" data-arg="'+t.id+'">'+
         '<span style="min-width:0;text-align:left"><span style="display:block;font-size:12.5px">'+t.name+'</span><span style="display:block;font-size:10.5px;opacity:.75;font-weight:500">'+t.hint+'</span></span></button>').join('')+
       '</div><div class="tiny mt6">Классика — янтарная Арми из v7.1, Aurora — голубая тема с фиолетовым акцентом. Данные и логика одинаковые, меняется только вид.</div></div>'+
-    '<div class="card"><h3>'+ic('zap')+'ИИ-режим<span class="h-note">настоящий: облако + локальная модель</span></h3><div class="row wrap" style="gap:8px">'+
-      [['auto','Авто'],['online','Облако'],['offline','Локально']].map(m=>'<button class="btn'+(S.aiMode===m[0]?' btn-amber':'')+' btn-sm" data-act="aiMode" data-arg="'+m[0]+'">'+m[1]+'</button>').join('')+'</div>'+
-      '<div class="note mt10">'+(S.aiMode==='online'
-        ? 'Все запросы уходят в облако — самые умные ответы, нужен интернет.'
-        : S.aiMode==='offline'
-        ? 'Всё считается на устройстве: сначала быстрые ответы, потом локальная модель. Интернет не нужен.'
-        : 'Есть интернет — отвечает облако (умнее). Нет сети — локальная модель (своя, всегда с собой). Быстрые вопросы (время, счёт) решаются мгновенно без сети.')+'</div></div>'+
+    '<div class="card"><h3>'+ic('zap')+'Облако<span class="h-note">'+(S.cloudOn?'включено':'выключено')+'</span></h3>'+
+      (S.cloudOn
+        ? '<div class="row wrap" style="gap:8px">'+[['auto','Авто'],['online','Всегда облако'],['offline','Только локально']].map(m=>'<button class="btn'+(S.aiMode===m[0]?' btn-amber':'')+' btn-sm" data-act="aiMode" data-arg="'+m[0]+'">'+m[1]+'</button>').join('')+'</div>'+
+          '<div class="note mt10">'+(S.aiMode==='online' ? 'Запросы уходят на сервер — ответы умнее, нужен интернет.' : S.aiMode==='offline' ? 'Облако включено, но используется только локальная модель.' : 'Есть сеть — отвечает облако, нет сети — локальная модель.')+' Облако также нужно для расшифровки лекций, конспектов и поиска фактов: туда уходит текст запроса или аудио.</div>'+
+          '<button class="btn btn-sm btn-danger mt10" data-act="cloudToggle">Выключить облако</button>'
+        : (S.cloudAsk
+          ? '<div class="note">Если включить облако, <b>тексты твоих вопросов (и контекст задач/заметок для ответа), аудио лекций и поисковые запросы будут уходить на сервер</b>. Секретная зона в облако не отправляется. Локальная модель продолжит работать без сети.</div>'+
+            '<div class="row wrap mt10" style="gap:8px"><button class="btn btn-amber btn-sm" data-act="cloudConfirm">Понимаю, включить</button><button class="btn btn-sm" data-act="cloudToggle">Отмена</button></div>'
+          : '<div class="note">Сейчас всё считается на устройстве: быстрые ответы и локальная модель. Ничего не уходит наружу.</div>'+
+            '<button class="btn btn-sm mt10" data-act="cloudToggle">Включить облако…</button>'))+'</div>'+
     '<div class="card"><h3>'+ic('brain')+'Локальный ИИ<span class="h-note">модели на устройстве · офлайн · все бесплатные</span></h3>'+
       '<div class="sub" style="margin-bottom:10px">Скачай модель один раз — и Арми будет отвечать без интернета. Можно держать несколько: скачанные отмечены, между ними можно переключаться. Работает через WebGPU: Chrome 113+ на ПК, Chrome 121+ на Android.'+(LocalAI.hasWebGPU()?'':' <b style="color:var(--amber3)">Этот браузер без WebGPU — скачивание недоступно.</b>')+'</div>'+
       '<div class="row wrap" style="gap:6px;margin-bottom:10px">'+
@@ -2977,7 +3031,10 @@ const LocalAI = (() => {
     loadLib._c = (async ()=>{
       try{ return await import('./vendor-webllm.js'); }
       catch(e){
-        if(!navigator.onLine) throw new Error('Файл vendor-webllm.js не найден рядом с приложением, а интернета нет. Скачай ZIP-версию Арми или включи интернет.');
+        /* Windows/Android-сборки (127.0.0.1) и file:// никогда не ходят на CDN: файл обязан лежать рядом.
+           Запасной вариант с CDN — только для веб-копии/PWA, где локального файла может не быть. */
+        const localBuild = location.protocol==='file:' || /^(127\.0\.0\.1|localhost)$/.test(location.hostname);
+        if(localBuild || !navigator.onLine) throw new Error('Файл vendor-webllm.js не найден рядом с приложением. Переустанови Арми из ZIP/APK — движок ИИ лежит внутри сборки.');
         return await import('https://esm.run/@mlc-ai/web-llm@0.2.88');
       }
     })();
@@ -3093,7 +3150,7 @@ function msgFooter(m){
   return '<div class="mt">'+esc(m.time||'')+'</div>';
 }
 function scrChat(){
-  const mode = S.aiMode;
+  const mode = aiEffMode();
   const net = navigator.onLine && !isStandalone();
   const hint = isStandalone() ? 'Один файл без сервера: быстрые ответы + локальная модель'
     : mode==='online' ? 'Облако — спроси посложнее'
@@ -3203,7 +3260,7 @@ function fastAgent(q){
 function isStandalone(){ return location.protocol === 'file:'; }
 
 async function aiAsk(q){
-  const mode = S.aiMode;
+  const mode = aiEffMode();
   const net = navigator.onLine && !isStandalone();
   /* 1) быстрый агент всегда первый: математика и время — мгновенно, без сети и облака */
   const fast = fastAgent(q);
@@ -3293,8 +3350,19 @@ const ACTIONS = {
   logoTap(){ logoTap(); },
   viewCycle(){ S.view = resolveView()==='pc'?'phone':'pc'; persist(); render(); },
   view(arg){ S.view=arg; persist(); render(); },
-  aiToggle(){ ACTIONS.aiMode(S.aiMode==='online'?'offline':(S.aiMode==='offline'?'auto':'online')); },
-  aiMode(arg){ S.aiMode=arg; persist(); render(); toast(arg==='online'?'Облако: самые умные ответы':arg==='offline'?'Локально: без интернета':'Авто: облако при сети, иначе локально'); },
+  aiToggle(){
+    if(!S.cloudOn){ ACTIONS.go('settings'); toast('Облако выключено — всё работает локально. Включить можно здесь'); return; }
+    ACTIONS.aiMode(S.aiMode==='online'?'offline':(S.aiMode==='offline'?'auto':'online'));
+  },
+  aiMode(arg){
+    if(arg!=='offline' && !S.cloudOn){ toast('Сначала включи облако в Настройках'); return; }
+    S.aiMode=arg; persist(); render(); toast(arg==='online'?'Облако: самые умные ответы':arg==='offline'?'Локально: без интернета':'Авто: облако при сети, иначе локально');
+  },
+  cloudToggle(){
+    if(S.cloudOn){ S.cloudOn=false; S.aiMode='offline'; S.cloudAsk=false; persist(); render(); toast('Облако выключено. Всё считается на устройстве'); return; }
+    S.cloudAsk=!S.cloudAsk; render();
+  },
+  cloudConfirm(){ S.cloudOn=true; S.aiMode='auto'; S.cloudAsk=false; persist(); render(); toast('Облако включено. Выключить можно в любой момент'); },
   modelFilter(arg){ S.modelFilter=arg; render(); },
   deepToggle(){ S.deepThink=!S.deepThink; persist(); render(); toast(S.deepThink?'Глубокое мышление включено — Арми подумает дольше и структурированнее':'Обычный режим'); },
   /* мульти-чаты */
@@ -3638,6 +3706,7 @@ const ACTIONS = {
   },
   async lectAsr(arg){
     const l = DB.lectures.find(x=>x.id===arg); if(!l || l.busy) return;
+    if(!cloudGuard('расшифровка лекции')) return;
     if(isStandalone()){ toast('Расшифровка работает в онлайн-копии Арми (открытой по ссылке) — один файл без сервера её не умеет'); return; }
     const b = await IDB.get('lec_'+arg);
     if(!b){ toast('Аудио не найдено — запись не сохранилась'); return; }
@@ -3661,6 +3730,7 @@ const ACTIONS = {
   },
   async lectSum(arg){
     const l = DB.lectures.find(x=>x.id===arg); if(!l || l.busy || !l.excerpt) return;
+    if(!cloudGuard('конспект лекции')) return;
     if(isStandalone()){ toast('Конспект собирается в онлайн-копии Арми — один файл без сервера его не умеет'); return; }
     l.busy='sum'; saveDB(); render();
     try{
@@ -3684,6 +3754,7 @@ const ACTIONS = {
     const inp=document.getElementById('web-topic');
     const topic=(inp&&inp.value.trim()) || (S.funWeb&&S.funWeb.topic) || '';
     if(!topic){ toast('Введи тему — о чём найти'); if(inp) inp.focus(); return; }
+    if(!cloudGuard('поиск в интернете')) return;
     if(isStandalone()){ toast('Поиск в интернете работает в онлайн-копии Арми — один файл без сервера его не умеет'); return; }
     if(!navigator.onLine){ toast('Интернета нет — поищи, когда появится сеть. Встроенные факты и книги работают офлайн'); return; }
     S.funWeb={topic, busy:true, digest:'', items:[], error:'', saved:false, kind};
@@ -3783,13 +3854,13 @@ const ACTIONS = {
     }catch(e){ fail('Не удалось загрузить: '+(e.message||'ошибка')); }
   },
   resetData(){
-    modal('<h3>Сбросить прототип?</h3><div class="sub mt6">Удалятся обычные данные и вернутся демо-данные (задачи, разделы, расписание, заметки). Секретный контур не трогается (его сброс — отдельно).</div><div class="row mt14" style="gap:8px"><button class="btn btn-danger" style="flex:1" data-act="resetDataYes">Сбросить</button><button class="btn" data-act="modalBack">Отмена</button></div>');
+    modal('<h3>Сбросить прототип?</h3><div class="sub mt6">Удалятся обычные данные, останется чистый старт с короткими примерами. Сделай бэкап заранее (Экспорт). Секретный контур не трогается (его сброс — отдельно).</div><div class="row mt14" style="gap:8px"><button class="btn btn-danger" style="flex:1" data-act="resetDataYes">Сбросить</button><button class="btn" data-act="modalBack">Отмена</button></div>');
   },
   resetDataYes(){
     PLAYER.stopAll(); PLAYER.mode=null; PLAYER.fileId=null; PLAYER.custom=null; S.music.playing=false; S.music.progress=0;
     IDB.clear(); Object.keys(MEDIA_URLS).forEach(k=>{ try{URL.revokeObjectURL(MEDIA_URLS[k]);}catch(e){} delete MEDIA_URLS[k]; });
     ['armi_tasks','armi_notes','armi_events','armi_sections','armi_topics','armi_lectures','armi_myvideos','armi_weights','armi_chat','armi_chats','armi_chat_current','armi_media','armi_playlists','armi_books','armi_web_saved'].forEach(k=>store.removeItem(k));
-    Object.keys(store).forEach(k=>{ if(k.startsWith('m_')||k.startsWith('tr_')||k.startsWith('mm_')) store.removeItem(k); });
+    store.keys().forEach(k=>{ if(k.startsWith('m_')||k.startsWith('tr_')||k.startsWith('mm_')) store.removeItem(k); });
     DB.tasks=SEED_TASKS.map(t=>({...t})); DB.notes=SEED_NOTES.map(n=>({...n})); DB.events=SEED_EVENTS.map(e=>({...e})); DB.sections=SEED_SECTIONS.map(s=>({...s})); DB.topics=SEED_TOPICS.map(t=>({...t})); DB.lectures=SEED_LECTURES.map(l=>({...l})); DB.myvideos=SEED_MYVIDEOS.map(v=>({...v})); DB.weights=[]; DB.media=[]; DB.playlists=[]; DB.books=[];
     CHATS=[{id:uid('ch'), name:'Новый чат', updated:Date.now(), msgs:[{id:uid('c'), role:'ai', content:'Привет! Я Арми — работаю на твоём устройстве, без интернета. Вижу план тренировок, задачи, заметки и расписание. Спроси что угодно — отвечу локально.', time:'09:00', local:true}]}];
     CHAT_ID=CHATS[0].id; store.setItem('armi_chat_current', CHAT_ID); CHAT=CHATS[0].msgs;
@@ -3857,6 +3928,29 @@ async function sha(s){
   const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
   return B.enc(d);
 }
+/* Проверочный хэш пароля-приманки: тот же PBKDF2 (150k), что и у основных слотов.
+   Раньше был голый SHA-256 → приманку подбирали на порядки быстрее основного пароля. */
+async function kdfHash(pass, salt){
+  const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(pass), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits({name:'PBKDF2', salt:new TextEncoder().encode('decoy:'+salt), iterations:150000, hash:'SHA-256'}, km, 256);
+  return B.enc(bits);
+}
+async function mkDecoyMeta(decoyPass){
+  const salt = crypto.randomUUID();
+  /* Приманка есть ВСЕГДА: если пользователь её не задал, кладём случайный хэш — по метаданным не видно, настроена ли она */
+  const vhash = decoyPass ? await kdfHash(decoyPass, salt) : B.enc(crypto.getRandomValues(new Uint8Array(32)));
+  return {salt, vhash, kdf:'pbkdf2'};
+}
+async function decoyMatches(m, pass){
+  if(!m.decoy) return false;
+  if(m.decoy.kdf==='pbkdf2') return (await kdfHash(pass, m.decoy.salt)) === m.decoy.vhash;
+  /* старый формат (SHA-256): проверяем и сразу переводим на PBKDF2 */
+  if((await sha(m.decoy.salt + pass)) === m.decoy.vhash){
+    try{ const m2 = meta(); if(m2 && m2.decoy){ m2.decoy.kdf='pbkdf2'; m2.decoy.vhash = await kdfHash(pass, m2.decoy.salt); saveJSON(META_K, m2); } }catch(e){}
+    return true;
+  }
+  return false;
+}
 const META_K='armi_sec_meta', DATA_K='armi_sec_data', DECOY_K='armi_decoy_data', SYNC_K='armi_sec_sync';
 function meta(){ return loadJSON(META_K, null); }
 function status(){ return {configured: !!meta()}; }
@@ -3914,7 +4008,7 @@ async function tryLogin(){
   let mk = await openSlot(pass, m.slots.pass);
   if(mk){ await enterReal(mk); return; }
   /* пароль-приманка: открывает правдоподобную «пустую» зону */
-  if(m.decoy && (await sha(m.decoy.salt + pass)) === m.decoy.vhash){ await enterDecoy(); return; }
+  if(await decoyMatches(m, pass)){ await enterDecoy(); return; }
   const err = document.getElementById('sg-err');
   err.style.display='block'; err.textContent='Неверный пароль';
 }
@@ -3993,10 +4087,9 @@ async function setupStep3(){
   '<button class="btn btn-amber mt14" style="width:100%" onclick="Secret.setupFinish()">Готово — войти в зону</button>');
 }
 async function setupFinish(){
-  const dsalt = crypto.randomUUID();
   const m = { v:1, created:new Date().toISOString(),
     slots:{ pass: await mkSlot(Secret._pass), rec: await mkSlot(Secret._rec) },
-    decoy: Secret._decoy ? {salt: dsalt, vhash: await sha(dsalt + Secret._decoy)} : null };
+    decoy: await mkDecoyMeta(Secret._decoy) };
   saveJSON(META_K, m);
   await persistData();
   await enterReal(MK);
@@ -5310,7 +5403,7 @@ EXPL_CFG.lectures = {
   addButton:'<button class="btn btn-amber btn-sm" data-act="lectRecMenu">' + ic('mic') + 'Записать</button>',
   empty:'Пока нет записей — нажми «Записать»',
   itemIcon:'lect',
-  subLabel: o => (o.dur || '—') + ' · ' + (o.date || ''),
+  subLabel: o => esc(o.dur || '—') + ' · ' + esc(o.date || ''),
   canEdit: oid => { const l = DB.lectures.find(x => x.id === oid); return !!(l && l.recId); },
   onOpen: (oid) => { ACTIONS.lectPlay(oid); },
   onEdit: oid => audioEditorOpen('lec_' + oid, oid),
@@ -5324,7 +5417,7 @@ EXPL_CFG.videos = {
     '<button class="btn btn-sm" data-act="vidNew">' + ic('plus') + 'Ссылка</button>',
   empty:'Добавь файл или ссылку на YouTube — всё останется на устройстве',
   thumb: o => o.kind === 'video' ? '<img data-mid="' + o.id + '" alt="">' : ic('video'),
-  subLabel: o => o.kind === 'video' ? (fmtSize(o.size || 0)) : 'ссылка · ' + (o.added || ''),
+  subLabel: o => o.kind === 'video' ? (fmtSize(o.size || 0)) : 'ссылка · ' + esc(o.added || ''),
   canEdit: () => false,
   onOpen: (oid) => { const m = DB.media.find(x => x.id === oid); if(m && m.kind === 'video') ACTIONS.vidFilePlay(oid); },
 };

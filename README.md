@@ -98,3 +98,9 @@ cd android && ./build.sh   # нужен Android SDK (aapt2, d8, zipalign, apksig
 ## Лицензия
 
 Личный проект. Все данные и код — твои.
+
+## Тесты
+
+`tests/` — e2e на Playwright без сети (`cd tests && npm install && npm test`), запускаются в GitHub Actions.
+Подробности и план улучшений: `docs/изменения-арми-9.1.md`, `docs/путь-к-10.md`.
+Облако в приложении выключено по умолчанию и включается только в Настройках.

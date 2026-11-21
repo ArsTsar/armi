@@ -1,7 +1,7 @@
 {
   "name": "armi",
   "productName": "Арми 9",
-  "version": "9.0.0",
+  "version": "9.1.0",
   "description": "Арми 9 — локальный ассистент: чат с ИИ, задачи, заметки, лекции, медиа; темы «Классика» и «Aurora»",
   "main": "main.js",
   "author": "Armi",

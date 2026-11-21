@@ -1,0 +1,12 @@
+{
+  "name": "armi-tests",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Автотесты Арми (Playwright, без сети)",
+  "scripts": {
+    "test": "node run.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.48.0"
+  }
+}
