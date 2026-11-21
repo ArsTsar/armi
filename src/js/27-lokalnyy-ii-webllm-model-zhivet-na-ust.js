@@ -3,7 +3,7 @@ const LocalAI = (() => {
   const MODELS = [
     {id:'Qwen2.5-0.5B-Instruct-q4f16_1-MLC', t:'Арми Мини (Qwen 0.5Б)', size:'0,9 ГБ', vram:900, desc:'для телефона и слабых ПК — быстрая', tag:'Qwen'},
     {id:'Qwen2.5-1.5B-Instruct-q4f16_1-MLC', t:'Арми Стандарт (Qwen 1.5Б)', size:'1,6 ГБ', vram:1600, desc:'баланс качества и скорости', tag:'Qwen'},
-    {id:'Qwen2.5-3B-Instruct-q4f16_1-MLC', t:'Арми Макс (Qwen 3Б)', size:'2,4 ГБ', vram:2400, desc:'самая умная локально, нужен GPU · рекомендуется для ПК', tag:'Qwen'},
+    {id:'Qwen2.5-3B-Instruct-q4f16_1-MLC', t:'Арми Макс (Qwen 3Б)', size:'2,4 ГБ', vram:2400, desc:'самая умная локально, нужен GPU и ≥8 ГБ ОЗУ', tag:'Qwen'},
     {id:'SmolLM2-360M-Instruct-q4f16_1-MLC', t:'SmolLM2 360М', size:'0,4 ГБ', vram:500, desc:'совсем крошка — самый быстрый старт', tag:'SmolLM'},
     {id:'SmolLM2-1.7B-Instruct-q4f16_1-MLC', t:'SmolLM2 1.7Б', size:'1,3 ГБ', vram:1500, desc:'шустрая английская, русский ограничен', tag:'SmolLM'},
     {id:'gemma-2-2b-it-q4f16_1-MLC', t:'Gemma 2 2Б', size:'1,8 ГБ', vram:2000, desc:'от Google, аккуратные ответы', tag:'Gemma'},
@@ -18,6 +18,32 @@ const LocalAI = (() => {
   function hasWebGPU(){
     try{ return !!navigator.gpu; }catch(e){ return false; }
   }
+  /* ── подбор модели под железо ──
+     info = {gpu:bool, mem:ГБ|null (navigator.deviceMemory, максимум 8), mobile:bool, maxBuf:байт|null (лимит WebGPU-буфера)}
+     Чистая функция — проверяется тестами; probe() собирает info с реального устройства. */
+  function pickModel(info){
+    if(!info.gpu) return {id:null, why:'В этом браузере нет WebGPU — локальная модель не запустится. Открой Арми в Chrome 113+ (ПК) или Chrome 121+ (Android).'};
+    const mem = info.mem==null ? (info.mobile?4:8) : info.mem;
+    const buf = info.maxBuf==null ? null : info.maxBuf/1073741824;
+    let id, why;
+    if(info.mobile){
+      if(mem<=3){ id='SmolLM2-360M-Instruct-q4f16_1-MLC'; why='слабый телефон (≈'+mem+' ГБ ОЗУ): самая лёгкая модель'; }
+      else if(mem<=4){ id='Qwen2.5-0.5B-Instruct-q4f16_1-MLC'; why='телефон с ≈'+mem+' ГБ ОЗУ: лёгкая и по-русски понимает'; }
+      else { id='Qwen2.5-1.5B-Instruct-q4f16_1-MLC'; why='телефон с ≥6 ГБ ОЗУ: баланс качества и скорости'; }
+    } else if(mem>=8 && (buf==null || buf>=3.5)){ id='Qwen2.5-3B-Instruct-q4f16_1-MLC'; why='ПК: ≥8 ГБ ОЗУ и видеопамять позволяют самую умную локальную модель'; }
+    else if(mem>=4 && (buf==null || buf>=1.8)){ id='Qwen2.5-1.5B-Instruct-q4f16_1-MLC'; why='ПК средней мощности: баланс качества и скорости'; }
+    else { id='Qwen2.5-0.5B-Instruct-q4f16_1-MLC'; why='ограниченная память: лёгкая модель'; }
+    return {id, why};
+  }
+  async function probe(){
+    const info = {gpu:hasWebGPU(), mem:null, mobile:false, maxBuf:null};
+    try{ if(navigator.deviceMemory) info.mem = navigator.deviceMemory; }catch(e){}
+    try{ info.mobile = /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent) || (matchMedia && matchMedia('(pointer:coarse)').matches && innerWidth<820); }catch(e){}
+    try{ if(info.gpu){ const ad = await navigator.gpu.requestAdapter(); if(ad && ad.limits) info.maxBuf = ad.limits.maxBufferSize || null; } }catch(e){}
+    return info;
+  }
+  let rec = null, recP = null;
+  function recommend(){ if(!recP) recP = probe().then(info=>{ rec = Object.assign({info}, pickModel(info)); return rec; }); return recP; }
   /* скачанные (кешированные браузером) модели — можно держать несколько и переключаться */
   function downloaded(){ return loadJSON('armi_local_models_saved', current?[current]:[]); }
   function markDownloaded(id){
@@ -108,6 +134,6 @@ const LocalAI = (() => {
   }
   /* переключение на уже скачанную модель без удаления других */
   async function switchTo(modelId){ return load(modelId); }
-  return { MODELS, ready, modelName, hasWebGPU, load, chat, complete, preferLocal, unload, switchTo, downloaded, get current(){return current;}, get loading(){return !!loading;} };
+  return { MODELS, ready, modelName, hasWebGPU, pickModel, probe, recommend, get rec(){ return rec; }, load, chat, complete, preferLocal, unload, switchTo, downloaded, get current(){return current;}, get loading(){return !!loading;} };
 })();
 
