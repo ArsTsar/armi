@@ -4,6 +4,7 @@ set -e
 cd "$(dirname "$0")"
 # приложение и локальный ИИ берём из ../app, чтобы в APK лежала актуальная версия
 mkdir -p assets && cp ../app/index.html ../app/vendor-webllm.js assets/
+rm -f assets/personal-pack.js; [ -f ../app/personal-pack.js ] && cp ../app/personal-pack.js assets/ || true   # личный план (необязателен, в git не входит)
 export PATH=~/jdk/bin:$PATH
 
 BT=$(pwd)/android-14

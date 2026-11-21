@@ -83,9 +83,10 @@ public class LocalServer implements Runnable {
                 String path = req.substring(4).split(" ")[0];
                 if (path.equals("/") || path.equals("/index.html") || path.startsWith("/?")) {
                     write(out, 200, source.indexHtml(), "text/html; charset=utf-8");
-                } else if (path.equals("/vendor-webllm.js")) {
-                    /* локальный движок ИИ лежит в APK: без него приложению пришлось бы грузить его с CDN */
-                    byte[] js = source.asset("vendor-webllm.js");
+                } else if (path.equals("/vendor-webllm.js") || path.equals("/personal-pack.js")) {
+                    /* локальный движок ИИ лежит в APK: без него приложению пришлось бы грузить его с CDN.
+                       personal-pack.js — необязательный личный план владельца (в репозитории его нет) */
+                    byte[] js = source.asset(path.substring(1));
                     if (js != null) write(out, 200, js, "text/javascript; charset=utf-8");
                     else write(out, 404, bytes("Not Found"), "text/plain");
                 } else {

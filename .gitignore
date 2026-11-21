@@ -1,2 +1,4 @@
 node_modules/
 *.log
+# личные данные владельца — не публиковать
+app/personal-pack.js

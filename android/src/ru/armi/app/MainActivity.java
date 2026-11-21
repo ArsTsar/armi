@@ -52,10 +52,10 @@ public class MainActivity extends Activity implements LocalServer.Source {
         return readAsset("index.html");
     }
 
-    /** Отдаём только vendor-webllm.js — остальные ассеты наружу не выходят. */
+    /** Отдаём только vendor-webllm.js и необязательный personal-pack.js — остальные ассеты наружу не выходят. */
     @Override
     public byte[] asset(String name) throws Exception {
-        if (!"vendor-webllm.js".equals(name)) return null;
+        if (!"vendor-webllm.js".equals(name) && !"personal-pack.js".equals(name)) return null;
         try { return readAsset(name); } catch (java.io.IOException e) { return null; }
     }
 
