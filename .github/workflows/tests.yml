@@ -19,7 +19,7 @@ jobs:
         run: |
           npm ci
           npx playwright install --with-deps chromium
-      - name: Автотесты (без сети: smoke, облако выключено, хранилище, секретная зона, XSS, функции)
+      - name: "Автотесты (без сети): smoke, облако, хранилище, секретная зона, XSS, функции"
         working-directory: tests
         run: npm test
       - name: Проверка синтаксиса index.html
