@@ -22,6 +22,8 @@ jobs:
       - name: "Автотесты (без сети): smoke, облако, хранилище, секретная зона, XSS, функции"
         working-directory: tests
         run: npm test
+      - name: "Сборка из src/ совпадает с app/index.html"
+        run: node src/build.js --check
       - name: Проверка синтаксиса index.html
         run: |
           node -e "const s=require('fs').readFileSync('app/index.html','utf8');const m=[...s.matchAll(/<script(?![^>]*src)[^>]*>([\s\S]*?)<\/script>/g)];m.forEach(x=>new Function(x[1]));console.log('ok',m.length)"

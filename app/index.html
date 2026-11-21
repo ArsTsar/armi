@@ -512,7 +512,7 @@ h3 .h-note{white-space:normal}
 <div id="app" class="app"></div><div id="overlays"></div>
 <div id="toast" class="toast"></div>
 <script src="personal-pack.js" onerror="this.remove()"></script>
-<script>
+<script id="armi-main" type="text/plain">
 'use strict';
 /* ══════════ ЛИЧНЫЙ ПЛАН: необязательный personal-pack.js ══════════
    Личные данные (даты, план тренировок, протоколы, ответы чата) в репозиторий не входят.
@@ -788,25 +788,67 @@ function pickBook(){
 
 /* ══════════ ХРАНИЛИЩЕ И УТИЛИТЫ ══════════ */
 const store = (function(){
-  /* Хранилище с честной диагностикой. Раньше при недоступном localStorage данные молча уходили в память
-     и пропадали при закрытии. Теперь: флаг volatile, счётчик сбоев, overlay в памяти и баннер (см. Durable). */
-  let real=null;
-  try{ const t='__t'; localStorage.setItem(t,'1'); localStorage.removeItem(t); real=localStorage; }catch(e){}
-  const mem={};
+  /* Хранилище v2 (Арми 9.2). Главное место хранения — IndexedDB (десятки/сотни МБ), localStorage — быстрая синхронная копия.
+     Загрузчик (в конце страницы) читает IndexedDB ДО запуска этого кода и кладёт снимок в window.__ARMI_KV.
+     • чтение — всегда из памяти (mem), синхронно;
+     • запись — mem + localStorage (если влезает) + отложенная пакетная запись в IndexedDB;
+     • то, что не влезло в localStorage (книги, расшифровки), живёт только в IndexedDB — список ключей в «__overflow»;
+     • если localStorage очистили — всё поднимается из IndexedDB; если IndexedDB недоступна — работает как раньше (только localStorage). */
+  let ls=null;
+  try{ const t='__t'; localStorage.setItem(t,'1'); localStorage.removeItem(t); ls=localStorage; }catch(e){}
+  const mem={}, dirty=new Set(), gone=new Set(), overflow=new Set();
+  const boot = window.__ARMI_KV || null;
+  let idbOk = boot!==null, timer=null;
   const w = {
-    volatile: !real,
-    failed: 0,
-    onChange: null,
-    getItem:k=>(k in mem)?mem[k]:(real?real.getItem(k):null),
-    setItem:(k,v)=>{
-      v=String(v);
-      try{ if(!real) throw new Error('no-storage'); real.setItem(k,v); delete mem[k]; }
-      catch(e){ mem[k]=v; w.failed++; }
-      if(w.onChange) w.onChange(k);
-    },
-    removeItem:k=>{ delete mem[k]; try{ if(real) real.removeItem(k); }catch(e){} if(w.onChange) w.onChange(k); },
-    keys:()=>{ const o={}; try{ if(real) for(let i=0;i<real.length;i++) o[real.key(i)]=1; }catch(e){} Object.keys(mem).forEach(k=>o[k]=1); return Object.keys(o); },
+    failed:0, onChange:null,
+    get volatile(){ return !ls && !idbOk; },
+    get idb(){ return idbOk; },
+    get overflowKeys(){ return [...overflow]; },
   };
+  /* --- старт: свести localStorage и IndexedDB --- */
+  const lsKeys=[]; try{ if(ls) for(let i=0;i<ls.length;i++){ const k=ls.key(i); if(k!=='__t' && k!=='__overflow') lsKeys.push(k); } }catch(e){}
+  let lsOvr=[]; try{ lsOvr = JSON.parse((ls && ls.getItem('__overflow')) || '[]'); }catch(e){}
+  const ovr = new Set([...(boot && Array.isArray(boot.__overflow) ? boot.__overflow : []), ...lsOvr]);
+  if(lsKeys.length===0 && boot){
+    Object.keys(boot).forEach(k=>{ if(k!=='__overflow') mem[k]=boot[k]; });          // localStorage пуст/очищен → восстановление из IndexedDB
+  } else {
+    lsKeys.forEach(k=>{ mem[k]=ls.getItem(k); });                                    // localStorage не старее IndexedDB
+    if(boot) ovr.forEach(k=>{ if(k in boot) mem[k]=boot[k]; });                      // кроме ключей, живущих только в IndexedDB
+  }
+  ovr.forEach(k=>{ if(k in mem) overflow.add(k); });
+  if(boot){
+    Object.keys(mem).forEach(k=>{ if(!(k in boot) || boot[k]!==mem[k]) dirty.add(k); });   // догнать IndexedDB
+    Object.keys(boot).forEach(k=>{ if(k!=='__overflow' && !(k in mem)) gone.add(k); });     // удалённое в localStorage, но оставшееся в IDB
+  }
+  /* --- запись в IndexedDB --- */
+  function schedule(){ if(!timer) timer=setTimeout(flush, 350); }
+  async function flush(){
+    timer=null;
+    const puts={}; dirty.forEach(k=>{ if(k in mem) puts[k]=mem[k]; });
+    const dels=[...gone]; dirty.clear(); gone.clear();
+    if(!Object.keys(puts).length && !dels.length) return;
+    puts.__overflow=[...overflow];
+    try{ if(ls) ls.setItem('__overflow', JSON.stringify([...overflow])); }catch(e){}
+    let ok=false;
+    try{ ok = await IDB.kvFlush(puts, dels); }catch(e){}
+    if(ok) idbOk=true;
+    else { Object.keys(puts).forEach(k=>{ if(k!=='__overflow') dirty.add(k); }); dels.forEach(k=>gone.add(k)); w.failed++; }
+    if(w.onChange) w.onChange('__flush');
+  }
+  w.flush = flush;
+  w.getItem = k => (k in mem) ? mem[k] : null;
+  w.setItem = (k,v)=>{
+    v=String(v); mem[k]=v; let lsOk=false;
+    if(ls){ try{ ls.setItem(k,v); lsOk=true; overflow.delete(k); }catch(e){ overflow.add(k); try{ ls.removeItem(k); }catch(_){} } }
+    gone.delete(k); dirty.add(k); schedule();
+    if(!lsOk && !idbOk && !ls) w.failed++;               // негде сохранить вообще — только память
+    if(w.onChange) w.onChange(k);
+  };
+  w.removeItem = k=>{ delete mem[k]; overflow.delete(k); try{ if(ls) ls.removeItem(k); }catch(e){} dirty.delete(k); gone.add(k); schedule(); if(w.onChange) w.onChange(k); };
+  w.keys = ()=>Object.keys(mem);
+  w.bytes = ()=>{ let n=0; for(const k in mem) n += (k.length + mem[k].length)*2; return n; };
+  if(dirty.size || gone.size) schedule();
+  try{ addEventListener('pagehide', ()=>{ if(dirty.size||gone.size) flush(); }); document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden' && (dirty.size||gone.size)) flush(); }); }catch(e){}
   return w;
 })();
 function loadJSON(k, d){ try{ const v = store.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
@@ -824,9 +866,14 @@ function fmtSize(b){ return b>1048576? (b/1048576).toFixed(1)+' МБ' : Math.rou
 const IDB = {
   async ok(){ return !!(await this.open()); },
   _p:null,
-  open(){ if(!this._p) this._p = new Promise((res)=>{ try{ const rq=indexedDB.open('armi_files',2);
-    rq.onupgradeneeded=()=>{ if(!rq.result.objectStoreNames.contains('files')) rq.result.createObjectStore('files'); };
-    rq.onsuccess=()=>res(rq.result); rq.onerror=()=>res(null); rq.onblocked=()=>res(null); }catch(e){ res(null); } }); return this._p; },
+  open(){ if(!this._p) this._p = (window.__armiIDBOpen ? window.__armiIDBOpen() : new Promise((res)=>{ try{ const rq=indexedDB.open('armi_files',3);
+    rq.onupgradeneeded=()=>{ const db=rq.result; if(!db.objectStoreNames.contains('files')) db.createObjectStore('files'); if(!db.objectStoreNames.contains('kv')) db.createObjectStore('kv'); };
+    rq.onsuccess=()=>res(rq.result); rq.onerror=()=>res(null); rq.onblocked=()=>res(null); }catch(e){ res(null); } })); return this._p; },
+  /* kv: пары «ключ → строка» основного хранилища (см. store) */
+  async kvFlush(puts, dels){ const db=await this.open(); if(!db) return false;
+    return new Promise(res=>{ try{ const tx=db.transaction('kv','readwrite'); const st=tx.objectStore('kv');
+      for(const k in puts) st.put(puts[k],k); dels.forEach(k=>st.delete(k));
+      tx.oncomplete=()=>res(true); tx.onerror=tx.onabort=()=>res(false); }catch(e){ res(false); } }); },
   async _tx(mode,fn){ const db=await this.open(); if(!db) return new Promise(r=>r(undefined));
     return new Promise((res)=>{ try{ const tx=db.transaction('files',mode); const q=fn(tx.objectStore('files'));
       tx.oncomplete=()=>res(q&&q.result); tx.onerror=()=>res(undefined); tx.onabort=()=>res(undefined); }catch(e){ res(undefined); } }); },
@@ -836,39 +883,18 @@ const IDB = {
   clear(){ return this._tx('readwrite',st=>st.clear()); },
 };
 
-/* ══════════ ДОЛГОВЕЧНОСТЬ ДАННЫХ (v9.1) ══════════
-   1) запрос «постоянного» хранилища у браузера (navigator.storage.persist)
-   2) зеркало всех ключей в IndexedDB (другая квота и другая «судьба», чем у localStorage)
-   3) автовосстановление из зеркала, если localStorage очистили
-   4) баннер, если данные не сохраняются или место заканчивается */
+/* ══════════ ДОЛГОВЕЧНОСТЬ ДАННЫХ (v9.2) ══════════
+   Основная работа — в store (IndexedDB + localStorage). Здесь: запрос «постоянного» хранилища у браузера
+   и баннер, если данные не сохраняются или места на устройстве почти не осталось. */
 const Durable = (function(){
-  const SNAP = '__snapshot', LIMIT = 5*1024*1024;
-  let timer = null, dismissed = false, restored = false;
-  function usage(){ let n=0; try{ store.keys().forEach(k=>{ const v=store.getItem(k); n += (k.length + (v?v.length:0))*2; }); }catch(e){} return n; }
-  async function snapshot(){
-    try{
-      const o={}; store.keys().forEach(k=>{ if(k!=='__t') o[k]=store.getItem(k); });
-      if(Object.keys(o).length) await IDB.put(SNAP, {ts:Date.now(), data:o});
-    }catch(e){}
-  }
-  function schedule(){ if(timer) clearTimeout(timer); timer=setTimeout(()=>{ timer=null; snapshot(); warn(); }, 900); }
-  async function restoreIfWiped(){
-    try{
-      const hasData = store.getItem('armi_tasks')!==null || store.getItem('armi_notes')!==null || store.getItem('armi_sec_data')!==null;
-      if(hasData || store.volatile) return false;
-      const snap = await IDB.get(SNAP);
-      if(!snap || !snap.data) return false;
-      if(!(snap.data.armi_tasks || snap.data.armi_notes)) return false;
-      try{ if(sessionStorage.getItem('armi_restored')) return false; sessionStorage.setItem('armi_restored','1'); }catch(e){}
-      Object.keys(snap.data).forEach(k=>store.setItem(k, snap.data[k]));
-      restored = true;
-      return true;
-    }catch(e){ return false; }
+  let dismissed=false, quotaPct=0;
+  async function estimate(){
+    try{ if(navigator.storage && navigator.storage.estimate){ const e=await navigator.storage.estimate(); if(e && e.quota) quotaPct = Math.round(e.usage/e.quota*100); } }catch(err){}
   }
   function problem(){
     if(store.volatile) return 'Хранилище браузера недоступно — всё, что ты вводишь, пропадёт при закрытии. Открой Арми обычным окном (не приватным) и сделай бэкап: Настройки → Экспорт.';
-    if(store.failed>0) return 'Не удалось сохранить часть данных — место закончилось. Сделай бэкап (Настройки → Экспорт) и удали лишнее.';
-    if(usage() > LIMIT*0.8) return 'Хранилище заполнено на '+Math.round(usage()/LIMIT*100)+'%. Сделай бэкап (Настройки → Экспорт), пока ничего не потерялось.';
+    if(store.failed>0) return 'Не удалось сохранить часть данных. Сделай бэкап (Настройки → Экспорт), пока ничего не потерялось, и освободи место на устройстве.';
+    if(quotaPct>=85) return 'Память для приложения заполнена на '+quotaPct+'%. Сделай бэкап (Настройки → Экспорт) и удали ненужное (корзина, старые файлы).';
     return '';
   }
   function warn(){
@@ -887,12 +913,11 @@ const Durable = (function(){
   }
   async function init(){
     try{ if(navigator.storage && navigator.storage.persist) await navigator.storage.persist(); }catch(e){}
-    store.onChange = schedule;
-    const did = await restoreIfWiped();
-    if(did){ location.reload(); return; }
-    await snapshot(); warn();
+    store.onChange = ()=>{ warn(); };
+    await estimate(); warn();
+    setInterval(async ()=>{ await estimate(); warn(); }, 60000);
   }
-  return {init, usage, snapshot, warn, problem, get restored(){ return restored; }, LIMIT};
+  return {init, warn, problem, estimate};
 })();
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', ()=>Durable.init()); else Durable.init();
 const MEDIA_URLS = {};
@@ -2624,7 +2649,9 @@ const Books = {
     toast('«'+book.title+'» добавлена · '+words.toLocaleString('ru-RU')+' слов');
   },
   async del(id){
-    DB.books=DB.books.filter(b=>b.id!==id); saveDB(); render(); toast('Книга удалена');
+    const b=DB.books.find(x=>x.id===id); if(!b) return;
+    trashPush('book', b, 'Книги');
+    DB.books=DB.books.filter(x=>x.id!==id); saveDB(); render(); toast('Книга в корзине · возврат в течение 30 дней');
   },
   progress(b){
     if(!b||!b.chapters||!b.chapters.length) return 0;
@@ -3411,7 +3438,7 @@ const ACTIONS = {
     const ts=document.getElementById('ne-topic'); if(ts && DB.topics.some(t=>t.name===ts.value)) n.topic=ts.value;
     n.updatedAt='только что'; saveDB(); toast('Заметка сохранена'); render();
   },
-  noteDel(arg){ DB.notes=DB.notes.filter(x=>x.id!==arg); S.noteOpen=null; saveDB(); render(); toast('Заметка удалена'); },
+  noteDel(arg){ trashNote(arg); },                          /* мягкое удаление: заметка уходит в корзину на 30 дней */
   /* темы заметок */
   topicMng(){ S._topicColor=SECT_COLORS[0]; modal(topicMngModal()); },
   topicColor(arg){ S._topicColor=arg; document.querySelectorAll('#tm2-colors .dot').forEach(d=>d.style.borderColor='transparent'); event.target.style.borderColor='var(--t1)'; },
@@ -3537,7 +3564,7 @@ const ACTIONS = {
     const note=document.getElementById('vv-note').value.trim();
     DB.myvideos.unshift({id:uid('mv'), title, url, note, added:'сейчас'}); saveDB(); closeModal(); render(); toast('Ссылка сохранена');
   },
-  vidDel(arg){ DB.myvideos=DB.myvideos.filter(v=>v.id!==arg); saveDB(); render(); },
+  vidDel(arg){ trashVideo(arg); },
   async vidFileAdd(inp){ await mediaAdd(inp,'video',500); },
   vidFilePlay(arg){
     mediaUrl(arg).then(u=>{ if(!u){ toast('Файл не найден'); return; }
@@ -3594,10 +3621,7 @@ const ACTIONS = {
   lectStop(){ LectRec.stop(); },
   lectCancel(){ LectRec.cancel(); },
   async lectDel(arg){
-    const l = DB.lectures.find(x=>x.id===arg); if(!l) return;
-    DB.lectures = DB.lectures.filter(x=>x.id!==arg);
-    if(l.recId){ try{ await IDB.del('lec_'+l.id); }catch(e){} }
-    saveDB(); render(); toast('Лекция удалена');
+    await trashLecture(arg);                                  /* аудио остаётся в IndexedDB до автоочистки корзины */
   },
   async lectPlay(arg){
     const b = await IDB.get('lec_'+arg);
@@ -4151,8 +4175,10 @@ async function noteSave(arg){
   await persistData(); toast('Сохранено в зашифрованном виде'); render();
 }
 async function noteDel(arg){
-  const d=data(); d.notes=d.notes.filter(x=>x.id!==arg); S.secretNoteOpen=null;
-  await persistData(); render(); toast('Заметка удалена');
+  const d=data(); const n=d.notes.find(x=>x.id===arg);
+  if(n){ if(!d.trash) d.trash=[]; d.trash.unshift({ kind:'note', obj: JSON.parse(JSON.stringify(n)), from:'Секретные заметки', deletedAt: Date.now() }); }
+  d.notes=d.notes.filter(x=>x.id!==arg); S.secretNoteOpen=null;
+  await persistData(); render(); toast('В корзину закрытой зоны · 30 дней');
 }
 
 /* ── ФОТО ЗОНЫ ── */
@@ -5389,22 +5415,6 @@ afterRender = function(){
   };
 }
 
-/* ── демо-плейлист и секретная музыка внизу экрана Музыки ── */
-EXPL_CFG.music.extraBottomFn = function(){
-  let html = '';
-  if(typeof TRACKS !== 'undefined' && TRACKS.length){
-    html += '<div class="card"><h3>Демо-плейлист<span class="h-note">звучит встроенным синтезатором</span></h3>' +
-      TRACKS.map(t => '<div class="trow" data-act="musicPick" data-arg="' + t.id + '">' +
-        '<span class="eq' + (S.music.playing && PLAYER.mode !== 'file' && S.music.trackId === t.id ? ' play' : '') + '"><span></span><span></span><span></span></span>' +
-        '<span style="min-width:0;flex:1"><span style="font-size:13.5px;color:var(--t1)">' + esc(t.title) + '</span>' +
-        '<span class="tiny" style="display:block">' + esc(t.artist) + ' · ' + fmtSec(t.seconds) + '</span></span></div>').join('') + '</div>';
-  }
-  html += S.secretActive
-    ? '<div class="card" style="cursor:pointer;border-style:dashed" data-act="go" data-arg="smusic"><h3>' + ic('lock') + 'Закрытая музыка<span class="h-note">галерея и плееры не видят</span></h3><div class="dim">Закрытая зона открыта — секретные треки появились рядом с обычными. Нажми, чтобы открыть.</div></div>'
-    : '<div class="note">Секретная музыка прячется в закрытой зоне: два клика по логотипу «А» → пароль — и раздел появится в меню.</div>';
-  return html;
-};
-
 /* ── PLAY с очередью папки: v6.6 сам строит очередь из всех треков,
      а мы передаём очередь = треки текущей папки через setQueue ── */
 {
@@ -5895,40 +5905,6 @@ const TRASH_KIND_META = {
   book:    { t:'Книга',   icon:'note',   zoneName:'Книги' },
 };
 
-function scTrash(){
-  const items = TRASH.slice();
-  const total = items.length;
-  const expiring = items.filter(t => trashDaysLeft(t.deletedAt) <= 7).length;
-  return '<div class="stack">' +
-    '<div class="row between wrap"><div style="font-size:19px;font-weight:800">Корзина</div>' +
-    '<span class="pill">' + total + ' элем. · хранение 30 дней</span></div>' +
-    '<div class="banner red">Удалённые файлы хранятся 30 дней, затем исчезают безвозвратно. ' +
-    'Ручная очистка корзины отключена — только восстановление. Всё это скрыто в закрытой зоне и не видно в обычном интерфейсе.</div>' +
-    (total === 0
-      ? '<div class="empty">Корзина пуста. Удали что-нибудь в обычных разделах — оно появится здесь и будет ждать 30 дней.</div>'
-      : '<div class="tr-grid">' + items.map((t, i) => {
-          const meta = TRASH_KIND_META[t.kind] || TRASH_KIND_META.media;
-          const days = trashDaysLeft(t.deletedAt);
-          const nm = t.kind === 'folder' ? (t.obj.folder ? t.obj.folder.name : 'Папка')
-            : (t.obj.name || t.obj.title || 'Без названия');
-          const sub = (t.obj.size ? fmtSize(t.obj.size) + ' · ' : '') + (t.obj.dur && typeof t.obj.dur === 'number' ? fmtSec(t.obj.dur) + ' · ' : '') +
-            'удалено ' + new Date(t.deletedAt).toLocaleDateString('ru-RU', { day:'numeric', month:'short' }) + ' · из «' + esc(t.from || meta.zoneName) + '»';
-          const thumb = t.kind === 'media' && t.obj.kind === 'photo'
-            ? '<img data-mid="' + t.obj.id + '" alt="">'
-            : ic(meta.icon);
-          return '<div class="tr-item">' +
-            '<div class="tr-ic">' + thumb + '</div>' +
-            '<div class="tr-body"><div class="tr-name">' + esc(nm) + '</div>' +
-            '<div class="tr-sub">' + sub + '</div></div>' +
-            '<span class="tr-days' + (days <= 7 ? ' warn' : '') + '">' + (days > 0 ? days + ' дн. до удаления' : 'истекает') + '</span>' +
-            '<button class="btn btn-amber btn-sm tr-undo" data-expl="trashRestore" data-i="' + i + '">' + ic('up') + 'Вернуть</button>' +
-          '</div>';
-        }).join('') + '</div>') +
-    (expiring ? '<div class="tiny">Скоро исчезнут без возврата: ' + expiring + ' элем. (через ≤7 дней) — верни, если нужны.</div>' : '') +
-    '<div class="tiny">Автоочистка запускается при открытии приложения и раз в час. Восстановление возвращает файл в ту же папку, откуда он был удалён.</div>' +
-  '</div>';
-}
-
 /* ═══ V7 MODULE: 60-chat-v7.js ═══ */
 /* ═══════════════════════════════════════════════════════════════════
    V7 · ЧАТ: чистка подсказок
@@ -5960,102 +5936,16 @@ function scTrash(){
 
 /* ═══ V7 MODULE: 70-secret-v7.js ═══ */
 /* ═══════════════════════════════════════════════════════════════════
-   V7 · СЕКРЕТНАЯ ЗОНА: корзина в меню + soft-delete секретных фото/музыки
-   ─────────────────────────────────────────────────────────────────
-   Раздел strash добавлен в SECRET_IDS патчем базы. Здесь:
-   • удаление секретных фото/треков тоже становится мягким 
-     (секретные данные лежат в зашифрованном DATA, поэтому корзина
-     для них — отдельный зашифрованный список trash внутри DATA)
-   • кнопки удаления секретных фото/музыки перехватываются
+   V7 · КОРЗИНА: кнопки «Вернуть».
+   Мягкое удаление секретных данных, секретная корзина и её экран живут в модуле 85-embedded-v7.js.
    ═══════════════════════════════════════════════════════════════════ */
 
-/* soft-delete для секретной зоны: копия в DATA.trash с deletedAt */
-async function secretTrashPush(kind, obj, from){
-  const d = data();
-  if(!d.trash) d.trash = [];
-  d.trash.unshift({ kind, obj: JSON.parse(JSON.stringify(obj)), from: from || '', deletedAt: Date.now() });
-  await persistData();
-  render();
-  toast('В корзину закрытой зоны · 30 дней');
-}
-async function secretTrashRestore(idx){
-  const d = data();
-  if(!d.trash || !d.trash[idx]) return;
-  const t = d.trash[idx];
-  if(t.kind === 'photo') d.photos.unshift(t.obj);
-  else if(t.kind === 'track') d.music.push(t.obj);
-  else if(t.kind === 'note') d.notes.unshift(t.obj);
-  d.trash.splice(idx, 1);
-  await persistData();
-  render();
-  toast('Восстановлено в закрытой зоне');
-}
-async function secretTrashPurge(){
-  const d = data();
-  if(!d.trash) return 0;
-  const keep = d.trash.filter(t => !trashIsExpired(t.deletedAt));
-  const gone = d.trash.length - keep.length;
-  if(gone){ d.trash = keep; await persistData(); }
-  return gone;
-}
-/* дни до удаления для секрета — тот же TRASH_DAYS */
-function secretTrashDays(ts){ return trashDaysLeft(ts); }
-
-/* перехват удалений в секретной зоне (фото/трек) */
-const _secretPhotoDelV66 = Secret.photoDel;
-Secret.photoDel = async function(arg){
-  const d = data();
-  const p = (d.photos || []).find(x => x.id === arg);
-  if(!p) return;
-  await secretTrashPush('photo', p, 'Секретные фото');
-  d.photos = d.photos.filter(x => x.id !== arg);
-  await persistData(); render();
-};
-const _secretTrackDelV66 = Secret.trackDel;
-Secret.trackDel = async function(arg){
-  const d = data();
-  const t = (d.music || []).find(x => x.id === arg);
-  if(!t) return;
-  await secretTrashPush('track', t, 'Секретная музыка');
-  d.music = d.music.filter(x => x.id !== arg);
-  await persistData(); render();
-};
-
-/* показать секретную корзину: если в закрытой зоне открыт раздел strash
-   И контур расшифрован (MODE==='real'), показываем и обычную (армi_trash
-   из localStorage), и секретную (DATA.trash). Иначе — только обычную. */
-const _scTrashV7 = scTrash;
-scTrash = function(){
-  let html = _scTrashV7();
-  if(typeof MODE !== 'undefined' && MODE === 'real' && typeof data === 'function'){
-    const d = data();
-    const sec = (d && d.trash) || [];
-    if(sec.length){
-      html += '<div class="card" style="margin-top:12px"><h3>' + ic('lock') + 'Из закрытой зоны<span class="h-note">зашифрованная корзина</span></h3>' +
-        '<div class="tr-grid">' + sec.map((t, i) => {
-          const days = secretTrashDays(t.deletedAt);
-          const nm = t.obj.d ? 'Фото' : (t.obj.title || 'Трек');
-          return '<div class="tr-item">' +
-            '<div class="tr-ic">' + ic(t.kind === 'photo' ? 'img' : 'music') + '</div>' +
-            '<div class="tr-body"><div class="tr-name">' + esc(nm) + '</div>' +
-            '<div class="tr-sub">удалено ' + new Date(t.deletedAt).toLocaleDateString('ru-RU', { day:'numeric', month:'short' }) + '</div></div>' +
-            '<span class="tr-days' + (days <= 7 ? ' warn' : '') + '">' + days + ' дн.</span>' +
-            '<button class="btn btn-amber btn-sm tr-undo" data-expl="secTrashRestore" data-i="' + i + '">' + ic('up') + 'Вернуть</button>' +
-          '</div>';
-        }).join('') + '</div></div>';
-    }
-  }
-  return html;
-};
-
-/* кнопки восстановления корзины: делегированный обработчик data-expl */
+/* кнопки восстановления обычной корзины: делегированный обработчик data-expl
+   (секретная корзина — отдельный перехватчик в модуле 85) */
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-expl="trashRestore"]');
-  if(b){ trashRestore(Number(b.getAttribute('data-i'))); return; }
-  const s = e.target.closest('[data-expl="secTrashRestore"]');
-  if(s){ secretTrashRestore(Number(s.getAttribute('data-i'))); }
+  if(b){ trashRestore(Number(b.getAttribute('data-i'))); }
 });
-
 /* ═══ V7 MODULE: 80-boot-v7.js ═══ */
 /* ═══════════════════════════════════════════════════════════════════
    V7 · ЗАГРУЗКА: авто-очистка корзины, версия, сброс
@@ -6458,7 +6348,7 @@ window.__secTrashHTMLV71 = function(){
         '<button class="btn btn-amber btn-sm tr-undo" data-expl="secTrashRestore" data-i="'+i+'">'+ic('up')+'Вернуть</button></div>';
     }).join('')+'</div></div>';
 };
-scTrash = function(){
+function scTrash(){
   const items = TRASH.slice();
   const total = items.length;
   const expiring = items.filter(t => trashDaysLeft(t.deletedAt) <= 7).length;
@@ -6490,7 +6380,7 @@ scTrash = function(){
     window.__secTrashHTMLV71() +
     '<div class="tiny">Автоочистка запускается при открытии приложения и раз в час. Восстановление возвращает файл в ту же папку, откуда он был удалён.</div>' +
   '</div>';
-};
+}
 /* восстановление секретного — рабочая версия (v7.0 звала приватную data()) */
 window.__secTrashRestoreV71 = async function(idx){
   if(!secAvailable()) return;
@@ -6534,18 +6424,17 @@ Secret.trackDel = async function(arg){
   await Secret.persist(); render();
   toast('В корзину закрытой зоны · 30 дней');
 };
-/* функции модуля 70, звавшие приватную data(): подменяем на рабочие.
-   Объявлены как function-декларации — переприсваивание безопасно. */
-secretTrashPush = async function(kind, obj, from){
+/* секретная корзина (функции работают через Secret.secData()) */
+async function secretTrashPush(kind, obj, from){
   if(!secAvailable()) return;
   const d = Secret.secData();
   if(!d.trash) d.trash = [];
   d.trash.unshift({ kind, obj: JSON.parse(JSON.stringify(obj)), from: from || '', deletedAt: Date.now() });
   await Secret.persist(); render();
   toast('В корзину закрытой зоны · 30 дней');
-};
-secretTrashRestore = window.__secTrashRestoreV71;
-secretTrashPurge = async function(){
+}
+function secretTrashRestore(idx){ return window.__secTrashRestoreV71(idx); }
+async function secretTrashPurge(){
   if(!secAvailable()) return 0;
   const d = Secret.secData();
   if(!d.trash) return 0;
@@ -6553,7 +6442,7 @@ secretTrashPurge = async function(){
   const gone = d.trash.length - keep.length;
   if(gone){ d.trash = keep; await Secret.persist(); }
   return gone;
-};
+}
 
 /* ── 6. ФИКС v7.0 #4: extraBottomFn музыки (демо-плейлист + карточка)
    в v7.0 никогда не вызывался — обёртка scrExplorerV7 обрабатывала
@@ -7172,4 +7061,22 @@ if('serviceWorker' in navigator && location.protocol.startsWith('http')){
     navigator.serviceWorker.register(swPath).catch(()=>{});
   });
 }
+</script>
+<script>
+/* Загрузчик: до запуска приложения асинхронно читает снимок хранилища из IndexedDB (window.__ARMI_KV),
+   затем исполняет основной код. Если IndexedDB недоступна или отвечает дольше 2,5 с — стартует с localStorage. */
+(function(){
+  function open(){ return new Promise(function(res){ try{ var rq=indexedDB.open('armi_files',3);
+    rq.onupgradeneeded=function(){ var db=rq.result; if(!db.objectStoreNames.contains('files')) db.createObjectStore('files'); if(!db.objectStoreNames.contains('kv')) db.createObjectStore('kv'); };
+    rq.onsuccess=function(){ res(rq.result); }; rq.onerror=function(){ res(null); }; rq.onblocked=function(){ res(null); }; }catch(e){ res(null); } }); }
+  var p=null; window.__armiIDBOpen=function(){ return p||(p=open()); };
+  function readAll(db){ return new Promise(function(res){ try{ var out={}; var tx=db.transaction('kv','readonly'); var rq=tx.objectStore('kv').openCursor();
+    rq.onsuccess=function(){ var c=rq.result; if(c){ out[c.key]=c.value; c.continue(); } };
+    tx.oncomplete=function(){ res(out); }; tx.onerror=tx.onabort=function(){ res(null); }; }catch(e){ res(null); } }); }
+  function run(){ var s=document.createElement('script'); s.textContent=document.getElementById('armi-main').textContent; document.body.appendChild(s); }
+  var guard=new Promise(function(r){ setTimeout(function(){ r('timeout'); },2500); });
+  Promise.race([ window.__armiIDBOpen().then(function(db){ return db?readAll(db):null; }), guard ])
+    .then(function(v){ window.__ARMI_KV=(v&&v!=='timeout')?v:null; }, function(){ window.__ARMI_KV=null; })
+    .then(run);
+})();
 </script></body></html>

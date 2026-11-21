@@ -102,5 +102,6 @@ cd android && ./build.sh   # нужен Android SDK (aapt2, d8, zipalign, apksig
 ## Тесты
 
 `tests/` — e2e на Playwright без сети (`cd tests && npm install && npm test`), запускаются в GitHub Actions.
-Подробности и план улучшений: `docs/изменения-арми-9.1.md`, `docs/путь-к-10.md`.
+Подробности и план улучшений: `docs/изменения-арми-9.2.md`, `docs/путь-к-10.md`.
+Исходники — в `src/` (`node src/build.js` собирает `app/index.html`; не правь `index.html` вручную).
 Облако в приложении выключено по умолчанию и включается только в Настройках.

@@ -8,8 +8,8 @@ exports.name = 'секретная зона: шифрование, приман�
 exports.run = async ({ browser, base, helpers: { open, assert } }) => {
   const { ctx, page, errors } = await open(browser, base);
   await setup(page, 'main-pass-1', 'decoy-pass-2');
-  const meta = await page.evaluate(() => JSON.parse(localStorage.getItem('armi_sec_meta')));
-  const stored = await page.evaluate(() => localStorage.getItem('armi_sec_data'));
+  const meta = await page.evaluate(() => JSON.parse(store.getItem('armi_sec_meta')));
+  const stored = await page.evaluate(() => store.getItem('armi_sec_data'));
   assert.strictEqual(meta.decoy.kdf, 'pbkdf2', 'приманка должна использовать PBKDF2');
   assert.ok(stored && !stored.includes('main-pass') && !stored.includes('Секретный чат'), 'в хранилище не должно быть открытого текста');
   assert.strictEqual(await page.evaluate(() => S.secretMode), 'real');
@@ -33,7 +33,7 @@ exports.run = async ({ browser, base, helpers: { open, assert } }) => {
   // приманка не задана: запись всё равно есть (по метаданным не видно, настроена ли она)
   const b = await open(browser, base);
   await setup(b.page, 'p-123456', '');
-  const nd = await b.page.evaluate(() => JSON.parse(localStorage.getItem('armi_sec_meta')).decoy);
+  const nd = await b.page.evaluate(() => JSON.parse(store.getItem('armi_sec_meta')).decoy);
   assert.ok(nd && nd.kdf === 'pbkdf2' && nd.vhash, 'фиктивная приманка должна присутствовать всегда');
   await b.ctx.close();
 
@@ -41,15 +41,15 @@ exports.run = async ({ browser, base, helpers: { open, assert } }) => {
   const c = await open(browser, base);
   await setup(c.page, 'old-pass-1', 'old-decoy');
   await c.page.evaluate(async () => {
-    const m = JSON.parse(localStorage.getItem('armi_sec_meta'));
+    const m = JSON.parse(store.getItem('armi_sec_meta'));
     const salt = 'legacy-salt';
     const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(salt + 'old-decoy'));
     m.decoy = { salt, vhash: btoa(String.fromCharCode(...new Uint8Array(d))) };      // без kdf → «старая» запись
-    localStorage.setItem('armi_sec_meta', JSON.stringify(m)); Secret.panic();
+    store.setItem('armi_sec_meta', JSON.stringify(m)); Secret.panic();
   });
   await c.page.evaluate(() => Secret.openGate()); await c.page.waitForTimeout(100);
   await c.page.fill('#sg-pass', 'old-decoy'); await c.page.evaluate(() => Secret.tryLogin()); await c.page.waitForTimeout(200);
   assert.strictEqual(await c.page.evaluate(() => S.secretMode), 'decoy', 'старая приманка должна работать');
-  assert.strictEqual(await c.page.evaluate(() => JSON.parse(localStorage.getItem('armi_sec_meta')).decoy.kdf), 'pbkdf2', 'и мигрировать на PBKDF2');
+  assert.strictEqual(await c.page.evaluate(() => JSON.parse(store.getItem('armi_sec_meta')).decoy.kdf), 'pbkdf2', 'и мигрировать на PBKDF2');
   await c.ctx.close();
 };

@@ -1,0 +1,19 @@
+</script>
+<script>
+/* Загрузчик: до запуска приложения асинхронно читает снимок хранилища из IndexedDB (window.__ARMI_KV),
+   затем исполняет основной код. Если IndexedDB недоступна или отвечает дольше 2,5 с — стартует с localStorage. */
+(function(){
+  function open(){ return new Promise(function(res){ try{ var rq=indexedDB.open('armi_files',3);
+    rq.onupgradeneeded=function(){ var db=rq.result; if(!db.objectStoreNames.contains('files')) db.createObjectStore('files'); if(!db.objectStoreNames.contains('kv')) db.createObjectStore('kv'); };
+    rq.onsuccess=function(){ res(rq.result); }; rq.onerror=function(){ res(null); }; rq.onblocked=function(){ res(null); }; }catch(e){ res(null); } }); }
+  var p=null; window.__armiIDBOpen=function(){ return p||(p=open()); };
+  function readAll(db){ return new Promise(function(res){ try{ var out={}; var tx=db.transaction('kv','readonly'); var rq=tx.objectStore('kv').openCursor();
+    rq.onsuccess=function(){ var c=rq.result; if(c){ out[c.key]=c.value; c.continue(); } };
+    tx.oncomplete=function(){ res(out); }; tx.onerror=tx.onabort=function(){ res(null); }; }catch(e){ res(null); } }); }
+  function run(){ var s=document.createElement('script'); s.textContent=document.getElementById('armi-main').textContent; document.body.appendChild(s); }
+  var guard=new Promise(function(r){ setTimeout(function(){ r('timeout'); },2500); });
+  Promise.race([ window.__armiIDBOpen().then(function(db){ return db?readAll(db):null; }), guard ])
+    .then(function(v){ window.__ARMI_KV=(v&&v!=='timeout')?v:null; }, function(){ window.__ARMI_KV=null; })
+    .then(run);
+})();
+</script></body></html>
